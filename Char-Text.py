@@ -45,19 +45,19 @@ for ii in range(num_sentences):
     Y[ii] = text_1hot[cp + 1: cp + max_sequence_length + 1]
     cp += mb_increment
 
-x = tf.placeholder(tf.float32,[num_sentences, max_sequence_length, n_chars])
-y_ = tf.placeholder(tf.float32,[num_sentences, max_sequence_length, n_chars])
+x = tf.placeholder(tf.float32,[None, max_sequence_length, n_chars])
+y_ = tf.placeholder(tf.float32,[None, max_sequence_length, n_chars])
 cell = tf.nn.rnn_cell.LSTMCell(hidden_size,state_is_tuple=True)
 val,state = tf.nn.dynamic_rnn(cell,x,dtype = tf.float32)
 val = tf.transpose(val,[1,0,2])
-last = tf.gather(val,int(val.get.shape()[0]) - 1)
-weight = tf.Variable(tf.truncated_normal([hidden_size,int(y_.get_shape()[1])]))
-bias = tf.Variable(tf.constant(0.1,shape = [y_.get_shape()[1]]))
+last = tf.gather(val,val.get_shape().as_list()[0] - 1)
+weight = tf.Variable(tf.truncated_normal([hidden_size,y_.get_shape().as_list()[2]]))
+bias = tf.Variable(tf.constant(0.1,shape = [y_.get_shape().as_list()[2]]))
 prediction = tf.nn.softmax(tf.matmul(last, weight) + bias)
-cross_entropy = -tf.reduce_sum(target * tf.log(tf.clip_by_value(prediction,1e-10,1.0)))
+cross_entropy = -tf.reduce_sum(y_ * tf.log(tf.clip_by_value(prediction,1e-10,1.0)))
 optimizer = tf.train.AdamOptimizer()
 minimize = optimizer.minimize(cross_entropy)
-mistakes = tf.not_equal(tf.argmax(target, 1), tf.argmax(prediction, 1))
+mistakes = tf.not_equal(tf.argmax(y_, 1), tf.argmax(prediction, 1))
 error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
 
 init_op = tf.initialize_all_variables()

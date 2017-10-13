@@ -46,26 +46,34 @@ class MetaOpt(Optimizer):
         grads = self.get_gradients(loss,params)
         self.updates = [K.update_add(self.iterations,1)]
         self.Optimizer_weight = [[] for _ in range(2*(1+self.lstmunit))]
+        C_in = K.zeros([1,1],dtype='float32', name ='C')
+        H_in = K.zeros([1,1],dtype='float32', name ='H')
+        state = [[] for _ in range(len(grads))]
+        for j in range(len(grads)):
+            gradsj = tf.reshape(grads[j], [-1, 1])
+            for i in range(gradsj.get_shape().as_list()[0]):
+                state[j].append((tf.contrib.rnn.LSTMStateTuple(C_in, H_in),))
         shapes = [K.int_shape(p) for p in params]
         grad_a = [K.zeros(shape) for shape in shapes]
         grad_na = [K.zeros(shape) for shape in shapes]
-        g_new,state_i,state_f = self.update_param(grads)
-        shape_state = [K.int_shape(p) for p in state_i[0]]
-        state_init = [K.zeros(shape) for shape in shape_state]
-        state_final = [K.zeros(shape) for shape in shape_state]
-        for p,g_n,g,g_a,g_na,s_i,s_in,s_f,s_fi in zip(params,g_new,grads,grad_a,grad_na,state_i[0],state_init,state_f[0],state_final):
+        g_new,state_f = self.update_param(grads,state)
+        # shape_state = [K.int_shape(p) for p in state]
+        # state_init = [K.zeros(shape) for shape in shape_state]
+        # state_final = [K.zeros(shape) for shape in shape_state]
+        for p,g_n,g,g_a,g_na, in zip(params,g_new,grads,grad_a,grad_na):
             new_p = p + g_n
             if getattr(p, 'constraint', None) is not None:
                 new_p = p.constraint(new_p)
-            self.updates.append(K.update(p, new_p))
+            # self.updates.append(K.update(p, new_p))
             self.updates.append(K.update(g_a,g))
             self.updates.append(K.update(g_na, g_n))
-            self.updates.append(K.update(s_in, s_i))
-            self.updates.append(K.update(s_fi, s_f))
+        for i in range(len(state)):
+            for j in range(len(state[i])):
+                for s,s_n in zip(state[i][j][0],state_f[i][j][0]):
+                    self.updates.append(K.update(s,s_n))
         self.grad_v = grad_a
         self.grad_nv = grad_na
-        self.state_init = state_init
-        self.state_final = state_final
+        self.state = state
         return self.updates
 
     def get_config(self):
@@ -73,7 +81,8 @@ class MetaOpt(Optimizer):
 
         return dict(list(base_config.items()))
 
-    def update_param(self, grads):
+    def update_param(self, grads,state):
+        state_f = [[] for _ in range(len(grads))]
         with tf.variable_scope('metaoptvar') as scope:
             g_new_list = [[] for _ in range(len(grads))]
             softmax_w = tf.get_variable("softmax_w", shape=[self.hidden_size, 1], dtype=tf.float32)
@@ -83,15 +92,13 @@ class MetaOpt(Optimizer):
                 cell = tf.contrib.rnn.MultiRNNCell(
                     [tf.contrib.rnn.LSTMCell(self.hidden_size) for _ in range(self.lstmunit)])
                 gradsj = tf.reshape(grads[j], [-1, 1])
-                state = [cell.zero_state(1, tf.float32) for i in range(gradsj.get_shape().as_list()[0])]
-                state_init = state[0]
+                state_f[j] = [[] for _ in range(gradsj.get_shape().as_list()[0])]
                 for i in range(gradsj.get_shape().as_list()[0]):
                     grad_f_t = tf.slice(gradsj, begin=[i, 0], size=[1, 1])
-                    cell_out, state[i] = cell(grad_f_t, state[i])
+                    cell_out, state_f[j][i] = cell(grad_f_t, state[j][i])
                     g_new_i = tf.add(tf.matmul(cell_out, softmax_w), softmax_b)
                     g_new_list[j].append(g_new_i)
-                    if i == 0:
-                        state_final = state[0]
+
                 g_new_list[j] = tf.reshape(g_new_list[j], grads[j].shape)
             self.softmax_w = tf.get_variable("softmax_w")
             self.softmax_b = tf.get_variable("softmax_b")
@@ -99,16 +106,17 @@ class MetaOpt(Optimizer):
             self.b_lstm = tf.get_variable("multi_rnn_cell/cell_0/lstm_cell/bias")
             g_new = g_new_list
             self.Optimizer_weight = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='metaoptvar')
-        return g_new,state_init,state_final
+        return g_new,state_f
 
 
 class UpdateOpt(Callback):
     def on_train_begin(self, logs={}):
-        K.set_value(self.model.optimizer.softmax_w,1*np.ones([1,1]))
-        K.set_value(self.model.optimizer.softmax_b, np.zeros([1]))
-        K.set_value(self.model.optimizer.w_lstm, np.array([[1e10,1,-1e10,1e10],[1e10,1,-1e10,1e10]]))
-        K.set_value(self.model.optimizer.b_lstm, np.array([0, 0, 0, 0]))
+        # K.set_value(self.model.optimizer.softmax_w,1*np.ones([1,1]))
+        # K.set_value(self.model.optimizer.softmax_b, np.zeros([1]))
+        # K.set_value(self.model.optimizer.w_lstm, np.array([[1e10,1,-1e10,1e10],[1e10,1,-1e10,1e10]]))
+        # K.set_value(self.model.optimizer.b_lstm, np.array([0, 0, 0, 0]))
         self.losses = []
+        state_i = K.get_value(self.model.optimizer.state[0][0][0][0])
         return
     def on_train_end(self, logs={}):
         return
@@ -118,15 +126,15 @@ class UpdateOpt(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         if epoch > 0:
-            K.set_value(self.model.optimizer.softmax_w, 1 * np.ones([1, 1]))
-            K.set_value(self.model.optimizer.softmax_b, np.zeros([1]))
-            K.set_value(self.model.optimizer.w_lstm, np.array([[1e10, 1, -1e10, 1e10], [1e10, 1, -1e10, 1e10]]))
-            K.set_value(self.model.optimizer.b_lstm, np.array([0, 0, 0, 0]))
-            state_i = K.get_value(self.model.optimizer.state_init[0])
-            state_f = K.get_value(self.model.optimizer.state_final[0])
+            state_i = K.get_value(self.model.optimizer.state[0][0][0][0])
             grad_n = K.get_value(self.model.optimizer.grad_v[0])
             grad_na = K.get_value(self.model.optimizer.grad_nv[0])
             self.losses.append(self.model.total_loss)
+            # K.set_value(self.model.optimizer.softmax_w, 1 * np.ones([1, 1]))
+            # K.set_value(self.model.optimizer.softmax_b, np.zeros([1]))
+            # K.set_value(self.model.optimizer.w_lstm, np.array([[1e10, 1, -1e10, 1e10], [1e10, 1, -1e10, 1e10]]))
+            # K.set_value(self.model.optimizer.b_lstm, np.array([0, 0, 0, 0]))
+
         # if epoch == 5:
         #     tvar = K.gradients(sum(self.losses)/len(self.losses),self.model.optimizer.softmax_w)
             # tvars = self.model.optimizer.Optimizer_weight
@@ -146,18 +154,16 @@ class UpdateOpt(Callback):
     def on_batch_end(self, batch, logs={}):
         return
 
-X = np.zeros((batch_num, batch_size, n_input), np.float32)
-Y = np.zeros((batch_num, batch_size, n_output), np.float32)
+X = np.zeros((batch_size, n_input), np.float32)
+Y = np.zeros((batch_size, n_output), np.float32)
 cp = 0
-for ii in range(batch_num):
-    X[ii] = X_train[cp: cp + batch_size]
-    Y[ii] = y_train[cp + 1: cp + batch_size + 1]
-    cp += 10
+X = X_train[:batch_size]
+Y = y_train[:batch_size]
 metaopt = MetaOpt()
 Metaupdate = UpdateOpt()
 model = Sequential()
-model.add(layers.Dense(n_hidden1,input_shape = (batch_size,n_input),activation='sigmoid'))
-model.add(layers.Dense(n_output,input_shape = (batch_size,n_hidden1),activation='sigmoid'))
+model.add(layers.Dense(n_hidden1,input_shape=(n_input,),activation='sigmoid'))
+model.add(layers.Dense(n_output,input_shape=(n_hidden1,),activation='sigmoid'))
 model.compile(optimizer = metaopt, loss='mean_squared_error', metrics=['accuracy'])
 history = model.fit(X, Y, batch_size=batch_size, epochs=Optimizee_steps,callbacks=[Metaupdate])
 plt.plot(history.history['loss'])

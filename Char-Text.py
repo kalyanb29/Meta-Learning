@@ -11,6 +11,8 @@ np.set_printoptions(linewidth=140)
 nlp_data_dir = r"C:\Data\nlp"
 hidden_size = 512
 max_sequence_length = 100
+total_iter = 10
+batch_size = 50
 filter_syms = '0123456789"#$%&()*+-/:<=>?@[\\]^_`{|}~\t\n'
 sentence_terminators = '.:;'
 texts = []
@@ -45,7 +47,7 @@ for ii in range(num_sentences):
     Y[ii] = text_1hot[cp + 1: cp + max_sequence_length + 1]
     cp += mb_increment
 
-x = tf.placeholder(tf.float32,[None,max_sequence_length,n_chars])
+x = tf.placeholder(tf.float32,[None,max_sequence_length,n_chars],name = 'x')
 y_ = tf.placeholder(tf.float32,[None,max_sequence_length,n_chars])
 y_out = []
 cell = tf.contrib.rnn.MultiRNNCell(
@@ -59,27 +61,31 @@ for i in range(max_sequence_length):
     softmax_b = tf.get_variable("softmax_b", [n_chars])
     output_slice = tf.add(tf.matmul(cell_out_slice, softmax_w), softmax_b)
     y_slice = y_[:,i]
-    y_out.append(output_slice)
+    y_out.append(tf.nn.softmax(output_slice))
     loss += tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = output_slice,labels=y_slice))
 loss = loss/max_sequence_length
 train_op = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
-output_op = tf.stack(y_out,axis = 1)
+output_op = tf.stack(y_out,axis = 1,name = 'output_op')
+
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for epoch in range(100):
-        chosen_idx = np.random.choice(X.shape[0], replace=False, size=20)
+    for epoch in range(total_iter):
+        chosen_idx = np.random.choice(X.shape[0], replace=False, size=batch_size)
         x_s = X[chosen_idx,]
         y_s = Y[chosen_idx]
         cost, _ = sess.run([loss, train_op], feed_dict={x: x_s, y_: y_s})
         print("Epoch %d : loss %f" % (epoch, cost))
     saver = tf.train.Saver()
-    saver.save(sess, "model", global_step=0)
+    saver.save(sess, "./model", global_step=0)
+    sess.close()
 
-tf.reset_default_graph()
-saver = tf.train.Saver()
 with tf.Session() as sess:
   # Restore variables from disk.
-    saver.restore(sess, "model")
+    saver = tf.train.import_meta_graph('model-0.meta')
+    saver.restore(sess, tf.train.latest_checkpoint('./'))
+    graph = tf.get_default_graph()
+    x = graph.get_tensor_by_name("x:0")
+    output_op = graph.get_tensor_by_name("output_op:0")
     next_char = np.random.randint(n_chars)
     for kk in range(10):
         cseed = np.zeros((1, max_sequence_length, n_chars), np.int32)
@@ -87,22 +93,4 @@ with tf.Session() as sess:
             cseed[0,ii,next_char] = 1
             out_emb = sess.run(output_op,feed_dict ={x:cseed})
             next_char = np.random.choice(n_chars, p=out_emb[0,ii])
-    print("".join([token_lookup.get(x,"") for x in cseed[0].argmax(axis=1)]))
-
-# model = Sequential()
-# model.add(layers.LSTM(hidden_size,input_shape=(max_sequence_length, n_chars),return_sequences=True))
-# model.add(layers.LSTM(hidden_size,input_shape=(max_sequence_length, n_chars),return_sequences=True))
-# model.add(layers.TimeDistributed(layers.Dense(n_chars, activation='softmax')))
-# model.compile('adam', 'categorical_crossentropy', metrics=['accuracy'])
-# # # tvar = model.trainable_weights
-# history = model.fit(X, Y, batch_size=20, epochs=100)
-# # model.save("char_rnn_model_l2_h512.h5")
-# model = models.load_model("char_rnn_model_l2_h512.h5")
-# next_char = np.random.randint(n_chars)
-# for kk in range(10):
-#    cseed = np.zeros((1, max_sequence_length, n_chars), np.int32)
-#    for ii in range(0, sequence_length):
-#        cseed[0,ii,next_char] = 1
-#        out_emb = model.predict(cseed)
-#        next_char = np.random.choice(n_chars, p=out_emb[0,ii])
-# print("".join([token_lookup.get(x,"") for x in cseed[0].argmax(axis=1)]))
+        print("".join([token_lookup.get(x,"") for x in cseed[0].argmax(axis=1)]))

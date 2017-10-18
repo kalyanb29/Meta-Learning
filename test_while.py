@@ -108,7 +108,7 @@ def problem():
     return compute_loss
 
 def metaopti(loss):
-    opt_var = _get_variables(loss)
+    opt_var = _get_variables(loss)[0]
     shapes = [K.get_variable_shape(p) for p in opt_var[0]]
     state = [[] for _ in range(len(opt_var[0]))]
     for i in range(len(opt_var[0])):
@@ -120,8 +120,8 @@ def metaopti(loss):
             state[i][ii]= tf.contrib.rnn.LSTMStateTuple(state_c[ii:ii + 1], state_h[ii:ii + 1])
 
     def update_state(fx,x,state):
-        shapes = [K.get_variable_shape(p) for p in x[0]]
-        grads = K.gradients(fx, x[0])
+        shapes = [K.get_variable_shape(p) for p in x]
+        grads = K.gradients(fx, x)
         grads = [tf.stop_gradient(g) for g in grads]
         cell_count = 0
         state_f = [[] for _ in range(len(grads))]
@@ -152,10 +152,10 @@ def metaopti(loss):
 
     def time_step(t,f_array,x,state):
         x_new = x
-        fx = _make_with_custom_variables(loss,x[0])
+        fx = _make_with_custom_variables(loss,x)
         f_array = f_array.write(t,fx)
         delta,state_f = update_state(fx, x, state)
-        x_new = [x_n + d for x_n,d in zip(x_new[0],delta)]
+        x_new = [x_n + d for x_n,d in zip(x_new,delta)]
         t_new = t + 1
 
         return t_new, f_array, x_new,state_f
@@ -165,7 +165,7 @@ def metaopti(loss):
     _, fx_array, x_final, s_final = tf.while_loop(
         cond=lambda t, *_: t < unroll_nn,
         body=time_step,
-        loop_vars=(0, fx_array, opt_var, state),
+        loop_vars=(0, fx_array, opt_var[0], state),
         parallel_iterations=1,
         swap_memory=True,
         name="unroll")

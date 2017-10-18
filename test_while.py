@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 from keras import backend as K
 from keras.optimizers import Optimizer
 from keras.layers import Input, Dense
+from tensorflow.python.util import nest
+import os
+import collections, mock
+import sonnet as snt
+from timeit import default_timer as timer
+from tensorflow.contrib.learn.python.learn import monitored_session as ms
 from keras.models import Sequential, Model
 from keras.utils import np_utils
 # f = np.load('mnist.npz')
@@ -18,8 +24,8 @@ from keras.utils import np_utils
 # y_train = np_utils.to_categorical(y_train)
 # y_test = np_utils.to_categorical(y_test)
 # Testing
-X_train = np.random.uniform(0,1,[224,10])
-y_train = np.power(X_train[:,1:6],2)
+X_train = np.random.uniform(0, 1, [224, 10])
+y_train = np.power(X_train[:, 1:6], 2)
 
 seed = 7
 np.random.seed(seed)
@@ -34,86 +40,171 @@ lstmunit = 1
 hidden_size = 1
 unroll_nn = 20
 lr = 0.001
+_nn_initializers = {
+    "w": tf.random_normal_initializer(mean=0, stddev=0.01),
+    "b": tf.random_normal_initializer(mean=0, stddev=0.01),
+}
 
-X = np.zeros((batch_num, batch_size, n_input), np.float32)
-Y = np.zeros((batch_num, batch_size, n_output), np.float32)
-cp = 0
-for ii in range(batch_num):
-    X[ii] = X_train[cp: cp + batch_size]
-    Y[ii] = y_train[cp + 1: cp + batch_size + 1]
-    cp += 10
+def _wrap_variable_creation(func, custom_getter):
+  """Provides a custom getter for all variable creations."""
+  original_get_variable = tf.get_variable
+  def custom_get_variable(*args, **kwargs):
+    if hasattr(kwargs, "custom_getter"):
+      raise AttributeError("Custom getters are not supported for optimizee "
+                           "variables.")
+    return original_get_variable(*args, custom_getter=custom_getter, **kwargs)
 
-x = tf.placeholder(tf.float32,[batch_size, n_input])
-y_ = tf.placeholder(tf.float32,[batch_size, n_output])
+  # Mock the get_variable method.
+  with mock.patch("tensorflow.get_variable", custom_get_variable):
+    return func()
 
-with tf.variable_scope('Optimizee'):
-    y1 = Dense(n_hidden1,activation='sigmoid')(x)
-    y2 = Dense(n_output,activation='sigmoid')(y1)
-    loss = K.pow((y_ - y2),2)/batch_size
-    x = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Optimizee')
-    grads = K.gradients(loss,x)
-    grads = [tf.stop_gradient(loss,g) for g in grads]
 
-def define_variable(grads,x,state):
-    x_new = x
-    with tf.variable_scope('Optimizer') as scope2:
+def _get_variables(func):
+
+  variables = []
+  constants = []
+
+  def custom_getter(getter, name, **kwargs):
+    trainable = kwargs["trainable"]
+    kwargs["trainable"] = False
+    variable = getter(name, **kwargs)
+    if trainable:
+      variables.append(variable)
+    else:
+      constants.append(variable)
+    return variable
+
+  with tf.name_scope("unused_graph"):
+    _wrap_variable_creation(func, custom_getter)
+
+  return variables, constants
+
+
+def _make_with_custom_variables(func, variables):
+
+  variables = collections.deque(variables)
+
+  def custom_getter(getter, name, **kwargs):
+    if kwargs["trainable"]:
+      return variables.popleft()
+    else:
+      kwargs["reuse"] = True
+      return getter(name, **kwargs)
+
+  return _wrap_variable_creation(func, custom_getter)
+
+def problem():
+    X = tf.constant(X_train[:batch_size], dtype=tf.float32)
+    Y = tf.constant(y_train[:batch_size], dtype=tf.float32)
+    mlp = snt.nets.MLP([n_hidden1]+[n_output],
+                       activation=tf.sigmoid,
+                       initializers=_nn_initializers)
+    network = snt.Sequential([snt.BatchFlatten(), mlp])
+
+    def compute_loss():
+        y2 = network(X)
+        loss = tf.reduce_mean(tf.pow((Y - y2), 2))
+        return loss
+    return compute_loss
+
+def metaopti(loss):
+    opt_var = _get_variables(loss)
+    shapes = [K.get_variable_shape(p) for p in opt_var[0]]
+    state = [[] for _ in range(len(opt_var[0]))]
+    for i in range(len(opt_var[0])):
+        n_param = int(np.prod(shapes[i]))
+        state_c = K.zeros((n_param, hidden_size), name="c_in")
+        state_h = K.zeros((n_param, hidden_size), name="h_in")
+        state[i] = [[] for _ in range(n_param)]
+        for ii in range(n_param):
+            state[i][ii]= tf.contrib.rnn.LSTMStateTuple(state_c[ii:ii + 1], state_h[ii:ii + 1])
+
+    def update_state(fx,x,state):
+        shapes = [K.get_variable_shape(p) for p in x[0]]
+        grads = K.gradients(fx, x[0])
+        grads = [tf.stop_gradient(g) for g in grads]
+        cell_count = 0
         state_f = [[] for _ in range(len(grads))]
-        g_new_list = [[] for _ in range(len(grads))]
-        softmax_w = tf.get_variable("softmax_w", shape=[hidden_size, 1], dtype=tf.float32)
-        softmax_b = tf.get_variable("softmax_b", shape=[1], dtype=tf.float32)
-        C_in = tf.get_variable('C', shape=[1,1], dtype=tf.float32, trainable=False)
-        H_in = tf.get_variable('H', shape=[1,1], dtype=tf.float32, trainable=False)
-        state = [[] for _ in range(len(grads))]
-        for j in range(len(grads)):
-            gradsj = tf.reshape(grads[j], [-1, 1])
-            for i in range(gradsj.get_shape().as_list()[0]):
-                state[j].append((tf.contrib.rnn.LSTMStateTuple(C_in, H_in),))
+        delta = [[] for _ in range(len(grads))]
+        for i in range(len(grads)):
+            g = grads[i]
+            n_param = int(np.prod(shapes[i]))
+            flat_g = tf.reshape(g, [-1, n_param])
 
-        for j in range(len(grads)):
-            if j > 0: scope2.reuse_variables()
-            cell = tf.contrib.rnn.MultiRNNCell(
-            [tf.contrib.rnn.LSTMCell(self.hidden_size) for _ in range(self.lstmunit)])
-            gradsj = tf.reshape(grads[j], [-1, 1])
-            state_f[j] = [[] for _ in range(gradsj.get_shape().as_list()[0])]
-            for i in range(gradsj.get_shape().as_list()[0]):
-                grad_f_t = tf.slice(gradsj, begin=[i, 0], size=[1, 1])
-                cell_out, state_f[j][i] = cell(grad_f_t, state[j][i])
-                g_new_i = tf.add(tf.matmul(cell_out, softmax_w), softmax_b)
-                g_new_list[j].append(g_new_i)
+            # Apply RNN cell for each parameter
+            with tf.variable_scope("ml_rnn"):
+                rnn_outputs = []
+                state_f[i] = [[] for _ in range(n_param)]
+                for ii in range(n_param):
+                    rnn_cell = tf.contrib.rnn.LSTMCell(num_units=hidden_size, reuse=cell_count > 0)
+                    cell_count += 1
 
-            g_new_list[j] = tf.reshape(g_new_list[j], grads[j].shape)
-        g_new = g_new_list
+                    # Individual update with individual state but global cell params
+                    rnn_out, state_f[i][ii] = rnn_cell(flat_g[:, ii:ii + 1], state[i][ii])
+                    rnn_outputs.append(rnn_out)
 
-        for i in range(grads):
-            x_new[i] = x[i] + g_new[i]
+                    # Form output as tensor
+            rnn_outputs = tf.reshape(tf.stack(rnn_outputs, axis=1), g.get_shape())
 
-    var_rnn = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Optimizer')
-    return x_new,state_f, var_rnn
-# Construct the while loop.
-def cond(i):
-    return i <100
+            # Dense output from state
+            delta[i] = rnn_outputs
+        return delta, state_f
 
-def body(i):
-    # Dequeue a single new example each iteration.
-    x, y = q_data.dequeue()
-    # Compute the loss and gradient update based on the current example.
-    loss = (tf.add(tf.multiply(x, w), b) - y) ** 2
-    train_op = optimizer.minimize(loss, global_step=gs)
-    # Ensure that the update is applied before continuing.
-    with tf.control_dependencies([train_op]):
-        return i + 5
+    def time_step(t,f_array,x,state):
+        x_new = x
+        fx = _make_with_custom_variables(loss,x[0])
+        f_array = f_array.write(t,fx)
+        delta,state_f = update_state(fx, x, state)
+        x_new = [x_n + d for x_n,d in zip(x_new[0],delta)]
+        t_new = t + 1
 
-loop = tf.while_loop(cond, body, [tf.constant(0)])
+        return t_new, f_array, x_new,state_f
 
-data = [k * 1. for k in range(100)]
+    fx_array = tf.TensorArray(tf.float32, size=unroll_nn + 1,
+                              clear_after_read=False)
+    _, fx_array, x_final, s_final = tf.while_loop(
+        cond=lambda t, *_: t < unroll_nn,
+        body=time_step,
+        loop_vars=(0, fx_array, opt_var, state),
+        parallel_iterations=1,
+        swap_memory=True,
+        name="unroll")
 
-with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
-    for _ in range(1):
-        # NOTE: Constructing the enqueue op ahead of time avoids adding
-        # (potentially many) copies of `data` to the graph.
-        sess.run(enqueue_data_op,
-                 feed_dict={placeholder_x: data, placeholder_y: data})
-    print (sess.run([gs, w, b]))  # Prints before-loop values.
-    sess.run(loop)
-    print (sess.run([gs, w, b]))  # Prints after-loop values.
+    fx_final = _make_with_custom_variables(loss, x_final)
+
+    fx_array = fx_array.write(unroll_nn, fx_final)
+
+    loss_optimizer = tf.reduce_sum(fx_array.stack(), name="loss")
+
+    variables = (nest.flatten(state) + opt_var)
+    reset = [tf.variables_initializer(variables), fx_array.close()]
+    update = (nest.flatten([tf.assign(r,v) for r,v in zip(opt_var,x_final)]) + nest.flatten([tf.assign(r,v) for r,v in zip(state,s_final)]))
+    optimizer = tf.train.AdamOptimizer(lr)
+    step = optimizer.minimize(loss_optimizer)
+
+    return step, loss_optimizer, update, reset, fx_final, x_final
+
+def run_epoch(sess, cost_op, ops, reset, num_unrolls,**kwargs):
+  """Runs one optimization epoch."""
+  start = timer()
+  sess.run(reset)
+  for _ in range(num_unrolls):
+    cost = sess.run([cost_op] + ops,feed_dict=kwargs)[0]
+  return timer() - start, cost
+
+loss = problem()
+step, loss_opt, update, reset, cost_op, _ = metaopti(loss)
+
+with ms.MonitoredSession() as sess:
+    # Prevent accidental changes to the graph.
+    tf.get_default_graph().finalize()
+
+    best_evaluation = float("inf")
+    total_time = 0
+    total_cost = 0
+    for e in range(Optimizee_steps):
+        # Training.
+        time, cost = run_epoch(sess, cost_op, [update, step], reset,
+                               unroll_nn,{x:X,y_:Y})
+        total_time += time
+        total_cost += cost

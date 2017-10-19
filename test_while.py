@@ -10,6 +10,7 @@ import collections, mock
 import sonnet as snt
 from timeit import default_timer as timer
 from tensorflow.contrib.learn.python.learn import monitored_session as ms
+logging  = tf.logging
 from keras.models import Sequential, Model
 from keras.utils import np_utils
 # f = np.load('mnist.npz')
@@ -29,17 +30,26 @@ y_train = np.power(X_train[:, 1:6], 2)
 
 seed = 7
 np.random.seed(seed)
-Optimizee_steps = 100
+n_epoch = 40
+Optimizee_steps = 30
 batch_size = 50
 n_input = X_train.shape[1]
 n_output = y_train.shape[1]
 n_hidden1 = 7
-batch_num = 3
+batch_num = 20
 Optimizer_steps = 20
 lstmunit = 1
 hidden_size = 1
 unroll_nn = 20
 lr = 0.001
+logs_path = '/MetaLog/'
+save_path = "/MetaOpt"
+
+if os.path.exists(save_path):
+    print("Do nothing")
+else:
+    os.mkdir(save_path)
+
 _nn_initializers = {
     "w": tf.random_normal_initializer(mean=0, stddev=0.01),
     "b": tf.random_normal_initializer(mean=0, stddev=0.01),
@@ -94,8 +104,9 @@ def _make_with_custom_variables(func, variables):
   return _wrap_variable_creation(func, custom_getter)
 
 def problem():
-    X = tf.constant(X_train[:batch_size], dtype=tf.float32)
-    Y = tf.constant(y_train[:batch_size], dtype=tf.float32)
+    indices = tf.random_uniform([batch_size], 0, X_train.shape[0], tf.int64)
+    X = tf.gather(tf.constant(X_train,dtype=tf.float32),indices)#tf.constant(X_train[:indices], dtype=tf.float32)
+    Y = tf.gather(tf.constant(y_train,dtype=tf.float32),indices)#tf.constant(y_train[:indices], dtype=tf.float32)
     mlp = snt.nets.MLP([n_hidden1]+[n_output],
                        activation=tf.sigmoid,
                        initializers=_nn_initializers)
@@ -109,23 +120,22 @@ def problem():
 
 def metaopti(loss):
     opt_var = _get_variables(loss)[0]
-    shapes = [K.get_variable_shape(p) for p in opt_var[0]]
-    state = [[] for _ in range(len(opt_var[0]))]
-    for i in range(len(opt_var[0])):
+    shapes = [K.get_variable_shape(p) for p in opt_var]
+    state_c = [[] for _ in range(len(opt_var))]
+    state_h = [[] for _ in range(len(opt_var))]
+    for i in range(len(opt_var)):
         n_param = int(np.prod(shapes[i]))
-        state_c = K.zeros((n_param, hidden_size), name="c_in")
-        state_h = K.zeros((n_param, hidden_size), name="h_in")
-        state[i] = [[] for _ in range(n_param)]
-        for ii in range(n_param):
-            state[i][ii]= tf.contrib.rnn.LSTMStateTuple(state_c[ii:ii + 1], state_h[ii:ii + 1])
+        state_c[i] = tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32,name="c_in",trainable=False)
+        state_h[i] = tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32,name="h_in",trainable=False)
 
-    def update_state(fx,x,state):
+    def update_state(fx,x,state_c,state_h):
         shapes = [K.get_variable_shape(p) for p in x]
         grads = K.gradients(fx, x)
         grads = [tf.stop_gradient(g) for g in grads]
         cell_count = 0
-        state_f = [[] for _ in range(len(grads))]
         delta = [[] for _ in range(len(grads))]
+        S_C_out = [[] for _ in range(len(opt_var))]
+        S_H_out = [[] for _ in range(len(opt_var))]
         for i in range(len(grads)):
             g = grads[i]
             n_param = int(np.prod(shapes[i]))
@@ -134,38 +144,47 @@ def metaopti(loss):
             # Apply RNN cell for each parameter
             with tf.variable_scope("ml_rnn"):
                 rnn_outputs = []
-                state_f[i] = [[] for _ in range(n_param)]
+                rnn_state_c = []
+                rnn_state_h = []
                 for ii in range(n_param):
+                    state_in = tf.contrib.rnn.LSTMStateTuple(state_c[i][ii:ii + 1], state_h[i][ii:ii + 1])
                     rnn_cell = tf.contrib.rnn.LSTMCell(num_units=hidden_size, reuse=cell_count > 0)
                     cell_count += 1
 
                     # Individual update with individual state but global cell params
-                    rnn_out, state_f[i][ii] = rnn_cell(flat_g[:, ii:ii + 1], state[i][ii])
+                    rnn_out, state_out = rnn_cell(flat_g[:, ii:ii + 1], state_in)
                     rnn_outputs.append(rnn_out)
+                    rnn_state_c.append(state_out.c)
+                    rnn_state_h.append(state_out.h)
 
                     # Form output as tensor
             rnn_outputs = tf.reshape(tf.stack(rnn_outputs, axis=1), g.get_shape())
+            rnn_new_c = tf.reshape(tf.stack(rnn_state_c, axis=1), (n_param, hidden_size))
+            rnn_new_h = tf.reshape(tf.stack(rnn_state_h, axis=1), (n_param, hidden_size))
 
             # Dense output from state
             delta[i] = rnn_outputs
-        return delta, state_f
+            S_C_out[i] = rnn_new_c
+            S_H_out[i] = rnn_new_h
 
-    def time_step(t,f_array,x,state):
+        return delta, S_C_out,S_H_out
+
+    def time_step(t,f_array,x,state_c,state_h):
         x_new = x
         fx = _make_with_custom_variables(loss,x)
         f_array = f_array.write(t,fx)
-        delta,state_f = update_state(fx, x, state)
+        delta,s_c_out,s_h_out = update_state(fx, x, state_c,state_h)
         x_new = [x_n + d for x_n,d in zip(x_new,delta)]
         t_new = t + 1
 
-        return t_new, f_array, x_new,state_f
+        return t_new, f_array, x_new,s_c_out,s_h_out
 
     fx_array = tf.TensorArray(tf.float32, size=unroll_nn + 1,
                               clear_after_read=False)
-    _, fx_array, x_final, s_final = tf.while_loop(
+    _, fx_array, x_final, S_C,S_H = tf.while_loop(
         cond=lambda t, *_: t < unroll_nn,
         body=time_step,
-        loop_vars=(0, fx_array, opt_var[0], state),
+        loop_vars=(0, fx_array, opt_var, state_c,state_h),
         parallel_iterations=1,
         swap_memory=True,
         name="unroll")
@@ -176,24 +195,37 @@ def metaopti(loss):
 
     loss_optimizer = tf.reduce_sum(fx_array.stack(), name="loss")
 
-    variables = (nest.flatten(state) + opt_var)
+    variables = (nest.flatten(state_c) + nest.flatten(state_h) + opt_var)
     reset = [tf.variables_initializer(variables), fx_array.close()]
-    update = (nest.flatten([tf.assign(r,v) for r,v in zip(opt_var,x_final)]) + nest.flatten([tf.assign(r,v) for r,v in zip(state,s_final)]))
+    update = (nest.flatten([tf.assign(r,v) for r,v in zip(opt_var,x_final)]) + nest.flatten([tf.assign(r,v) for r,v in zip(state_c,S_C)]) +
+              nest.flatten([tf.assign(r, v) for r, v in zip(state_h, S_H)]))
     optimizer = tf.train.AdamOptimizer(lr)
     step = optimizer.minimize(loss_optimizer)
 
     return step, loss_optimizer, update, reset, fx_final, x_final
 
-def run_epoch(sess, cost_op, ops, reset, num_unrolls,**kwargs):
+def run_epoch(sess, e, cost_op, m_summary, ops, reset, num_unrolls, summary_writer):
   """Runs one optimization epoch."""
   start = timer()
   sess.run(reset)
-  for _ in range(num_unrolls):
-    cost = sess.run([cost_op] + ops,feed_dict=kwargs)[0]
-  return timer() - start, cost
+  for i in range(num_unrolls):
+    cost,summary = [sess.run([cost_op,m_summary] + ops)[j] for j in range(2)]
+    summary_writer.add_summary(summary, e)
+    e += 1
+  return timer() - start, e, cost
+
+def print_stats(header, total_error, total_time, n):
+  """Prints experiment statistics."""
+  print(header)
+  print("Log Mean Final Error: {:.2f}".format(total_error / n))
+  print("Mean epoch time: {:.2f} s".format(total_time / n))
 
 loss = problem()
 step, loss_opt, update, reset, cost_op, _ = metaopti(loss)
+
+tf.summary.scalar("loss", cost_op)
+tf.summary.scalar("metaloss",loss_opt)
+merged_summary_op = tf.summary.merge_all()
 
 with ms.MonitoredSession() as sess:
     # Prevent accidental changes to the graph.
@@ -202,9 +234,39 @@ with ms.MonitoredSession() as sess:
     best_evaluation = float("inf")
     total_time = 0
     total_cost = 0
-    for e in range(Optimizee_steps):
+    count = 0
+    summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
+    for e in range(n_epoch):
         # Training.
-        time, cost = run_epoch(sess, cost_op, [update, step], reset,
-                               unroll_nn,{x:X,y_:Y})
+        time, count, cost = run_epoch(sess, count, cost_op, merged_summary_op, [update, step], reset,
+                               unroll_nn,summary_writer)
         total_time += time
         total_cost += cost
+
+        if (e + 1) % Optimizee_steps == 0:
+            print_stats("Epoch {}".format(e + 1), total_cost, total_time,
+                             Optimizee_steps)
+            total_time = 0
+            total_cost = 0
+
+
+        if (e + 1) % Optimizer_steps == 0:
+            eval_cost = 0
+            eval_time = 0
+            for o_s in range(Optimizer_steps):
+                time, count, cost = run_epoch(sess, count, cost_op, merged_summary_op, [update], reset,
+                                       unroll_nn,summary_writer)
+                eval_time += time
+                eval_cost += cost
+
+            print_stats("EVALUATION", eval_cost, eval_time, Optimizer_steps)
+            saver = tf.train.Saver()
+            if save_path is not None and eval_cost < best_evaluation:
+                print("Removing previously saved meta-optimizer")
+                for f in os.listdir(save_path):
+                    os.remove(os.path.join(save_path, f))
+                print("Saving meta-optimizer to {}".format(save_path))
+                saver.save(sess, save_path)
+                best_evaluation = eval_cost
+
+    os.system('tensorboard --logdir=/Metalog/ --port 6006')

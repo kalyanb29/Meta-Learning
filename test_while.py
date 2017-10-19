@@ -31,16 +31,17 @@ y_train = np.power(X_train[:, 1:6], 2)
 seed = 7
 np.random.seed(seed)
 n_epoch = 40
-Optimizee_steps = 30
+log_steps = 4
 batch_size = 50
 n_input = X_train.shape[1]
 n_output = y_train.shape[1]
 n_hidden1 = 7
 batch_num = 20
-Optimizer_steps = 20
+Optimizer_steps = 5
+Evaluation_period = 10
 lstmunit = 1
 hidden_size = 1
-unroll_nn = 20
+unroll_nn = 5
 lr = 0.001
 logs_path = '/MetaLog/'
 save_path = "/MetaOpt"
@@ -217,7 +218,7 @@ def run_epoch(sess, e, cost_op, m_summary, ops, reset, num_unrolls, summary_writ
 def print_stats(header, total_error, total_time, n):
   """Prints experiment statistics."""
   print(header)
-  print("Log Mean Final Error: {:.2f}".format(total_error / n))
+  print("Mean Final Error: {:.2f}".format(total_error / n))
   print("Mean epoch time: {:.2f} s".format(total_time / n))
 
 loss = problem()
@@ -243,14 +244,14 @@ with ms.MonitoredSession() as sess:
         total_time += time
         total_cost += cost
 
-        if (e + 1) % Optimizee_steps == 0:
+        if (e + 1) % log_steps == 0:
             print_stats("Epoch {}".format(e + 1), total_cost, total_time,
-                             Optimizee_steps)
+                        log_steps)
             total_time = 0
             total_cost = 0
 
 
-        if (e + 1) % Optimizer_steps == 0:
+        if (e + 1) % Evaluation_period == 0:
             eval_cost = 0
             eval_time = 0
             for o_s in range(Optimizer_steps):

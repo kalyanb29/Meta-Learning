@@ -31,13 +31,12 @@ y_train = np.power(X_train[:, 1:6], 2)
 seed = 7
 np.random.seed(seed)
 n_epoch = 40
-batch_size = 50
+batch_size = 100
 n_input = X_train.shape[1]
 n_output = y_train.shape[1]
 n_hidden1 = 7
-batch_num = 20
 num_layer = 2
-hidden_size = 5
+hidden_size = 8
 unroll_nn = 10
 lr = 0.001
 logs_path = '/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog/'
@@ -78,8 +77,7 @@ def _get_variables(func):
       constants.append(variable)
     return variable
 
-  with tf.name_scope("unused_graph"):
-    _wrap_variable_creation(func, custom_getter)
+  _wrap_variable_creation(func, custom_getter)
 
   return variables, constants
 
@@ -109,15 +107,15 @@ def problem():
 
         def compute_loss():
             y2 = network(X)
-            loss = tf.reduce_mean(tf.pow((Y - y2), 2))
+            loss = tf.losses.mean_squared_error(Y,y2)
             return loss
     return compute_loss
 
 def metaopti(prob):
     opt_var = _get_variables(prob)[0]
     shapes = [K.get_variable_shape(p) for p in opt_var]
-    softmax_w = tf.get_variable("softmax_w", shape=[hidden_size, 1], dtype=tf.float32)
-    softmax_b = tf.get_variable("softmax_b", shape=[1], dtype=tf.float32)
+    softmax_w = tf.get_variable("softmax_w",shape=[hidden_size, 1], dtype=tf.float32)
+    softmax_b = tf.get_variable("softmax_b",shape=[1], dtype=tf.float32)
     with tf.name_scope('states'):
         state_c = [[] for _ in range(len(opt_var))]
         state_h = [[] for _ in range(len(opt_var))]
@@ -131,6 +129,7 @@ def metaopti(prob):
         with tf.name_scope("gradients"):
             shapes = [K.get_variable_shape(p) for p in x]
             grads = K.gradients(fx, x)
+            grads, _ = tf.clip_by_global_norm(grads, 5.0)
             grads = [tf.stop_gradient(g) for g in grads]
         with tf.variable_scope('MetaNetwork'):
             cell_count = 0
@@ -204,8 +203,7 @@ def metaopti(prob):
         loss_optimizer = tf.reduce_sum(fx_array.stack())
 
     with tf.name_scope('state_optimizee_var'):
-        #variables = (nest.flatten(state_c) + nest.flatten(state_h) + opt_var)
-        variables = (nest.flatten(state_c) + nest.flatten(state_h))
+        variables = (nest.flatten(state_c) + nest.flatten(state_h) + opt_var)
 
     with tf.name_scope('state_reset'):
         reset = [tf.variables_initializer(variables), fx_array.close()]
@@ -219,23 +217,24 @@ def metaopti(prob):
         optimizer = tf.train.AdamOptimizer(lr)
 
     with tf.name_scope('Meta_update'):
-        step = optimizer.minimize(loss_optimizer)
-
+        gvs = optimizer.compute_gradients(loss_optimizer)
+        grads, tvars = zip(*gvs)
+        clipped_grads,_ = tf.clip_by_global_norm(grads, 5.0)
+        step = optimizer.apply_gradients(zip(clipped_grads, tvars))
     return step, loss_optimizer, update, reset, fx_final, x_final
 
-def run_epoch(sess, e, cost_op, m_summary, ops, reset, num_unrolls, summary_writer):
+def run_epoch(sess, e, cost_op, m_summary, ops, summary_writer):
   """Runs one optimization epoch."""
-  start = timer()
   cost, summary = [sess.run([cost_op, m_summary] + ops)[j] for j in range(2)]
   summary_writer.add_summary(summary, e)
   e += 1
-  return timer() - start, e, cost, summary_writer
+  return e, cost, summary_writer
 
-def print_stats(header, total_error, total_time, n):
+def print_stats(header, total_error, total_time):
   """Prints experiment statistics."""
   print(header)
-  print("Mean Final Error: {:.2f}".format(total_error / n))
-  print("Mean epoch time: {:.2f} s".format(total_time / n))
+  print("Mean Final Error: {:.2f}".format(total_error))
+  print("Mean epoch time: {:.2f} s".format(total_time))
 
 prob = problem()
 step, loss_opt, update, reset, cost_op, _ = metaopti(prob)
@@ -245,22 +244,24 @@ tf.summary.scalar("metaloss",loss_opt)
 merged_summary_op = tf.summary.merge_all()
 
 with tf.Session() as sess:
-    # Prevent accidental changes to the graph.
     sess.run(tf.global_variables_initializer())
     best_evaluation = float("inf")
     count = 0
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
+    start = timer()
     for e in range(n_epoch):
+        sess.run(reset)
+        for _ in range(5):
             # Training.
-        time, count, cost,summary_writer = run_epoch(sess, count, cost_op, merged_summary_op, [update, step], reset,
-                               unroll_nn,summary_writer)
+            count, cost,summary_writer = run_epoch(sess, count, cost_op, merged_summary_op, [update, step],summary_writer)
 
-        print_stats("Epoch {}".format(e), cost, time)
+
+        print_stats("Epoch {}".format(e), cost, timer() - start)
         saver = tf.train.Saver()
         if save_path is not None and cost < best_evaluation:
             print("Saving meta-optimizer to {}".format(save_path))
             saver.save(sess, save_path,global_step=e)
             best_evaluation = cost
 
-    os.system('tensorboard --logdir=/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog')
+    #os.system('tensorboard --logdir=/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog')
     # os.system('-m webbrowser -t "http://bairstow:6006/#graphs"')

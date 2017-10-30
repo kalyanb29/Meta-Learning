@@ -233,7 +233,7 @@ def run_epoch(sess, num_iter, cost_op, ops, reset):
   sess.run(reset)
   """Runs one optimization epoch."""
   for _ in range(num_iter):
-     cost= [sess.run([cost_op] + ops)[j] for j in range(1)]
+     cost= sess.run([cost_op] + ops)[0]
   return cost
 
 def print_stats(header, total_error_optimizee, total_time):

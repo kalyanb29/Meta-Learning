@@ -29,8 +29,11 @@ from keras.utils import np_utils
 
 seed = 7
 np.random.seed(seed)
-n_epoch = 20
+n_epoch = 40
 num_steps = 100
+evaluation_period = 10
+evaluation_epochs = 20
+log_period = 10
 batch_size = 100
 num_dims = 10
 num_layer = 2
@@ -226,72 +229,61 @@ def metaopti(prob):
         step = optimizer.apply_gradients(zip(clipped_grads, tvars))
     return step, loss_optimizer, update, reset, fx_final, x_final
 
-def run_epoch(sess, e, cost_op, loss_optimizer, m_summary, ops, summary_writer):
+def run_epoch(sess, num_iter, cost_op, ops, reset):
+  sess.run(reset)
   """Runs one optimization epoch."""
-  cost, loss_opt, summary = [sess.run([cost_op, loss_optimizer, m_summary] + ops)[j] for j in range(3)]
-  summary_writer.add_summary(summary, e)
-  e += 1
-  return e, cost, loss_opt, summary_writer
+  for _ in range(num_iter):
+     cost= [sess.run([cost_op] + ops)[j] for j in range(1)]
+  return cost
 
-def print_stats(header, total_error_optimizee, error_optimizer, total_time):
+def print_stats(header, total_error_optimizee, total_time):
   """Prints experiment statistics."""
   print(header)
   print("Mean Final Error Optimizee: {:.2f}".format(total_error_optimizee))
-  print("Mean Final Error Optimizer: {:.2f}".format(error_optimizer))
   print("Mean epoch time: {:.2f} s".format(total_time))
 
 prob = problem()
 step, loss_opt, update, reset, cost_op, _ = metaopti(prob)
 
-tf.summary.scalar("Optimizeeloss", cost_op)
-tf.summary.scalar("metaloss",loss_opt)
-merged_summary_op = tf.summary.merge_all()
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     best_evaluation = float("inf")
     count = 0
-    summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
     start = timer()
     num_iter = num_steps // unroll_nn
     losstrain = []
+    losseval = []
     #Training
     for e in range(n_epoch):
-        sess.run(reset)
-        for _ in range(num_iter):
-            count, cost, loss_meta, summary_writer = run_epoch(sess, count, cost_op, loss_opt, merged_summary_op, [update, step],summary_writer)
-
-            losstrain.append(cost)
-        print_stats("Training Epoch {}".format(e), cost, loss_meta, timer() - start)
+        cost= run_epoch(sess, num_iter, cost_op, [update, step], reset)
+        losstrain.append(np.log10(cost))
+        print_stats("Training Epoch {}".format(e), cost, timer() - start)
         saver = tf.train.Saver()
-        if save_path is not None and cost < best_evaluation:
-            print("Saving meta-optimizer to {}".format(save_path))
-            saver.save(sess, save_path,global_step=e)
-            best_evaluation = cost
-    slengths = np.arange(n_epoch*num_iter)
+
+        if (e + 1) % evaluation_period == 0:
+            for _ in range(evaluation_epochs):
+                evalcost = run_epoch(sess, num_iter, cost_op, [update], reset)
+                losseval.append(np.log10(evalcost))
+            if save_path is not None and evalcost < best_evaluation:
+                print("Saving meta-optimizer to {}".format(save_path))
+                saver.save(sess, save_path,global_step=e)
+                best_evaluation = evalcost
+    slengths = np.arange(n_epoch)
     plt.figure(figsize=(8, 5))
     plt.plot(slengths, losstrain, 'r-', label='Training Loss')
     plt.xlabel('Sequence length')
     plt.ylabel('Training Loss')
     plt.legend()
     savefig('Training.png')
-    plt.show()
     plt.close()
-    lossvalid = []
-    for e in range(n_epoch):
-        sess.run(reset)
-        for _ in range(num_iter):
-            count, cost, loss_meta, summary_writer = run_epoch(sess, count, cost_op, loss_opt, merged_summary_op, [update],summary_writer)
-
-            lossvalid.append(cost)
-        print_stats("Validation Epoch {}".format(e), cost, loss_meta, timer() - start)
+    slengths = np.arange(len(losseval))
     plt.figure(figsize=(8, 5))
-    plt.plot(slengths, lossvalid, 'b-', label='Validation Loss')
+    plt.plot(slengths, losseval, 'b-', label='Validation Loss')
     plt.xlabel('Sequence length')
     plt.ylabel('Validation Loss')
     plt.legend()
     savefig('Validation.png')
-    plt.show()
     plt.close()
     #os.system('tensorboard --logdir=/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog')
     # os.system('-m webbrowser -t "http://bairstow:6006/#graphs"')

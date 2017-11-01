@@ -29,7 +29,7 @@ from keras.utils import np_utils
 
 seed = 7
 np.random.seed(seed)
-n_epoch = 40
+n_epoch = 10
 num_steps = 100
 evaluation_period = 10
 evaluation_epochs = 20
@@ -204,6 +204,7 @@ def metaopti(prob):
     with tf.name_scope('Unroll_loss_period'):
         fx_final = _make_with_custom_variables(prob, x_final)
         fx_array = fx_array.write(unroll_nn, fx_final)
+        arrayf = fx_array.stack()
 
     with tf.name_scope('Metaloss'):
         loss_optimizer = tf.reduce_sum(fx_array.stack())
@@ -227,14 +228,16 @@ def metaopti(prob):
         grads, tvars = zip(*gvs)
         clipped_grads,_ = tf.clip_by_global_norm(grads, 5.0)
         step = optimizer.apply_gradients(zip(clipped_grads, tvars))
-    return step, loss_optimizer, update, reset, fx_final, x_final
+    return step, loss_optimizer, update, reset, fx_final, arrayf, x_final
 
-def run_epoch(sess, num_iter, cost_op, ops, reset):
+def run_epoch(sess, num_iter, arraycost, ops, reset):
   sess.run(reset)
+  costepoch = []
   """Runs one optimization epoch."""
   for _ in range(num_iter):
-     cost= sess.run([cost_op] + ops)[0]
-  return cost
+     cost= sess.run([arraycost] + ops)[0]
+     costepoch.append(np.log10(cost))
+  return costepoch
 
 def print_stats(header, total_error_optimizee, total_time):
   """Prints experiment statistics."""
@@ -243,10 +246,11 @@ def print_stats(header, total_error_optimizee, total_time):
   print("Mean epoch time: {:.2f} s".format(total_time))
 
 prob = problem()
-step, loss_opt, update, reset, cost_op, _ = metaopti(prob)
+step, loss_opt, update, reset, cost_op, arraycost, _ = metaopti(prob)
 
 
 with tf.Session() as sess:
+    graph_writer = tf.summary.FileWriter(logs_path, sess.graph)
     sess.run(tf.global_variables_initializer())
     best_evaluation = float("inf")
     count = 0
@@ -256,34 +260,36 @@ with tf.Session() as sess:
     losseval = []
     #Training
     for e in range(n_epoch):
-        cost= run_epoch(sess, num_iter, cost_op, [update, step], reset)
-        losstrain.append(np.log10(cost))
+        cost= run_epoch(sess, num_iter, arraycost, [update, step], reset)
+        print(cost)
+        losstrain.append(cost)
         print_stats("Training Epoch {}".format(e), cost, timer() - start)
         saver = tf.train.Saver()
 
         if (e + 1) % evaluation_period == 0:
             for _ in range(evaluation_epochs):
-                evalcost = run_epoch(sess, num_iter, cost_op, [update], reset)
-                losseval.append(np.log10(evalcost))
-            if save_path is not None and evalcost < best_evaluation:
+                evalcost = run_epoch(sess, num_iter, arraycost, [update], reset)
+                losseval.append(evalcost)
+            if save_path is not None and evalcost[unroll_nn+1] < best_evaluation:
                 print("Saving meta-optimizer to {}".format(save_path))
                 saver.save(sess, save_path,global_step=e)
-                best_evaluation = evalcost
-    slengths = np.arange(n_epoch)
-    plt.figure(figsize=(8, 5))
-    plt.plot(slengths, losstrain, 'r-', label='Training Loss')
-    plt.xlabel('Sequence length')
-    plt.ylabel('Training Loss')
-    plt.legend()
-    savefig('Training.png')
-    plt.close()
-    slengths = np.arange(len(losseval))
-    plt.figure(figsize=(8, 5))
-    plt.plot(slengths, losseval, 'b-', label='Validation Loss')
-    plt.xlabel('Sequence length')
-    plt.ylabel('Validation Loss')
-    plt.legend()
-    savefig('Validation.png')
-    plt.close()
+                best_evaluation = evalcost[unroll_nn+1]
+    # slengths = np.arange(n_epoch)
+    # plt.figure(figsize=(8, 5))
+    # plt.plot(slengths, losstrain, 'r-', label='Training Loss')
+    # plt.xlabel('Epoch')
+    # plt.ylabel('Training Loss')
+    # plt.legend()
+    # savefig('Training.png')
+    # plt.close()
+    # slengths = np.arange(len(losseval))
+    # plt.figure(figsize=(8, 5))
+    # plt.plot(slengths, losseval, 'b-', label='Validation Loss')
+    # plt.xlabel('Epoch')
+    # plt.ylabel('Validation Loss')
+    # plt.legend()
+    # savefig('Validation.png')
+    # plt.close()
+    graph_writer.close()
     #os.system('tensorboard --logdir=/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog')
     # os.system('-m webbrowser -t "http://bairstow:6006/#graphs"')

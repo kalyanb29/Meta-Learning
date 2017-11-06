@@ -24,7 +24,7 @@ from keras.utils import np_utils
 # y_test = np_utils.to_categorical(y_test)
 # Testing
 
-n_epoch = 30
+n_epoch = 40
 num_steps = 50
 evaluation_period = 10
 evaluation_epochs = 20
@@ -35,9 +35,14 @@ num_layer = 2
 hidden_size = 5
 unroll_nn = 5
 lr = 0.001
-logs_path = '/Users/Admin/Desktop/TensorFlow/MetaLog/'
-save_path = '/Users/Admin/Desktop/TensorFlow/MetaOpt/model.ckpt'
+logs_path = '/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog/'
+save_path = '/Users/kalyanb/PycharmProjects/MetaLearning/MetaOpt/model.ckpt'
 
+
+def log_encode(x, p=10.0):
+    xa = tf.log(tf.maximum(tf.abs(x), np.exp(-p))) / p
+    xb = tf.clip_by_value(x * np.exp(p), -1, 1)
+    return tf.stack([xa, xb], axis=1)
 
 def _wrap_variable_creation(func, custom_getter):
   """Provides a custom getter for all variable creations."""
@@ -130,7 +135,6 @@ def metaopti(prob):
         with tf.name_scope("gradients"):
             shapes = [K.get_variable_shape(p) for p in x]
             grads = K.gradients(fx, x)
-            # grads, _ = tf.clip_by_global_norm(grads, 5.0)
             grads = [tf.stop_gradient(g) for g in grads]
         with tf.variable_scope('MetaNetwork'):
             cell_count = 0
@@ -140,7 +144,8 @@ def metaopti(prob):
             for i in range(len(grads)):
                 g = grads[i]
                 n_param = int(np.prod(shapes[i]))
-                flat_g = tf.reshape(g, [-1, n_param])
+                flat_g = tf.reshape(g, [n_param,-1])
+                flat_g_mod = tf.reshape(log_encode(flat_g),[n_param,-1])
                 rnn_new_c = [[] for _ in range(num_layer)]
                 rnn_new_h = [[] for _ in range(num_layer)]
             # Apply RNN cell for each parameter
@@ -153,8 +158,11 @@ def metaopti(prob):
                         rnn_cell = tf.contrib.rnn.MultiRNNCell([tf.contrib.rnn.LSTMCell(num_units=hidden_size, reuse=cell_count > 0) for _ in range(num_layer)])
                         cell_count += 1
 
+                        # Verify whether the variables are used
+                        # for v in tf.global_variables():
+                        #     print(v.name)
                     # Individual update with individual state but global cell params
-                        rnn_out_all, state_out = rnn_cell(flat_g[:, ii:ii + 1], state_in)
+                        rnn_out_all, state_out = rnn_cell(flat_g_mod[ii:ii + 1,:], state_in)
                         rnn_out = tf.add(tf.matmul(rnn_out_all, softmax_w), softmax_b)
                         rnn_outputs.append(rnn_out)
                         for j in range(num_layer):
@@ -267,12 +275,12 @@ with tf.Session() as sess:
             for _ in range(evaluation_epochs):
                 evalcost,evaloss = run_epoch(sess, num_iter, arraycost, cost_op, [update], reset)
                 losseval.append(evalcost)
-            if save_path is not None and evaloss < best_evaluation:
-                print("Saving meta-optimizer to {}".format(save_path))
-                saver.save(sess, save_path,global_step=0)
-                best_evaluation = evaloss
-                plotlosstrain.append(cost)
-                plotlosseval.append(evalcost)
+                if save_path is not None and evaloss < best_evaluation:
+                    print("Saving meta-optimizer to {}".format(save_path))
+                    saver.save(sess, save_path,global_step=0)
+                    best_evaluation = evaloss
+                    plotlosstrain.append(cost)
+                    plotlosseval.append(evalcost)
     slengths = np.arange(num_steps)
     plt.figure(figsize=(8, 5))
     plt.plot(slengths, plotlosstrain[-1], 'r-', label='Training Loss')

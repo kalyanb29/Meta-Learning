@@ -24,7 +24,7 @@ from keras.utils import np_utils
 # y_test = np_utils.to_categorical(y_test)
 # Testing
 
-n_epoch = 1000
+n_epoch = 70
 num_steps = 100
 evaluation_period = 10
 evaluation_epochs = 20
@@ -212,11 +212,12 @@ def metaopti(dictloss):
 
         return t_new, f_array, f_array_opt, x_new,s_c_out,s_h_out
 
-    fx_array = tf.TensorArray(tf.float32, size=unroll_nn,
+    with tf.device('/device:GPU:0'):
+        fx_array = tf.TensorArray(tf.float32, size=unroll_nn,
                               clear_after_read=False)
-    fx_array_opt = tf.TensorArray(tf.float32, size=unroll_nn,
+        fx_array_opt = tf.TensorArray(tf.float32, size=unroll_nn,
                               clear_after_read=False)
-    _, fx_array, fx_array_opt, x_final, S_C,S_H = tf.while_loop(
+        _, fx_array, fx_array_opt, x_final, S_C,S_H = tf.while_loop(
         cond=lambda t, *_: t < unroll_nn-1,
         body=time_step,
         loop_vars=(0, fx_array, fx_array_opt, opt_var, state_c,state_h),
@@ -256,7 +257,7 @@ def metaopti(dictloss):
         update = (nest.flatten([tf.assign(r,v) for r,v in zip(opt_var,x_final)]) +
                   (nest.flatten([tf.assign(r,v) for r,v in zip(state_c[i],S_C[i]) for i in range(len(state_c))])) +
                   (nest.flatten([tf.assign(r, v) for r, v in zip(state_h[i], S_H[i]) for i in range(len(state_h))])))
-    return step, loss_optimizer, update, reset, fx_final, arrayf, x_final
+    return step, loss_optimizer, update, reset, fx_final, fx_final_opt, arrayf, x_final
 
 def run_epoch(sess, num_iter, arraycost, cost_op, ops, reset):
   sess.run(reset)
@@ -274,10 +275,10 @@ def print_stats(header, total_error_optimizee, total_time):
   print("Mean epoch time: {:.2f} s".format(total_time))
 
 dictloss = problem()
-step, loss_opt, update, reset, cost_op, arraycost, _ = metaopti(dictloss)
+step, loss_opt, update, reset, cost_tot, cost_op, arraycost, _ = metaopti(dictloss)
 
 
-with tf.Session() as sess:
+with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     graph_writer = tf.summary.FileWriter(logs_path, sess.graph)
     sess.run(tf.global_variables_initializer())
     best_evaluation = float("inf")

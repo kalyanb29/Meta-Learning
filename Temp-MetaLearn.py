@@ -27,6 +27,7 @@ from keras.utils import np_utils
 n_epoch = 70
 num_steps = 100
 evaluation_period = 10
+logging_period = 10
 evaluation_epochs = 20
 batch_size = 128
 num_dims = 10
@@ -37,6 +38,8 @@ lr = 0.001
 logs_path = '/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog/'
 save_path = '/Users/kalyanb/PycharmProjects/MetaLearning/MetaOpt/model.ckpt'
 alpha = 0.1
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 def log_encode(x, p=10.0):
     xa = tf.log(tf.maximum(tf.abs(x), np.exp(-p))) / p
@@ -132,17 +135,18 @@ def problem():
     return collections.OrderedDict([('Opt_loss',compute_loss),('Aux_loss',convex_loss)])
 
 def metaopti(dictloss):
-    opt_var = [_get_variables(a)[0][0] for a in dictloss.values()]
-    shapes = [K.get_variable_shape(p) for p in opt_var]
-    softmax_w = tf.get_variable("softmax_w",shape=[hidden_size, 1], dtype=tf.float32)
-    softmax_b = tf.get_variable("softmax_b",shape=[1], dtype=tf.float32)
-    with tf.name_scope('states'):
-        state_c = [[] for _ in range(len(opt_var))]
-        state_h = [[] for _ in range(len(opt_var))]
-        for i in range(len(opt_var)):
-            n_param = int(np.prod(shapes[i]))
-            state_c[i] = [tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32,name="c_in",trainable=False) for _ in range(num_layer)]
-            state_h[i] = [tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32,name="h_in",trainable=False) for _ in range(num_layer)]
+    with tf.device('/device:GPU:0'):
+        opt_var = [_get_variables(a)[0][0] for a in dictloss.values()]
+        shapes = [K.get_variable_shape(p) for p in opt_var]
+        softmax_w = tf.get_variable("softmax_w",shape=[hidden_size, 1], dtype=tf.float32)
+        softmax_b = tf.get_variable("softmax_b",shape=[1], dtype=tf.float32)
+        with tf.name_scope('states'):
+            state_c = [[] for _ in range(len(opt_var))]
+            state_h = [[] for _ in range(len(opt_var))]
+            for i in range(len(opt_var)):
+                n_param = int(np.prod(shapes[i]))
+                state_c[i] = [tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32,name="c_in",trainable=False) for _ in range(num_layer)]
+                state_h[i] = [tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32,name="h_in",trainable=False) for _ in range(num_layer)]
 
 
     def update_state(losstot,x,state_c,state_h):
@@ -224,37 +228,37 @@ def metaopti(dictloss):
         parallel_iterations=1,
         swap_memory=True,
         name="unroll")
-    finaltotloss = [_make_with_custom_variables(a, [x_final[b]]) for a,b in zip(dictloss.values(),range(len(x_final)))]
-    with tf.name_scope('Unroll_loss_period'):
-        fx_final = sum(finaltotloss[a] for a in range(len(finaltotloss)))
-        fx_array = fx_array.write(unroll_nn-1, fx_final)
+        finaltotloss = [_make_with_custom_variables(a, [x_final[b]]) for a,b in zip(dictloss.values(),range(len(x_final)))]
+        with tf.name_scope('Unroll_loss_period'):
+            fx_final = sum(finaltotloss[a] for a in range(len(finaltotloss)))
+            fx_array = fx_array.write(unroll_nn-1, fx_final)
 
-    with tf.name_scope('Final_Optimizee_loss'):
-        fx_final_opt = finaltotloss[0]
-        fx_array_opt = fx_array_opt.write(unroll_nn - 1, fx_final_opt)
-        arrayf = fx_array_opt.stack()
+        with tf.name_scope('Final_Optimizee_loss'):
+            fx_final_opt = finaltotloss[0]
+            fx_array_opt = fx_array_opt.write(unroll_nn - 1, fx_final_opt)
+            arrayf = fx_array_opt.stack()
 
-    with tf.name_scope('Metaloss'):
-        loss_optimizer = tf.reduce_sum(fx_array.stack())
+        with tf.name_scope('Metaloss'):
+            loss_optimizer = tf.reduce_sum(fx_array.stack())
 
-    with tf.name_scope('MetaOpt'):
-        optimizer = tf.train.AdamOptimizer(lr)
+        with tf.name_scope('MetaOpt'):
+            optimizer = tf.train.AdamOptimizer(lr)
 
-    with tf.name_scope('Meta_update'):
-        step = optimizer.minimize(loss_optimizer)
+        with tf.name_scope('Meta_update'):
+            step = optimizer.minimize(loss_optimizer)
         # gvs = optimizer.compute_gradients(loss_optimizer)
         # grads, tvars = zip(*gvs)
         # clipped_grads,_ = tf.clip_by_global_norm(grads, 5.0)
         # step = optimizer.apply_gradients(zip(grads, tvars))
 
-    with tf.name_scope('state_optimizee_var'):
-        variables = (nest.flatten(state_c) + nest.flatten(state_h) + opt_var)
+        with tf.name_scope('state_optimizee_var'):
+            variables = (nest.flatten(state_c) + nest.flatten(state_h) + opt_var)
 
-    with tf.name_scope('state_reset'):
-        reset = [tf.variables_initializer(variables), fx_array.close()]
+        with tf.name_scope('state_reset'):
+            reset = [tf.variables_initializer(variables), fx_array.close()]
 
-    with tf.name_scope('Optimizee_update'):
-        update = (nest.flatten([tf.assign(r,v) for r,v in zip(opt_var,x_final)]) +
+        with tf.name_scope('Optimizee_update'):
+            update = (nest.flatten([tf.assign(r,v) for r,v in zip(opt_var,x_final)]) +
                   (nest.flatten([tf.assign(r,v) for r,v in zip(state_c[i],S_C[i]) for i in range(len(state_c))])) +
                   (nest.flatten([tf.assign(r, v) for r, v in zip(state_h[i], S_H[i]) for i in range(len(state_h))])))
     return step, loss_optimizer, update, reset, fx_final, fx_final_opt, arrayf, x_final
@@ -296,7 +300,8 @@ with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
         losstrain.append(cost)
         print_stats("Training Epoch {}".format(e), trainloss, timer() - start)
         saver = tf.train.Saver()
-
+        if (e + 1) % logging_period == 0:
+            plotlosstrain.append(cost)
         if (e + 1) % evaluation_period == 0:
             for _ in range(evaluation_epochs):
                 evalcost,evaloss = run_epoch(sess, num_iter, arraycost, cost_op, [update], reset)
@@ -305,18 +310,17 @@ with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
                     print("Saving meta-optimizer to {}".format(save_path))
                     saver.save(sess, save_path,global_step=0)
                     best_evaluation = evaloss
-                    plotlosstrain.append(cost)
                     plotlosseval.append(evalcost)
     slengths = np.arange(num_steps)
     plt.figure(figsize=(8, 5))
-    plt.plot(slengths, plotlosstrain[-1], 'r-', label='Training Loss')
+    plt.plot(slengths, np.mean(plotlosstrain,0), 'r-', label='Training Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Training Loss')
     plt.legend()
     savefig('Training.png')
     plt.close()
     plt.figure(figsize=(8, 5))
-    plt.plot(slengths, plotlosseval[-1], 'b-', label='Validation Loss')
+    plt.plot(slengths, np.mean(plotlosseval,0), 'b-', label='Validation Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Validation Loss')
     plt.legend()

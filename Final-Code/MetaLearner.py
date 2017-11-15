@@ -33,7 +33,9 @@ class MetaOpt(object):
         unroll_nn = self._config['unroll_nn']
         lr = self._config['lr']
         with tf.device('/device:GPU:0'):
-            opt_var = [util._get_variables(a)[0][0] for a in dictloss.values()]
+            input_var = [util._get_variables(a)[0] for a in dictloss.values()]
+            num_var = nest.flatten([0,[len(a) for a in input_var]])
+            opt_var = nest.flatten(input_var)
             shapes = [K.get_variable_shape(p) for p in opt_var]
             with tf.variable_scope("softmax", reuse=tf.AUTO_REUSE):
                 softmax_w = tf.get_variable("softmax_w", shape=[hidden_size, 1], dtype=tf.float32)
@@ -52,7 +54,8 @@ class MetaOpt(object):
         def update_state(losstot, x, state_c, state_h):
             with tf.name_scope("gradients"):
                 shapes = [K.get_variable_shape(p) for p in x]
-                grads = [K.gradients(losstot[a], x[a])[0] for a in range(len(losstot))]
+                grads = nest.flatten([K.gradients(losstot[a], x[num_var[b]:num_var[b] + num_var[b+1]])
+                         for a, b in zip(range(len(losstot)),range(len(num_var)-1))])
                 grads = [tf.stop_gradient(g) for g in grads]
             with tf.variable_scope('MetaNetwork'):
                 cell_count = 0
@@ -78,10 +81,7 @@ class MetaOpt(object):
                                                                     for _ in range(num_layer)])
                             cell_count += 1
 
-                            # Verify whether the variables are used
-                            # for v in tf.global_variables():
-                            #     print(v.name)
-                        # Individual update with individual state but global cell params
+                            # Individual update with individual state but global cell params
                             rnn_out_all, state_out = rnn_cell(flat_g_mod[ii:ii + 1, :], state_in)
                             rnn_out = tf.add(tf.matmul(rnn_out_all, softmax_w), softmax_b)
                             rnn_outputs.append(rnn_out)
@@ -103,7 +103,8 @@ class MetaOpt(object):
             return delta, S_C_out, S_H_out
 
         def time_step(t, f_array, f_array_opt, x, state_c, state_h):
-            losstot = [util._make_with_custom_variables(a, [x[b]]) for a, b in zip(dictloss.values(), range(len(x)))]
+            losstot = [util._make_with_custom_variables(a, x[num_var[b]:num_var[b] + num_var[b+1]])
+                       for a, b in zip(dictloss.values(), range(len(num_var)-1))]
             with tf.name_scope('Unroll_Optimizee_loss'):
                 fx_opt = losstot[0]
                 f_array_opt = f_array_opt.write(t, fx_opt)
@@ -128,7 +129,8 @@ class MetaOpt(object):
                 parallel_iterations=1,
                 swap_memory=True,
                 name="unroll")
-            finaltotloss = [util._make_with_custom_variables(a, [x_final[b]]) for a, b in zip(dictloss.values(), range(len(x_final)))]
+            finaltotloss = [util._make_with_custom_variables(a, x_final[num_var[b]:num_var[b] + num_var[b+1]])
+                            for a, b in zip(dictloss.values(), range(len(num_var)-1))]
             with tf.name_scope('Unroll_loss_period'):
                 fx_final = sum(finaltotloss[a] for a in range(len(finaltotloss)))
                 fx_array = fx_array.write(unroll_nn-1, fx_final)
@@ -155,6 +157,6 @@ class MetaOpt(object):
 
             with tf.name_scope('Optimizee_update'):
                 update = (nest.flatten([tf.assign(r, v) for r, v in zip(opt_var, x_final)]) +
-                          (nest.flatten([tf.assign(r, v) for r, v in zip(state_c[i], S_C[i]) for i in range(len(state_c))])) +
-                          (nest.flatten([tf.assign(r, v) for r, v in zip(state_h[i], S_H[i]) for i in range(len(state_h))])))
+                          (nest.flatten([tf.assign(r, v) for r, v in zip(nest.flatten(state_c), nest.flatten(S_C))])) +
+                          (nest.flatten([tf.assign(r, v) for r, v in zip(nest.flatten(state_h), nest.flatten(S_H))])))
         return step, loss_optimizer, update, reset, fx_final, fx_final_opt, arrayf, x_final

@@ -90,32 +90,34 @@ def problem():
     with tf.name_scope('Optimizee_loss'):
 
         def compute_loss():
-            x = tf.get_variable("x",
-                                shape=[batch_size, num_dims],
-                                dtype=tf.float32,
-                                initializer=tf.random_normal_initializer(stddev=0.01))
+            with tf.variable_scope("Optimizee_var",reuse=tf.AUTO_REUSE):
+                x = tf.get_variable("x",
+                                    shape=[batch_size, num_dims],
+                                    dtype=tf.float32,
+                                    initializer=tf.random_normal_initializer(stddev=0.01))
 
-            # Non-trainable variables.
-            w = tf.get_variable("w",
-                                shape=[batch_size, num_dims, num_dims],
-                                dtype=tf.float32,
-                                initializer=tf.random_uniform_initializer(),
-                                trainable=False)
-            y = tf.get_variable("y",
-                                shape=[batch_size, num_dims],
-                                dtype=tf.float32,
-                                initializer=tf.random_uniform_initializer(),
-                                trainable=False)
+                # Non-trainable variables.
+                w = tf.get_variable("w",
+                                    shape=[batch_size, num_dims, num_dims],
+                                    dtype=tf.float32,
+                                    initializer=tf.random_uniform_initializer(),
+                                    trainable=False)
+                y = tf.get_variable("y",
+                                    shape=[batch_size, num_dims],
+                                    dtype=tf.float32,
+                                    initializer=tf.random_uniform_initializer(),
+                                    trainable=False)
 
             product = tf.squeeze(tf.matmul(w, tf.expand_dims(x, -1)))
             return tf.reduce_mean(tf.reduce_sum((product - y) ** 2, 1))
     with tf.name_scope('Convex_loss'):
 
         def convex_loss():
-            v = tf.get_variable("v", shape=[1, num_dims], dtype=tf.float32, initializer=tf.random_normal_initializer(stddev=0.01))
+            with tf.variable_scope("conv_var", reuse=tf.AUTO_REUSE):
+                v = tf.get_variable("v", shape=[1, num_dims], dtype=tf.float32, initializer=tf.random_normal_initializer(stddev=0.01))
 
             # Non-trainable variables.
-            target = tf.get_variable("target", shape=[1, num_dims], dtype=tf.float32, initializer=tf.random_uniform_initializer(), trainable=False)
+                target = tf.get_variable("target", shape=[1, num_dims], dtype=tf.float32, initializer=tf.random_uniform_initializer(), trainable=False)
 
             return tf.reduce_mean(tf.clip_by_value(tf.square(v - target), 0, 10))
     return collections.OrderedDict([('Opt_loss', compute_loss), ('Aux_loss', convex_loss)])
@@ -124,8 +126,9 @@ def metaopti(dictloss):
     with tf.device('/device:GPU:0'):
         opt_var = [_get_variables(a)[0][0] for a in dictloss.values()]
         shapes = [K.get_variable_shape(p) for p in opt_var]
-        softmax_w = tf.get_variable("softmax_w", shape=[hidden_size, 1], dtype=tf.float32)
-        softmax_b = tf.get_variable("softmax_b", shape=[1], dtype=tf.float32)
+        with tf.variable_scope("softmax",reuse=tf.AUTO_REUSE):
+            softmax_w = tf.get_variable("softmax_w", shape=[hidden_size, 1], dtype=tf.float32)
+            softmax_b = tf.get_variable("softmax_b", shape=[1], dtype=tf.float32)
         with tf.name_scope('states'):
             state_c = [[] for _ in range(len(opt_var))]
             state_h = [[] for _ in range(len(opt_var))]
@@ -235,7 +238,7 @@ def metaopti(dictloss):
             variables = (nest.flatten(state_c) + nest.flatten(state_h) + opt_var)
 
         with tf.name_scope('state_reset'):
-            reset = [tf.variables_initializer(variables), fx_array.close()]
+            reset = [tf.variables_initializer(variables), fx_array.close(), fx_array_opt.close()]
 
         with tf.name_scope('Optimizee_update'):
             update = (nest.flatten([tf.assign(r, v) for r, v in zip(opt_var, x_final)]) +

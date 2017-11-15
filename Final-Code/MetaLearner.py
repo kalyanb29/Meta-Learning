@@ -150,7 +150,7 @@ class MetaOpt(object):
                 variables = (nest.flatten(state_c) + nest.flatten(state_h) + opt_var)
 
             with tf.name_scope('state_reset'):
-                reset = [tf.variables_initializer(variables), fx_array.close()]
+                reset = [tf.variables_initializer(variables), fx_array.close(), fx_array_opt.close()]
 
             with tf.name_scope('Optimizee_update'):
                 update = (nest.flatten([tf.assign(r, v) for r, v in zip(opt_var, x_final)]) +

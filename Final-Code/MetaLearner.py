@@ -35,8 +35,9 @@ class MetaOpt(object):
         with tf.device('/device:GPU:0'):
             opt_var = [util._get_variables(a)[0][0] for a in dictloss.values()]
             shapes = [K.get_variable_shape(p) for p in opt_var]
-            softmax_w = tf.get_variable("softmax_w", shape=[hidden_size, 1], dtype=tf.float32)
-            softmax_b = tf.get_variable("softmax_b", shape=[1], dtype=tf.float32)
+            with tf.variable_scope("softmax", reuse=tf.AUTO_REUSE):
+                softmax_w = tf.get_variable("softmax_w", shape=[hidden_size, 1], dtype=tf.float32)
+                softmax_b = tf.get_variable("softmax_b", shape=[1], dtype=tf.float32)
             with tf.name_scope('states'):
                 state_c = [[] for _ in range(len(opt_var))]
                 state_h = [[] for _ in range(len(opt_var))]

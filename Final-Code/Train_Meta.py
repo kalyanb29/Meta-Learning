@@ -60,11 +60,11 @@ def main(_):
               for _ in range(FLAGS.evaluation_epochs):
                   evalcost, evaloss = util.run_epoch(sess, num_iter, arraycost, cost_op, [update], reset)
                   losseval.append(evalcost)
-                  if save_path is not None and evaloss < best_evaluation:
-                      print("Saving meta-optimizer to {}".format(save_path))
-                      saver.save(sess, save_path, global_step=0)
-                      best_evaluation = evaloss
-                      plotlosseval.append(evalcost)
+              if save_path is not None and evaloss < best_evaluation:
+                 print("Saving meta-optimizer to {}".format(save_path))
+                 saver.save(sess, save_path, global_step=0)
+                 best_evaluation = evaloss
+                 plotlosseval.append(evalcost)
       slengths = np.arange(FLAGS.num_steps)
       plt.figure(figsize=(8, 5))
       plt.plot(slengths, np.mean(plotlosstrain, 0), 'r-', label='Training Loss')

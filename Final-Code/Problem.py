@@ -6,7 +6,7 @@ import tensorflow as tf
 import numpy as np
 from keras.utils import np_utils
 
-pathcifar = '/Users/kalyanb/PycharmProjects/MetaLearning/Final-Code/Cifar/'
+pathcifar = '/Users/kalyanb/PycharmProjects/Final-Code/Cifar/'
 def simple():
     """Simple Problem"""
     with tf.name_scope('Optimizee_loss'):
@@ -268,8 +268,8 @@ def cifar10(path = pathcifar, activation = "sigmoid", conv_channels=(16, 16, 16)
             output = image_batch
             with tf.variable_scope('ConvMLP', reuse=tf.AUTO_REUSE):
                 for i in range(len(conv_channels)):
-                    output = tf.layers.conv2d(output, conv_channels[i], 5, 1, padding="same")
-                output = tf.nn.max_pool(tf.nn.relu(output), ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="same")
+                    output = tf.layers.conv2d(output, conv_channels[i], 5, 1, padding="SAME")
+                output = tf.nn.max_pool(tf.nn.relu(output), ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
                 output = tf.layers.batch_normalization(output)
                 output = tf.layers.flatten(output)
                 W_in = tf.get_variable("W_in",

@@ -13,7 +13,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 flags = tf.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_integer("num_epochs", 70, "Number of training epochs.") # 10000
-flags.DEFINE_integer("log_period", 10, "Log period.") # 100
+flags.DEFINE_integer("logging_period", 10, "Log period.") # 100
 flags.DEFINE_integer("evaluation_period", 20, "Evaluation period.")#1000
 flags.DEFINE_integer("evaluation_epochs", 20, "Number of evaluation epochs.")
 
@@ -25,8 +25,8 @@ flags.DEFINE_integer('num_layer',2,"Number of LSTM layer")
 flags.DEFINE_integer('hidden_size',20,"Number of hidden layer in each LSTM")
 flags.DEFINE_float('lr',0.001,"Initial learning rate")
 
-logs_path = '/Users/kalyanb/PycharmProjects/MetaLearning/MetaLog/'
-save_path = '/Users/kalyanb/PycharmProjects/MetaLearning/MetaOpt/model.ckpt'
+logs_path = '/Users/kalyanb/PycharmProjects/Final-Code//Log/'
+save_path = '/Users/kalyanb/PycharmProjects/Final-Code/Save/'
 
 def main(_):
   # Configuration.
@@ -34,12 +34,12 @@ def main(_):
 
   # Problem.
   config = {'hidden_size': FLAGS.hidden_size, 'num_layer': FLAGS.num_layer, 'unroll_nn': FLAGS.unroll_length,'lr': FLAGS.lr}
-  problem = FLAGS.problem()
+  problem = util.get_problem_config(FLAGS.problem)
   optimizer = MetaLearner.MetaOpt(**config)
   step, loss_opt, update, reset, cost_tot, cost_op, arraycost, _ = optimizer.metaoptimizer(problem)
 
   with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
-      graph_writer = tf.summary.FileWriter(logs_path, sess.graph)
+      graph_writer = tf.summary.FileWriter(logs_path + 'MetaLog/', sess.graph)
       sess.run(tf.global_variables_initializer())
       best_evaluation = float("inf")
       start = timer()
@@ -62,7 +62,7 @@ def main(_):
                   losseval.append(evalcost)
               if save_path is not None and evaloss < best_evaluation:
                  print("Saving meta-optimizer to {}".format(save_path))
-                 saver.save(sess, save_path, global_step=0)
+                 saver.save(sess, save_path + 'MetaSave/model.ckpt', global_step=0)
                  best_evaluation = evaloss
                  plotlosseval.append(evalcost)
       slengths = np.arange(FLAGS.num_steps)

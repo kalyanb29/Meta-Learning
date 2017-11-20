@@ -3,6 +3,8 @@ import collections
 import mock
 import numpy as np
 
+import Problem
+
 def _wrap_variable_creation(func, custom_getter):
     """Provides a custom getter for all variable creations."""
     original_get_variable = tf.get_variable
@@ -60,3 +62,16 @@ def print_stats(header, total_error_optimizee, total_time):
     print(header)
     print("Mean Final Error Optimizee: {:.2f}".format(total_error_optimizee))
     print("Mean epoch time: {:.2f} s".format(total_time))
+
+def get_problem_config(problem_name):
+    if problem_name == "simple":
+        problem = Problem.simple()
+    elif problem_name == "simple_multi":
+        problem = Problem.simple_multi()
+    elif problem_name == "quadratic":
+        problem = Problem.quadratic()
+    elif problem_name == "mnist":
+        problem = Problem.mnist()
+    elif problem_name == "cifar10":
+        problem = Problem.cifar10()
+    return problem

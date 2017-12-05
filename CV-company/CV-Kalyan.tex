@@ -1,0 +1,399 @@
+\documentclass[10pt]{article}
+\usepackage{databib}
+\usepackage{calc}
+\usepackage{bibunits}
+\reversemarginpar
+\usepackage[paper=a4paper,marginparwidth=30.5mm,marginparsep=1.5mm,margin=15mm,includemp]{geometry}
+\setlength{\parindent}{0in}
+\usepackage[shortlabels]{enumitem}
+\makeatletter
+\newlength{\bibhang}
+\setlength{\bibhang}{1em}
+\newlength{\bibsep}
+ {\@listi \global\bibsep\itemsep \global\advance\bibsep by\parsep}
+\newlist{bibsection}{itemize}{3}
+\setlist[bibsection]{label=,leftmargin=\bibhang,%
+        itemindent=-\bibhang,
+        itemsep=\bibsep,parsep=\z@,partopsep=0pt,
+        topsep=0pt}
+\newlist{bibenum}{enumerate}{3}
+\setlist[bibenum]{label=[\arabic*],resume,leftmargin={\bibhang+\widthof{[999]}},%
+        itemindent=-\bibhang,
+        itemsep=\bibsep,parsep=\z@,partopsep=0pt,
+        topsep=0pt}
+\let\oldendbibenum\endbibenum
+\def\endbibenum{\oldendbibenum\vspace{-.6\baselineskip}}
+\let\oldendbibsection\endbibsection
+\def\endbibsection{\oldendbibsection\vspace{-.6\baselineskip}}
+\makeatother
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyfootoffset{\marginparsep+\marginparwidth}
+\newlength{\footpageshift}
+\setlength{\footpageshift}
+          {0.5\textwidth+0.5\marginparsep+0.5\marginparwidth-2in}
+\lfoot{\hspace{\footpageshift}%
+       \parbox{4in}{\, \hfill %
+                    \arabic{page} of \protect\pageref*{LastPage} 
+                    \hfill \,}}
+\usepackage{color,hyperref}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.3}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+\newcommand{\makeheading}[2][]%
+        {\hspace*{-\marginparsep minus \marginparwidth}%
+         \begin{minipage}[t]{\textwidth+\marginparwidth+\marginparsep}%
+             {\large \bfseries #2 \hfill #1}\\[-0.15\baselineskip]%
+                 \rule{\columnwidth}{1pt}%
+         \end{minipage}}
+\renewcommand{\section}[1]{\pagebreak[3]%
+    \vspace{1.3\baselineskip}%
+    \phantomsection\addcontentsline{toc}{section}{#1}%
+    \noindent\llap{\scshape\smash{\parbox[t]{\marginparwidth}{\hyphenpenalty=10000\raggedright #1}}}%
+    \vspace{-\baselineskip}\par}
+\newcommand*\fixendlist[1]{%
+    \expandafter\let\csname preFixEndListend#1\expandafter\endcsname\csname end#1\endcsname
+    \expandafter\def\csname end#1\endcsname{\csname preFixEndListend#1\endcsname\vspace{-0.6\baselineskip}}}
+\let\originalItem\item
+\newcommand*\fixouterlist[1]{%
+    \expandafter\let\csname preFixOuterList#1\expandafter\endcsname\csname #1\endcsname
+    \expandafter\def\csname #1\endcsname{\csname preFixOuterList#1\endcsname\let\oldItem\item\def\item{\pagebreak[2]\oldItem}}
+    \expandafter\let\csname preFixOuterListend#1\expandafter\endcsname\csname end#1\endcsname
+    \expandafter\def\csname end#1\endcsname{\let\item\oldItem\csname preFixOuterListend#1\endcsname}}
+\newcommand*\fixinnerlist[1]{%
+    \expandafter\let\csname preFixInnerList#1\expandafter\endcsname\csname #1\endcsname
+    \expandafter\def\csname #1\endcsname{\let\oldItem\item\let\item\originalItem\csname preFixInnerList#1\endcsname}
+    \expandafter\let\csname preFixInnerListend#1\expandafter\endcsname\csname end#1\endcsname
+    \expandafter\def\csname end#1\endcsname{\csname preFixInnerListend#1\endcsname\let\item\oldItem}}
+\newlist{outerlist}{itemize}{3}
+    \setlist[outerlist]{label=\enskip\textbullet,leftmargin=*}
+    \fixendlist{outerlist}
+    \fixouterlist{outerlist}
+\newlist{lonelist}{itemize}{3}
+    \setlist[lonelist]{label=\enskip\textbullet,leftmargin=*,partopsep=0pt,topsep=0pt}
+    \fixendlist{lonelist}
+    \fixouterlist{lonelist}
+\newlist{innerlist}{itemize}{3}
+    \setlist[innerlist]{label=\enskip\textbullet,leftmargin=*,parsep=0pt,itemsep=0pt,topsep=0pt,partopsep=0pt}
+    \fixinnerlist{innerlist}
+\newlist{loneinnerlist}{itemize}{3}
+    \setlist[loneinnerlist]{label=\enskip\textbullet,leftmargin=*,parsep=0pt,itemsep=0pt,topsep=0pt,partopsep=0pt}
+    \fixendlist{loneinnerlist}
+    \fixinnerlist{loneinnerlist}
+\newcommand{\blankline}{\quad\pagebreak[3]}
+\newcommand{\halfblankline}{\quad\vspace{-0.5\baselineskip}\pagebreak[3]}
+\newcommand\doilink[1]{\href{http://dx.doi.org/#1}{#1}}
+\newcommand\doi[1]{doi:\doilink{#1}}
+\providecommand*\url[1]{\href{#1}{#1}}
+\renewcommand*\url[1]{\href{#1}{\texttt{#1}}}
+\providecommand*\email[1]{\href{mailto:#1}{#1}}
+\providecommand\BibTeX{{B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    \TeX}}
+\providecommand\Matlab{\textsc{Matlab}}
+\hyphenation{bio-mim-ic-ry bio-in-spi-ra-tion re-us-a-ble pro-vid-er}
+
+\begin{document}
+
+
+
+\makeheading{Curriculum Vitae: ~Kalyan~Shankar~Bhattacharjee}
+
+\section{Contact Information}
+\newlength{\rcollength}\setlength{\rcollength}{2.85in}%
+\newlength{\spacewidth}\setlength{\spacewidth}{20pt}
+\newcommand\spacechar{$|$}
+\begin{tabular}[t]{@{}p{\textwidth-\rcollength-\spacewidth}@{}p{\spacewidth}@{}p{\rcollength}}%
+\parbox{\textwidth-\rcollength-\spacewidth}{%
+Industrial Research Intern, Canon Information Research Systems Australia (CiSRA), Sydney, NSW.}
+& \parbox{\spacewidth}{\centering \spacechar\\\spacechar\\\spacechar\\\spacechar\\\spacechar} &
+\parbox{\rcollength}{%
+\textit{Tel:} +61-420201787 \\
+\textit{E-mail:} \email{k.bhattacharjee@student.adfa.edu.au}\\
+\textit{Profiles:} \href{https://github.com/kalyanb29}{GitHub}, 
+ \href{https://www.linkedin.com/in/kalyan-bhattacharjee-91552215/}{LinkedIn},
+ \href{https://scholar.google.com/citations?user=pyay8TUAAAAJ&hl=en}{Google Scholar}}\\
+%\textit{WWW:} \href{http://seit.unsw.adfa.edu.au/research/sites/mdo/index.html}{MDO Webpage}}
+\end{tabular}
+
+\section{Career Summary} 
+I am currently on a program leave from being a postgraduate researcher with the \textit{School of Engineering and Information Technology, University of New South Wales~(UNSW), Canberra} to pursue an industrial research internship for six months with the Canon Information Systems Research Australia (CiSRA) in collaboration with Australian Mathematical Sciences Institute (AMSI) on Image and Video Understanding using Machine Learning. Since september 2014, I am a part of the  Multidisciplinary Design Optimization Group (\textit{WWW:} \href{http://www.mdolab.net}{MDO Webpage}) at UNSW Canberra. I obtained my B.Tech (Hons.) in 2012, M.Tech in 2013 from \textit{Indian Institute of Technology (IIT), Kharagpur, India} in Ocean Engineering and Naval Architecture. Between 2013 and 2014, I worked with an e-learning start-up in India (\href{http://www.learnunbound.com/}{\textit{Unbound Learning Networx}}) for 4 months. As a research associate in IIT Khargpur, I worked on a project in collaboration with Naval Science \& Technological Laboratory~(NSTL), Visakhapatnam for 8 months. I currently hold a \textbf{permanent residency} in Australia.
+
+%I have secured external competitive research grants worth more than \textbf{1.7M AUD} and internal grants worth \textbf{282K AUD in cash and funding for 11 PhD Scholarships} since 2004. I have authored more than \textbf{200} refereed publications(\textbf{63} in journals; \textbf{40} of them in \textbf{ERA A*/A} journals. My \textbf{h-index} is \textbf{19} with a total citation of \textbf{1255} (SCOPUS) and \textbf{2442} and \textbf{27} based on Google Scholar. Codes developed by me and my students have been used by numerous groups worldwide. The MDO Group at UNSW had been the sole optimization technology provider to the \textbf{5M AUD} \textbf{Australian Space Research Program}. I have successfully supervised \textbf{7 PhD and 3 Masters students} as a primary supervisor to completion and I am currently supervising \textbf{3 PhD} students as a primary supervisor. 
+%
+%\item In terms of teaching, I had been the coordinator responsible for the design and delivery of all mechanical engineering design courses i.e. Mechanical Design-1(Third Year UG), Mechanical Design-2(Fourth Year UG) and Engineering Practice and Design(First Year UG) over several years. I have also been the coordinator responsible for the deliver of Computer Aided Design Tool CATIA. I have also taught Naval Architecture to UNSW undergraduates. Between 1997 and 1999, I have taught several courses in the field of Naval Architecture i.e. Ship Stability, Ship Maneuverability, Resistance and Propulsion and Ship Design to practitioners(Chief Engineers and Captains) at the \textit{Singapore Maritime Academy}. 
+%
+%\item I held several administrative leadership roles overs the years. They range from Chairing Research Panels within the School, Post Graduate Research Coordinator for the School, Reviewer for ARC and EPSRC Grant Applications, Member of Editorial Advisory Board, Program Committee Member of a number of premier international conferences in the area of Evolutionary Computation, Panel member for Academic Recruitment and Academic Promotion and UNSW, Reviewer of a large number of top tier journals in the field, Academic Expert Panel Member for International Association of the Engineering Modelling, Analysis and Simulation Community(NAFEMS) etc.
+%\end{innerlist}
+
+
+\section{Career Interests}
+\textit{My primary focus lies in the area of theoretical and applied machine learning and multidisciplinary optimization, with a deeper understanding of computationally expensive optimization and artificial Intelligence. I am in continuously development of novel, practical and efficient algorithms for the solution of computationally expensive optimization problems in the field of machine learning and big data. Such problems are commonly encountered in virtually all fields of science and engineering, such as in multidisciplinary product design, video understanding, image detection, biochemical pathway modeling, therapy planning, optimal management of natural resources etc.}
+
+\section{Education}
+\begin{innerlist}
+	\item \textbf{Ph.D.},
+	\href{http://www.unsw.adfa.edu.au/}{University of New South Wales~(UNSW), Canberra}, Ongoing (Expected to finish by March, 2018).
+	\item \textbf{M.Tech.},
+	\href{http://www.iitkgp.ac.in/}{Indian Institute of Technology, Kharagpur, India}, August 2013, CGPA: 8.91/10
+	\item \textbf{B.Tech.(Hons.)},
+	\href{http://www.iitkgp.ac.in/}{Indian Institute of Technology, Kharagpur, India}, August 2012, CGPA: 8.96/10
+\end{innerlist}
+
+\section{Experience}
+%\begin{outerlist}
+%\item []
+\begin{innerlist}
+	\item \textbf{Industrial Research Intern:} Development of deep learning for image and video understanding at \href{https://www.cisra.com.au//}{\textbf{Canon Information Systems Research Australia (CiSRA)}}, Sydney in collaboration with the \href{https://http://amsi.org.au//}{\textbf{Australian Mathematical Sciences Institute (AMSI)}}. September, 2017 to March, 2018. 
+	
+	\textbf{Understanding and Skills:} Image \& video understanding, Convolutional neural network (CNN), Recurrent neural network (RNN): Long short term memory (LSTM), Deep learning, Python, TensorFlow, Keras, Sonnet, Theano, CUDA, GPU. 
+	\item \textbf{Tutor}: Engineering Practice and Design: CATIA (ZEIT 1501), First Year Undergraduate Course in S2-2016. \href{https://www.unsw.adfa.edu.au/}{\textbf{University of New South Wales, Canberra}}, July, 2016 to November, 2016.
+	 
+	 \textbf{Understanding and Skills:} CATIA, Health and safety, Product design.
+	\item \textbf{Research Assistant:} Development of optimization techniques to tackle computationally expensive problems at \href{https://www.unsw.adfa.edu.au/}{\textbf{University of New South Wales, Canberra}}, July, 2015 to March, 2017. Algorithms developed during this phase are being used in several professional and academic organisation on a regular basis.
+	
+	\textbf{Understanding and Skills:} Heuristics and meta-heuristics, Surrogate assisted optimization, Multifidelity optimization, Multi-and many-objective optimization, SVM, Decision Making, Classification, Clustering, Constraint handling, MATLAB, C++, Microsoft Office, LaTeX.
+	\item \textbf{Research Assistant:} Hydrodynamic Design \& Development of Trimaran \& Delta Hull Forms~(Project Code:~TDHF), \href{https://www.drdo.gov.in/drdo/labs1/NSTL/English/indexnew.jsp?pg=homepage.jsp}{\textbf{Naval Science \& Technological Laboratory (NSTL)}}, Visakhapatnam, India, Dec, 2013--Aug, 2014.
+	
+	\textbf{Understanding and Skills:} Ship design, Hydrodynamics, ShipFlow, MAXSURF, NAPA, AutoCAD.
+	\item \textbf{Visiting Researcher:} Development of continuum damage model for high impact load using Element Free Galerkin Method, funded by \href{http://www.cacm.auckland.ac.nz/en/cacm.html}{\textbf{Centre for Advanced Composite Materials (CACM)}} at the \href{https://www.auckland.ac.nz/en.html}{\textbf{University of Auckland}}. May, 2012 to Jul, 2012.
+	
+	\textbf{Understanding and Skills:} Damage modelling, thermomechanical modelling, Composites, MATLAB, Fortran.
+	\item \textbf{Honorary Research Intern:} Development of transient elasto-plastic model for welding using Element Free Galerkin Method, at the \href{https://www.auckland.ac.nz/en.html}{\textbf{University of Auckland}}. May, 2011 to Jun, 2011.
+	
+	\textbf{Understanding and Skills:} Transient thermomechanical modelling, Finite Element Method, ANSYS, MATLAB, Fortran.
+	\item \textbf{Research Assistant:} Maritime Safety Modeling using Fuzzy Logic, \href{http://www.iitkgp.ac.in/}{\textbf{Indian Institute of Technology, Kharagpur, India}}, July, 2010 to Nov, 2010.
+	
+	\textbf{Understanding and Skills:} Fuzzy logic, MATLAB.
+	\item \textbf{Research Assistant:} Automated Oceanographic feature extraction from satellite remote sensing data using Neural Network architecture, \href{http://www.iitkgp.ac.in/}{\textbf{Indian Institute of Technology, Kharagpur, India}}, Dec, 2010 to Feb, 2011.
+	
+	\textbf{Understanding and Skills:} Neural networks, MATLAB.     
+\end{innerlist}
+
+\section{Certification}
+\begin{innerlist}
+	\item Machine Learning by Andrew Ng in Coursera, Ongoing.
+	\item Certificate of Merit in Graduate Teaching Training Programme (GTTP'16).
+	\item Certificate of Merit in Lab Supervisor Training (LABSUP'16).
+	\item Certificate of Merit in Health and Safety for Lab based supervisor, 2016.
+	\item Certificate from Jatiya Vijnan Parishad~(Indian Science Congress Association)), 2005.
+\end{innerlist}
+
+
+\section{Awards and Honors}
+\begin{innerlist}
+\item Partner investigator in \textbf{Australia-Germany Joint Cooperation Grant} (Singh, Bhattacharjee, Ray, Mostaghim, Moritz) on ``Identification of solutions of interest to aid evolutionary multi-objective optimization and decision-making'' awarded by \textbf{Universities Australia and DAAD} for 2017-2018 (23.5K AUD).
+\item One out of three recipients (worldwide) of 2016 \textbf{IEEE CIS Graduate Student Research Grant} on ``Decomposition based evolutionary algorithm with a dual set of reference vectors'' (2.6K USD).
+\item Recipient of the \textbf{Postgraduate Research Student Support} (PRSS) from UNSW (2.2K AUD).
+\item UNSW TFS Scholarship and Australian Research Council~(ARC) funded scholarship from Associate Professor Tapabrata Ray, 2014, University of New South Wales~(UNSW), Canberra.
+\item Merit-cum-Means~(MCM) Scholarship, 2008--2012, Indian Institute of Technology, Kharagpur, India.
+\item Centre for Advanced Composite Materials~(CACM) Scholarship, 2012, University of Auckland, New Zealand (4K NZD).
+\item University of Auckland IIT Internship Scholarship, 2011, University of Auckland, New Zealand (5K NZD).
+\end{innerlist}
+
+
+
+
+%\section{Grants}
+%\begin{innerlist}
+%\item[] \textbf{External Grants: Worth over 1.7 million AUD}
+%\vspace{0.6em}
+%\item ARC Future Fellowship, Australian Research Council: \textbf{Ray}, ``Development of methods and algorithms to support multidisciplinary optimization'', 539,768 AUD, 2012-2016.
+%\item ARC Discovery Grant, Australian Research Council: Young, Lai, \textbf{Ray} and Bomphrey, ``Intriguing aerodynamics of bees, hoverflies and beyond'', 380,000 AUD, 2013-2015.
+%\item Australian Space Research Program Grant: Boyce ~\textit{et al.}, ``Scramjet-based access-to-space systems'', 5,000,000 AUD(796K AUD to UNSW), 2010-2013.
+%
+%\vspace{0.8em}
+%
+%\item[] \textbf{Internal Grants: UNSW and UNSW Canberra: Worth 282KAUD in Cash and funding for 11 PhD Scholarships}.
+%\vspace{0.6em}
+%\item Special Research Grant, UNSW Canberra: Singh and \textbf{Ray}, ``Finding knee solutions to aid decision making for multi/many-objective optimization problems'', 3,906 AUD, 2015.
+%\item RTS PhD Scholarship,  UNSW Canberra: Sreenatha and \textbf{Ray}, ``Design and development of Eco-friendly Underwater Vehicle'', Australian Postgraduate Award Rates, 2014.
+%\item RTS PhD Scholarship,  UNSW Canberra: Singh and \textbf{Ray}, ``Development of optimization methods for problems involving multi-fidelity analysis'', Australian Postgraduate Award Rates, 2014.
+%\item PhD Scholarship, UNSW, Complementing ARC Discovery Grant: \textbf{Ray}, Australian Postgraduate Award Rates, 2013.
+%\item ARC Support Grant, UNSW Canberra: Young, Lai, \textbf{Ray} and Bomphrey, ``Intriguing aerodynamics of bees, hoverflies and beyond'', 50,000 AUD, 2013.
+%\item PhD Scholarship, UNSW, Complementing ARC Future Fellowship: \textbf{Ray}, Australian Postgraduate Award Rates, 2012.
+%\item Goldstar Award, UNSW Canberra: Young, Lai, \textbf{Ray} and Bomphrey, ``Exploiting the extraordinary aerodynamics of bees and hoverflies'',  40,000 AUD, 2012.
+%\item Special Research Grant, UNSW Canberra: \textbf{Ray}, ``Development of efficient schemes to deal with equality constraints in black box optimization problems'', 7,100 AUD, 2012.
+%\item Silverstar Award, UNSW Canberra: Lai, Young and \textbf{Ray}, ``Can we learn from nature to outfly the fly'',30,000 AUD, 2011.
+%\item PhD Scholarship, UNSW, Complementing Australian Space Research Program External Grant: Australian Postgraduate Award Rates, 2010.
+%\item RTS PhD Scholarship,  UNSW Canberra: \textbf{Ray} and Abbass, ``Uncovering the secrets of good design beyond optimization'', Australian Postgraduate Award Rates, 2010.
+%\item Major Research Equipment and Infrastructure Scheme, UNSW: Garratt, Ougrinovski, \textbf{Ray}, Pota and Anavatti, ``Satellite positioning and inertial navigation system'',  35,000 AUD, 2010.
+%\item Defence Security Application Research Centre (DSARC), PhD Scholarship,  UNSW Canberra : Neely, Riesen, \textbf{Ray} and Odam, ``Prediction and measurement of heating distributions on hypersonic vehicles'', Australian Postgraduate Award Rates, 2010.
+%\item UNSW-ADFA Collaboration Grant, UNSW Canberra: Prusty and \textbf{Ray}, ``Development of a novel fatigue life prediction model for characterization of composites exposed to extreme temperatures'', 18,000 AUD, 2010.
+%\item Special Research Grant, UNSW Canberra, \textbf{Ray}, ``Development of optimization methods to deal with the fundamental challenges in many objective optimization problems'',  6,000 AUD, 2009.
+%\item Defence Security Application Research Centre (DSARC), PhD Scholarship,  UNSW Canberra: \textbf{Ray}, Boyce and Coleman, ``Development of methods for spatial approximation and prediction of flow fields'', Australian Postgraduate Award Rates, 2008.
+%\item Silverstar Award, UNSW Canberra: Lai, Young and \textbf{Ray}, ``Float like a butterfly: The physics of optimal flapping wing flight'', 20,000 AUD, 2008.
+%\item Learning and Teaching Grant, UNSW Canberra: Smith, \textbf{Ray} and Fien, ``Integrating physical and virtual learning spaces with a problem based learning framework'',  10,000 AUD, 2008.
+%\item Defence Related Research Grant, UNSW Canberra: \textbf{Ray} and Sreenatha, ``Development of a dynamic, micro, hybrid optimization algorithm for multi-objective online UAV path planning'',  12,000 AUD, 2007.
+%\item Defence Security Application Research Centre (DSARC), PhD Scholarship,  UNSW Canberra: \textbf{Ray}, Smith and Cannon, ``Development of optimization methods for trans-dimensional optimization for concept evolution'',  Australian Postgraduate Award Rates, 2007.
+%\item Faculty Research Grant, UNSW Canberra: Young and \textbf{Ray}, ``Aerodynamic optimization of flapping-wing micro air vehicle propulsion using multi fidelity models and evolutionary algorithm'',  12,000 AUD, 2006.
+%\item Faculty Research Grant, UNSW Canberra: Boyce, Tsai Her Mann, \textbf{Ray}, Young, Kleine, Mudford and Neely, ``Collaborative UNSW/Singapore investigations of supersonic and hypersonic shock wave/boundary layer interactions in controlled pressure gradients'',  21,000 AUD, 2006.
+%\item Special Research Grant, UNSW Canberra: \textbf{Ray}, ``Development of novel optimization algorithms'', 5,000 AUD, 2006.
+%\item RTS PhD Scholarship,  UNSW Canberra: Boyce and \textbf{Ray}, ``Multidisciplinary design optimization for hypersonic air-breathing propulsion'', Australian Postgraduate Award Rates, 2006.
+%\item RTS PhD Scholarship,  UNSW Canberra: \textbf{Ray} and Smith, ``Framework for design optimization operating on a CAD system'', Australian Postgraduate Award Rates, 2006.
+%\item UNSW-ADFA Collaboration Grant, UNSW Canberra: Kara, Kayis, Sarker, Abbass, \textbf{Ray} and Freeman, ``A complex systems approach to quantifying Forrester effect in manufacturing supply chain'', 12,000 AUD, 2005.
+%\end{innerlist}
+%
+%\section{Invited Presentations}
+%I delivered invited presentations at the University of Birmingham(UK), University of Liverpool(UK), Cranfield University(UK), University of Warwick(UK), Institute of Engineers(Australia), ACM Workshop(Canberra), South China University of Technology(China), Jilin University(China), Tohoku University(Japan), Osaka Prefecture University(Japan), Shinshu University(Japan), Japan Aerospace Exploration Agency(JAXA) and at the Machine Learning for Aerospace Symposium, Marseille (France).
+%
+%\section{Postgraduate Supervision}
+%I have successfully supervised \textbf{7 PhD and 3 Masters students} as a primary supervisor to completion and I am currently supervising \textbf{3 PhD} students as a primary supervisor. 
+%\vspace{0.6em}
+%
+%\textbf{Graduated}
+%\blankline
+%\begin{innerlist}
+%\item Dr. Min, Liu, ``Development of realistic transportation modeling framework'', PhD Student, Graduated 2014, \textbf{Primary Supervisor}.
+%\item Dr. Md. Asafuddoula, ``Methods for constraint handling and many objective optimization'', Graduated 2014, Currently Research Associate with UNSW,\textbf{Primary Supervisor}.
+%\item Dr. Mohammad Sharif Khan, ``Development of methods for two dimensional and three dimensional optimization'', Graduated 2014,\textbf{Primary Supervisor}.
+%\item Dr. Khairul Alam, ``Development of framework for design optimization of underwater vehicles'', Graduated 2013, \textbf{Joint Supervisor}.
+%\item Mr. Amit Kumar Saha, MSc(UNSW), Title : Practical design optimizationtechniques, Graduated 2012, Currently with Red Hat, Brisbane, Australia. \textbf{(Primary Supervisor)}
+%\item Mr. Obinna Kenneth Ihesiulor, ME(UNSW), Title: Vibration based damage detection in composite structures using computational intelligence tools, Graduated 2012, Currently with UNSW Canberra, Australia. \textbf{(Joint-supervisor)}
+%\item Dr. Ahmad Faisal Mohamad Ayob, PhD(UNSW), Title: development of an optimization framework for the design of high speed planing craft, Graduated 2011, Currently with Universiti Malaysia, Terengganu, Malaysia.\textbf{(Primary Supervisor)}
+%\item Dr. Hemant Kumar Singh, PhD(UNSW), Title: Development of optimization methods to deal with current challenges in engineering design optimization, Graduated 2011, Currently with UNSW Canberra, Australia.\textbf{(Primary Supervisor)}
+%\item Mr. Gordon P. Briggs, ME(UNSW), Graduated 2010, Currently with Australian National University, Canberra, Australia.\textbf{(Primary Supervisor)}
+%\item Dr. Amitay Isaacs, PhD(UNSW), Title: Development of optimization methods to solve computationally expensive problems, Graduated 2009,Currently with IBM OZLabs, Canberra, Australia.\textbf{(Primary Supervisor)}
+%\vspace{2em}
+%\item In addition to the above, I have supervised 9 Masters Student of High Performance Computation for Engineered Systems(HPCES) under the \href{http://web.mit.edu/sma/students/programmes/hpces.htm}{Singapore-MIT Alliance Program} at the National University of Singapore between 2001 and 2004.
+%\blankline
+%\end{innerlist}
+
+%\textbf{Ongoing}
+%\blankline
+%\begin{innerlist}
+%
+%\item Mr. Ahsanul Habib, ``Development of novel methods for multi-fidelity optimization'', PhD Student, \textbf{Primary Supervisor}.
+%\item Mr. Md. Monjurul Islam, ``Development of efficient bi-level optimization methods'', PhD Student, \textbf{Primary Supervisor}.
+%\item Mr. Kalyan Shankar Bhattacharjee, ``Development of efficient optimization methods for the solution of computationally expensive optimization problems'', PhD Student, \textbf{Primary Supervisor}.
+%\end{innerlist}
+
+
+\section{Professional Service}
+\begin{innerlist}
+\item \textbf{Member of the Program Committee} of a number of premier conferences in the field e.g. The Second Australian Conference on Artificial Life and Computational Intelligence (ACALCI'16), The 20th Asia-Pacific Symposium on Intelligent and Evolutionary Systems (IES'16) and The Australian Society for Operations Research National Conference (ASOR'16).
+\item \textbf{Regular Reviewer} of top journals in the field: IEEE Transactions on Evolutionary Computation, IEEE Transactions on Cybernetics, Reliability Engineering and System Safety and International Journal of Engineering Science and Technology. 
+\end{innerlist}
+
+\section{Professional Memberships}
+\begin{innerlist}
+\item \textbf{Student Member} IEEE Young Professionals
+\item \textbf{Student Member} IEEE Computational Intelligence Society (Membership: 93404718)
+\item \textbf{Student Member} International Society for Structural and Multidisciplinary Optimization~(ISSMO)
+\item \textbf{Affiliate Member}, Institution of Mechanical Engineers~(IMechE)
+\item \textbf{Student Member}, Royal Institute of Naval Architect~(RINA).
+\end{innerlist}
+
+
+\section{Publications}   
+I have authored/co-authored \textbf{1} Book chapter, \textbf{7} Journal paper, \textbf{5} Lecture notes, \textbf{3} Conference papers and \textbf{1} abstract in Conference.  
+
+\vspace{0.8em}
+
+\noindent \textbf{Book Chapter}
+\begin{enumerate}[itemsep = 0em]
+\setcounter{enumi}{0}
+
+\item
+\textbf{Bhattacharjee,~K.~S.}, {Isaacs, A.}, and {Ray,~T.}, ``Multi-objective optimization using an evolutionary algorithm embedded with multiple spatially distributed surrogates,'' {\em Multi-objective Optimization: Techniques and Applications in Chemical Engineering}, World Scientific, 2017.
+
+\end{enumerate}
+\noindent \textbf{Journal Article}
+\begin{enumerate}[itemsep = 0em]
+\setcounter{enumi}{0}
+
+\item 
+\textbf{Bhattacharjee,~K.~S.}, {Singh,~H.~K.}, and {Ray,~T.}, ``Bridging the gap: many objective optimization and informed decision making,'' {\em IEEE Transactions on Evolutionary Computation}, vol. 21, issue 5, pp. 813--820, 2017 (ERA A\textsuperscript{*}).
+
+\item 
+\textbf{Bhattacharjee,~K.~S.}, {Singh,~H.~K.}, and {Ray,~T.}, ``A novel decomposition based evolutionary algorithm for engineering design optimization,'' {\em Journal of Mechanical Design}, vol. 139, issue 4, pp. 041403-041403-11, 2017 (ERA A\textsuperscript{*}).
+
+\item
+{Branke,~J.}, {Asafuddoula,~M.}, \textbf{Bhattacharjee,~K.~S.}, and {Ray,~T.}, ``Efficient use of partially converged simulations in evolutionary optimization,'' {\em IEEE Transactions on Evolutionary Computation}, vol. 21, issue 1, pp. 52--64, 2017 (ERA A\textsuperscript{*}).
+
+\item
+\textbf{Bhattacharjee,~K.~S.}, {Singh,~H.~K.}, and {Ray,~T.}, ``An approach to generate comprehensive piecewise linear interpolation of Pareto outcomes to aid decision making,'' {\em Journal of Global Optimization}, vol. 68, issue 1, pp. 71--93, 2017 (ERA A).
+
+\item
+\textbf{Bhattacharjee,~K.~S.}, {Singh,~H.~K.}, and {Ray,~T.}, ``Multi-objective optimization with multiple spatially distributed surrogates,'' {\em Journal of Mechanical Design}, vol. 138, issue 9, pp. 091401-091401-10, 2016 (ERA A\textsuperscript{*}).
+
+\item
+{Singh,~H.~K.}, \textbf{Bhattacharjee,~K.~S.}, and {Ray,~T.}, ``A projection based approach for constructing piecewise linear Pareto front approximations,'' {\em Journal of Mechanical Design}, vol. 138, issue 9, pp. 091404-091404-12, 2016 (ERA A\textsuperscript{*}).
+
+\item
+{Das,~R.}, \textbf{Bhattacharjee,~K.~S.}, and {Rao,~S.}, ``Welding heat transfer analysis using Element Free Galerkin Method,'' {\em Advanced Materials Research}, vol. 410, pp. 298--301, 2012. 
+
+\end{enumerate}
+
+\noindent\textbf{Lecture Notes: Journals (ERA-2012)}
+
+\begin{enumerate}[itemsep = 0em]
+\setcounter{enumi}{0}
+
+\item \textbf{Bhattacharjee, K.S.}, {Singh, H.K.} and {Ray, T.}, ``Enhanced Pareto interpolation method to aid decision
+making for discontinuous Pareto optimal fronts,'' in {\em Proceedings of the Australian Joint Conference on Artificial Intelligence (AI)}, Lecture Notes in Computer Science, pp. 93--105, Springer, 2017.
+
+\item Milowski, J., \textbf{Bhattacharjee,~K.~S.}, Singh, H.K. and Ray, T., ``Electric vehicles for Australia: A cost-benefit analysis,” in {\em Proceedings of 24th National Conference of the Australian Society for Operations Research (ASOR)}, Data and Decision Sciences in Action, Lecture Notes in Management and Industrial Engineering, pp. 163--173, Springer, 2016.
+
+\item \textbf{Bhattacharjee, K.S.}, {Singh, H.K.} and {Ray, T.}, ``A study on performance metrics to identify solutions of interest from a trade-off set,'' in {\em Proceedings of the Australasian
+Conference on Artificial Life and Computational Intelligence (ACALCI)}, Canberra, Australia, vol. 9592 of {\em Lecture Notes in Artificial Intelligence}, pp. 66--77, Springer, 2016.
+
+\item \textbf{Bhattacharjee, K.S.}, {Singh, H.K.} and {Ray, T.}, ``An evolutionary algorithm with classifier guided constraint evaluation strategy for computationally expensive optimization
+problems,'' in {\em Proceedings of the Australian Joint Conference on Artificial Intelligence (AI)}, Canberra, Australia, vol. 9457 of {\em Lecture Notes in Artificial Intelligence}, pp. 49--62, Springer, 2015.
+
+\item \textbf{Bhattacharjee, K.S.}, {Singh, H.K.} and {Ray, T.}, ``Cost to evaluate versus Cost to learn ? Performance of selective evaluation strategies in multiobjective optimization,'' in {\em Proceedings of the Australian Joint Conference on Artificial Intelligence (AI)}, Canberra, Australia, vol. 9457 of {\em Lecture Notes in Artificial Intelligence}, pp. 63--75, Springer, 2015.
+
+\end{enumerate}
+
+\textbf{Full Refereed Conference Papers}
+\begin{enumerate}[itemsep = 0em]
+\setcounter{enumi}{0}
+
+\item \textbf{Bhattacharjee,~K.~S.}, {Singh,~H.~K.}, {Ray,~T.}, and {Zhang,~Q.}, ``Decomposition based evolutionary algorithm with a dual set of reference vectors,'' in {\em Proceedings of IEEE Congress on Evolutionary Computation (CEC)}, Available online, San Sebastian, Spain, 2017.
+
+\item \textbf{Bhattacharjee,~K.~S.}, {Singh,~H.~K.}, {Ray,~T.}, and {Branke,~J.}, ``Multiple surrogate assisted multiobjective optimization using improved pre-selection,'' in {\em Proceedings of IEEE Congress on Evolutionary Computation (CEC)}, Vancouver, Canada, pp.~4328-4335, 2016.
+
+\item \textbf{Bhattacharjee,~K.~S.} and {Ray,~T.}, ``Selective evaluation in multiobjective optimization: A less explored avenue,'' in {\em Proceedings of IEEE Congress on Evolutionary Computation (CEC)}, Sendai, Japan, pp. 1893-1899, 2015.
+
+\end{enumerate}
+
+\textbf{Abstract/Extended Abstract Refereed Conference Papers}
+\begin{enumerate}
+\setcounter{enumi}{0}
+
+\item
+\textbf{Bhattacharjee,~K.~S.}, and {Ray,~T.}, 
+``Selective constraint evaluation in multidisciplinary design optimization,'' in 
+{\em Proceedings of World Congress of Structural and Multidisciplinary Optimization (WCSMO)}, Sydney, Australia, 2015.
+
+\end{enumerate}
+
+\section{List of Referees}
+\vspace{6mm}
+Prof. Tapabrata Ray \\
+School of Engineering and Information Technology \\
+The University of New South Wales, Canberra \\
+Northcott drive, ACT 2600.\\ 
+Phone: +61 2 62688248, Fax: +61 2 62688276\\ 
+Email: t.ray@adfa.edu.au\\
+
+Dr. Hemant Kumar Singh \\ 
+School of Engineering and Information Technology \\
+The University of New South Wales, Canberra \\
+Northcott drive, ACT 2600.\\ 
+Phone: +61 2 62688270, Fax: +61 2 62688276\\ 
+Email: h.singh@adfa.edu.au\\
+
+Dr. Nagita Mehrseresht\\
+Canon Information Research Systems Australia\\
+Macquarie Park, NSW 2113\\
+Email: nagita.mehrseresht@cisra.canon.com.au\\ 
+
+Prof. Qingfu Zhang\\
+Department of Computer Science\\
+City University of Hong Kong, Hong Kong \\
+Phone: +852 34428632 \\
+Email: qingfu.zhang@cityu.edu.hk 
+
+\end{document}

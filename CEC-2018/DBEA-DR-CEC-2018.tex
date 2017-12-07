@@ -118,8 +118,14 @@ The highlighted parts of the algorithm are elaborated below:\\
 	\end{equation}
 	
 	
-	\item \textbf{Assign}: In this stage, solutions are assigned to the reference directions. Let the number of solutions to be assigned be denoted by $R$. If the number of solutions to be assigned is more than $N$, the solutions are assigned in each subpopulation using distance based ranking. Take note that, in the assignment process, a sub-population with respect to a reference direction is constructed using the solutions which are closest to that reference direction based on angle measure. If no solutions belong to a sub-population, it is considered empty. 
+	\item \textbf{Assign}: In this stage, solutions are assigned to the reference directions. Let the number of solutions to be assigned be denoted by $R$. If the number of solutions to be assigned is more than $N$, the solutions are assigned in each subpopulation using distance based ranking. Take note that, in the assignment process, a sub-population with respect to a reference direction is constructed using the solutions which are closest to that reference direction based on angle measure. If no solutions belong to a sub-population, it is considered empty. Solutions within a non-empty sub-population is sorted based on a metric (modified distance based ranking) value which is obtained by comparing the objective values. The value of the metric for $i^{th}$ solution within a subpopulation of $P$ member is computed as:
 	
+	\begin{equation}
+	DR\_m_i = \sum_{k\neq i}\sum_{j=1}^M max(\{(- f^i_j + f^k_j),0\}) 
+	\label{eqn:KHT_Eqn:4}
+	\end{equation}
+	
+	This equation for the $i^{th}$ solution only aggregrates the difference values of objectives with other solutions which are worse than the $i^{th}$ solution.
 	
 	\item \textbf{CreateOffspring}: The process of creating offspring solutions involves two steps, the identification of participating parents for recombination and the recombination process itself. Both these steps are known to affect the performance and various rationales and recommendations have been suggested in the literature. 
 	
@@ -158,12 +164,10 @@ WFG1/WFG1\textsuperscript{-1}-WFG9/WFG9\textsuperscript{-1}& 3,5,8 &([400(G),91]
 
 \subsection{Results and Discussion}
 \label{sec:resdis}
-\subsubsection{IDTLZ1}
-Mean HV statistics for the 3, 5 and 8 objectives instances of IDTLZ1~\cite{Deb2014adaptive} problem are listed in Table~\ref{tab:HVdtlzim}. The performance of the proposed approach is compared with RVEA \cite{Cheng2016many}, $\theta$-DEA \cite{Yuan2016many}, NSGA-III \cite{Deb2014box}, MOEA/DD \cite{Li2015dominance}, MOEA/D-PBI \cite{zhang2007moead}, MOEA/D-AWA \cite{Qi2014adaptive} and PICEAg \cite{wangpicea2013}. Individual codes were collected directly from the authors' resources~(for RVEA, MOEA/D-AWA and PICEAg) and jMetal~\cite{durillo2011jmetal} sources~(for NSGA-III, MOEA/DD, MOEA/D-PBI, and $\theta$-DEA). 
  
-\subsubsection{Minus Problems}
+\subsubsection{Normal Problems}
 
-Next we demonstrate the performance of DBEA-DS on 13 unconstrained Minus-problems introduced in \cite{ishibuchi2016inverse}: DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1} and WFG1\textsuperscript{-1}-WFG9\textsuperscript{-1}. These problems are well suited to demonstrate the efficiency of using both $\mathbf{W}^I$ and $\mathbf{W}^N$. The detailed description of the problems and the difficulties in solving them can be found in \cite{ishibuchi2016inverse}. 
+Next we demonstrate the performance of DBEA-DR on 13 unconstrained DTLZ and WFG series problems (DTLZ1-DTLZ4, WFG1-WFG9) and Minus-problems introduced in \cite{ishibuchi2016inverse}: DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1} and WFG1\textsuperscript{-1}-WFG9\textsuperscript{-1}. These problems are well suited to demonstrate the efficiency of using both $\mathbf{W}^I$ and $\mathbf{W}^N$. The detailed description of the problems and the difficulties in solving them can be found in \cite{ishibuchi2016inverse}. 
 
 \begin{table*}[!htb]\scriptsize
 \centering
@@ -237,7 +241,7 @@ Next we demonstrate the performance of DBEA-DS on 13 unconstrained Minus-problem
 	\tabcolsep = 0.1cm
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
 		\noalign{\smallskip}\hline
-		\textbf{Problem}                & \textbf{M} & \textbf{DBEA-DS} & \textbf{NSGA-III} & \textbf{$\theta$-DEA} & \textbf{MOEA/DD} & \textbf{MOEA/D-PBI} & \textbf{MOEA/D-Tch} & \textbf{MOEA/D-WS} & \textbf{MOEA/D-IPBI} & \textbf{NSGA-II} \\ \hline
+		\textbf{Problem}                & \textbf{M} & \textbf{DBEA-DR} & \textbf{NSGA-III} & \textbf{$\theta$-DEA} & \textbf{MOEA/DD} & \textbf{MOEA/D-PBI} & \textbf{MOEA/D-Tch} & \textbf{MOEA/D-WS} & \textbf{MOEA/D-IPBI} & \textbf{NSGA-II} \\ \hline
 		\multirow{4}{*}{\textbf{DTLZ1}} & 3          & \textbf{0.04085} & 0.04362           & 0.04170               & 0.04138          & 0.04175             & 0.06082             & 0.50173            & 0.42397              & 0.06481          \\ \cline{2-11} 
 		& 5          & \textbf{0.10797} & 0.11308           & 0.11125               & 0.11110          & 0.11128             & 0.22189             & 0.73685            & 6.52117              & 19.87954         \\ \cline{2-11} 
 		& 8          & 0.21661          & 0.17984           & \textbf{0.17513}      & 0.17541          & 0.17601             & 0.23603             & 0.72480            & 0.52039              & 75.18619         \\ \cline{2-11} 
@@ -292,6 +296,10 @@ Next we demonstrate the performance of DBEA-DS on 13 unconstrained Minus-problem
 		& 10         & \textbf{0.42117} & 0.46273           & 0.46209               & 0.66553          & 0.83358             & 0.60033             & 0.92832            & 0.73585              & 0.50534          \\ \hline
 	\end{tabular}
 \end{table*}
+
+It is important to take note that for IGD computation of these problems, reference sets have been obtained from the authors of \cite{ishibuchi2016inverse} and results of the listed algorithms in terms of HV and IGD are also from the same source \cite{ishibuchi2016inverse}. Based on mean HV statistics listed in Table \ref{tab:HV} for the normal problems in DTLZ and WFG series, DBEA-DR performs best in all objective instances of WFG3 and for rest of the problems it's performance is quite close to the best performing algorithm. However, in terms of IGD values listed in Table \ref{tab:IGD}, it is interesting to see that DBEA-DR performs best in all objective instances of 5/13 problems namely in DTLZ2, WFG4, WFG5, WFG7 and WFG9. Additionally, DBEA-DR performs best in 3 and 5 objective instances DTLZ1, DTLZ3, DTLZ4. For rest of the problems, performance of DBEA-DR in terms of IGD is either better or at par with the best performing algorithm. 
+
+\subsubsection{Minus Problems}
 
 \begin{table*}[!htb]\scriptsize
 	\centering
@@ -420,12 +428,8 @@ Next we demonstrate the performance of DBEA-DS on 13 unconstrained Minus-problem
                                                       & 10         & \textbf{0.38110} & 0.44781           & 0.49704               & 0.60650          & 0.66438             & 0.52325             & 0.47860            & 0.47591              & 0.40130          \\ \hline
 	\end{tabular}
 \end{table*}
-
-Based on mean HV statistics listed in Table \ref{tab:HVminus}, DBEA-DS performs best in 3 objective instances of these minus instances i.e. DTLZ1\textsuperscript{-1}, DTLZ3\textsuperscript{-1}, DTLZ4\textsuperscript{-1}, WFG1\textsuperscript{-1} and WFG8\textsuperscript{-1}. Also the proposed approach delivers at par performance with the best performing algorithm in the context of 3 objective instances of other problems. In the context of 5 and 8 objectives instances of DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1} and WFG1\textsuperscript{-1}, 5 objective instances of  WFG4\textsuperscript{-1}-WFG9\textsuperscript{-1} problems, DBEA-DS performs best or at par with the best performing algorithms based on mean HV values. However, for the 5 and 8 objective instances of WFG2\textsuperscript{-1}-WFG4\textsuperscript{-1} problems and WFG6\textsuperscript{-1}-WFG7\textsuperscript{-1} problems, the performance of DBEA-DS based on mean HV values are significantly worse than the best performing algorithms. It is important to note that, performance of different algorithms based on HV varies significantly based on different reference points as seen in \cite{ishibuchi2016inverse}. Therefore, it is very difficult to judge the performance of an algorithm based on HV alone. Hence, IGD values are also presented below for these problems.  
-
-For IGD computation of these problems, reference sets have been obtained from the authors of \cite{ishibuchi2016inverse} and results of the listed algorithms are also from the same source\cite{ishibuchi2016inverse}. Based on the mean IGD statistics, DBEA-DS performs best in 3 objective instances of DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1}, WFG1\textsuperscript{-1}, WFG4\textsuperscript{-1}-WFG9\textsuperscript{-1} problems. In the context of 5 objective instances of DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1}, WFG1\textsuperscript{-1}, WFG8\textsuperscript{-1} and WFG9\textsuperscript{-1} problems, DBEA-DS performs best in terms of mean IGD values. Also DBEA-DS performs best on 8 objective instances of WFG1\textsuperscript{-1} and WFG9\textsuperscript{-1}. However, the proposed approach delivers at par performance with the best performing algorithm in terms of mean IGD values in the context of other instances of other problems. The non-dominated solutions delivered by DBEA-DS corresponding to the best IGD metric values for minus DTLZ problems are shown in Figure \ref{fig:frontminus} (with a light blue background representing the theoretical Pareto front for these problems).
-
-Please note that the performance for the conventional DTLZ and WFG series is omitted here due to space restrictions and given in \cite{mdonormal}. The illustration in the Section~\ref{sec:proapp} demonstrates how the proposed approach is able to identify appropriate set of reference directions to obtain competitive solutions for these problems. 
+ 
+Similarly, performances obtained in terms of HV and IGD values using various state of the art algorithms on the minus problems (DTLZ\textsuperscript{-1} and WFG\textsuperscript{-1}) are listed in Table \ref{tab:HVminus} and Table~\ref{tab:IGDminus} respectively. It is evident from Table \ref{tab:HVminus} that the proposed approach delivers best performance in all objective instances of DTLZ1\textsuperscript{-1}-DTLZ3\textsuperscript{-1}, WFG2\textsuperscript{-1}, WFG4\textsuperscript{-1} and WFG9\textsuperscript{-1} i.e. 5/13 problems. Also, it is able to deliver best performance in terms of HV in 3, 8 and 10 objective instances of WFG5\textsuperscript{-1}, WFG6\textsuperscript{-1} and WFG8\textsuperscript{-1}. In addition to that, the proposed approach delivers better or at par performance with the best performing algorithm in other objective instances of other problems. Based on the mean IGD statistics listed in Table~\ref{tab:IGDminus}, it is evident that DBEA-DR is able to deliver best performance in all objective instances of DTLZ3\textsuperscript{-1} and WFG9\textsuperscript{-1}. Additionally, it is able to deliver best performance in terms of IGD in 3, 8, and 10 objective instances of WFG4\textsuperscript{-1}-WFG6\textsuperscript{-1} and WFG8\textsuperscript(-1). Also, the proposed approach is able to deliver better or at par performance in other objective instances of other problems.
 
 \section{Conclusions and Future Work}
 \label{sec:conc}

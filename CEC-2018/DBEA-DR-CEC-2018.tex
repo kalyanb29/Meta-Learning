@@ -109,7 +109,7 @@ The highlighted parts of the algorithm are elaborated below:\\
 	
 	\item \textbf{Evaluate}: In this stage, the objective functions are evaluated for all the solutions generated above.
 	
-	\item \textbf{UpdateRef}: In this stage, the $i^{th}$ reference direction $W^i$ is modified to $W^i_m$ based on the ideal vector ($Z^I$) and nadir vector ($Z^N$) of the combined parent and child population using Equation \ref{eqn:KHT_Eqn:3}. Take note that the proposed approach uses the nadir point of the combined parent, child and archive population as opposed to maximum value of each objective function of parent and child population in the Reference Vector guided Evolutionary Algorithm~\cite{Cheng2016many}. 
+	\item \textbf{UpdateRef}: In this stage, the $i^{th}$ reference direction $W^i$ is modified to $W^i_m$ based on the ideal vector ($Z^I$) and nadir vector ($Z^N$) of the combined parent and child population using Equation \ref{eqn:KHT_Eqn:3}. Take note that the proposed approach uses the nadir point of the combined parent and child population as opposed to maximum value of each objective function of parent and child population in the Reference Vector guided Evolutionary Algorithm~\cite{Cheng2016many}. 
 	
 	\begin{equation}
 	(W^i_m)_j = (W^i)_j\times(Z^N - Z^I)_j, \forall~1\le j\le M
@@ -117,18 +117,45 @@ The highlighted parts of the algorithm are elaborated below:\\
 	\end{equation}
 	
 	
-	\item \textbf{Assign}: In this stage, solutions are assigned to the reference directions. Let the number of solutions to be assigned be denoted by $R$. If the number of solutions to be assigned is more than $N$, the solutions are assigned in each subpopulation using distance based ranking. Take note that, in the assignment process, a sub-population with respect to a reference direction is constructed using the solutions which are closest to that reference direction based on angle measure. If no solutions belong to a sub-population, it is considered empty. Solutions within a non-empty sub-population is sorted based on a metric (modified distance based ranking) value which is obtained by comparing the objective values. The value of the metric for $i^{th}$ solution within a subpopulation of $P$ member is computed as:
+	\item \textbf{Assign}: In this stage, solutions are assigned to the reference directions. A sub-population with respect to a reference direction is constructed using the solutions which are closest to that reference direction based on angle measure as described in \cite{Cheng2016many}. Instead of using angle penalized distance metric \cite{Cheng2016many} to assign the solutions in each subpopulation, distance based ranking is used in the paper. If no solutions belong to a sub-population, it is considered empty and all solutions in the existing population are made available to the subpopulation in this scenario. Solutions within a non-empty sub-population is sorted based on a metric (modified distance based ranking) value which is obtained by comparing the objective values. The value of the metric for $i^{th}$ solution within a subpopulation of $P$ member is computed as:
 	
 	\begin{equation}
-	DR\_m_i = \sum_{k\neq i}\sum_{j=1}^M max(\{(- f^i_j + f^k_j),0\}) 
+	DR\_m_i = -\sum_{k\neq i}\sum_{j=1}^M max(\{(f^i_j - f^k_j),0\}) 
 	\label{eqn:KHT_Eqn:4}
 	\end{equation}
 	
-	This equation for the $i^{th}$ solution only aggregrates the difference values of objectives with other solutions which are worse than the $i^{th}$ solution.
+	This equation for the $i^{th}$ solution only aggregrates the difference values of objectives with other solutions which are worse than the $i^{th}$ solution. For example objective values of some solutions are given in Table \ref{tab:Drexample}.
+	
+	\begin{table}[!htb]\scriptsize
+		\centering
+		\renewcommand{\arraystretch}{0.9}
+		\caption{Objective values of artificial solutions}
+		\label{tab:Drexample}
+		\tabcolsep = 0.1cm
+		\begin{tabular}{|c|c|c|c|}
+		\hline
+		\textbf{Solutions} & \textbf{$f_1$} & \textbf{$f_2$} & \textbf{$f_3$} \\ \hline
+		\textbf{A}         & 4              & 2              & 1              \\ \hline
+		\textbf{B}         & 0              & 6              & 5              \\ \hline
+		\textbf{C}         & 5              & 3              & 2              \\ \hline
+		\textbf{D}         & 4              & 3              & 8              \\ \hline
+		\textbf{E}         & 4              & 6              & 9              \\ \hline
+		\textbf{F}         & 3              & 5              & 5              \\ \hline
+		\end{tabular}
+	\end{table}
+
+	Based on Equation \ref{eqn:KHT_Eqn:4}, the distance based ranking values of Solution A, B, C, D, E and F will be -11, -7, -7, -5, -1, and -8 respectively. Therefore solution A is best in this context followed by solution F, B, C, D and E. The solutions are shown in Figure \ref{fig:drexp}.
+	
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[width=.7\textwidth]{drexp.eps}
+		\caption{Solutions}
+		\label{fig:drexp}
+	\end{figure}
 	
 	\item \textbf{CreateOffspring}: The process of creating offspring solutions involves two steps, the identification of participating parents for recombination and the recombination process itself. Both these steps are known to affect the performance and various rationales and recommendations have been suggested in the literature. 
 	
-	In our approach, each solution is selected as a base parent and its partner is randomly chosen from the rest. Such a scheme offers opportunity to all solutions to act as base parents for generating offspring. We capitalize on the advantages of two commonly used recombination schemes, i.e., differential evolution~(DE) crossover~\cite{das2011de} and simulated binary crossover~(SBX)~\cite{deb2002fast}. At each generation both types of crossover and polynomial mutation are employed for each of the base parents attached to each reference direction i.e. if at the first generation, the first reference direction uses differential evolution crossover, the second reference direction  would use simulated binary crossover and this will be reversed in the second generation. Such an alternation also removes the bias induced by the specific operators. One and two participating parents are identified when using SBX and DE respectively which results in two and one offspring respectively out of which the first offspring is selected.       
+	In our approach, each solution is selected as a base parent and its partner is randomly chosen from the rest. Such a scheme offers opportunity to all solutions to act as base parents for generating offspring. We capitalize on the advantages of two commonly used recombination schemes, i.e., differential evolution~(DE) crossover~\cite{das2011de} and simulated binary crossover~(SBX)~\cite{deb2002fast}. At each generation both types of crossover and polynomial mutation are employed for each of the base parents attached to each reference direction i.e. if at the first generation, the first reference direction uses differential evolution crossover, the second reference direction would use simulated binary crossover and this will be reversed in the second generation. Such an alternation also removes the bias induced by the specific operators. One and two participating parents are identified when using SBX and DE respectively which results in two and one offspring respectively out of which the first offspring is selected.       
 	
 \end{itemize}
 

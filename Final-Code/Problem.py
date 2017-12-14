@@ -268,46 +268,56 @@ def cifar10(path = pathcifar, activation = "sigmoid", conv_channels=(16, 16, 16)
             output = image_batch
             with tf.variable_scope('ConvMLP', reuse=tf.AUTO_REUSE):
                 conv1_w = tf.get_variable("conv1_w",
-                                           shape = [5, 5, depth, conv_channels(1)],
+                                           shape = [5, 5, depth, conv_channels[0]],
                                            dtype=tf.float32,
                                            initializer=tf.random_normal_initializer(stddev=0.01))
                 conv1_b = tf.get_variable("conv1_b",
-                                           shape = [conv_channels(1), ],
+                                           shape = [conv_channels[0], ],
                                            dtype=tf.float32,
                                            initializer=tf.random_normal_initializer(stddev=0.01))
                 conv1_beta = tf.get_variable("conv1_beta",
-                                              shape = [1, 1, 1, conv_channels(1)],
+                                              shape = [1, 1, 1, conv_channels[0]],
                                               dtype=tf.float32,
                                               initializer=tf.random_normal_initializer(stddev=0.01))
                 conv2_w = tf.get_variable("conv2_w",
-                                          shape=[5, 5, conv_channels(1), conv_channels(2)],
+                                          shape=[5, 5, conv_channels[0], conv_channels[1]],
                                           dtype=tf.float32,
                                           initializer=tf.random_normal_initializer(stddev=0.01))
                 conv2_b = tf.get_variable("conv2_b",
-                                          shape=[conv_channels(2), ],
+                                          shape=[conv_channels[1], ],
                                           dtype=tf.float32,
                                           initializer=tf.random_normal_initializer(stddev=0.01))
                 conv2_beta = tf.get_variable("conv2_beta",
-                                             shape=[1, 1, 1, conv_channels(2)],
+                                             shape=[1, 1, 1, conv_channels[1]],
                                              dtype=tf.float32,
                                              initializer=tf.random_normal_initializer(stddev=0.01))
                 conv3_w = tf.get_variable("conv3_w",
-                                          shape=[5, 5, conv_channels(2), conv_channels(3)],
+                                          shape=[5, 5, conv_channels[1], conv_channels[2]],
                                           dtype=tf.float32,
                                           initializer=tf.random_normal_initializer(stddev=0.01))
                 conv3_b = tf.get_variable("conv3_b",
-                                          shape=[conv_channels(3), ],
+                                          shape=[conv_channels[2], ],
                                           dtype=tf.float32,
                                           initializer=tf.random_normal_initializer(stddev=0.01))
                 conv3_beta = tf.get_variable("conv3_beta",
-                                             shape=[1, 1, 1, conv_channels(3)],
+                                             shape=[1, 1, 1, conv_channels[2]],
                                              dtype=tf.float32,
                                              initializer=tf.random_normal_initializer(stddev=0.01))
-                output = tf.nn.convolution(output, conv1_w, padding='SAME', strides=[1, 1, 1, 1])
-                output = tf.nn.relu(tf.nn.bias_add(output,conv1_b))
+                output = tf.nn.convolution(output, conv1_w, padding='SAME', strides=[1, 1])
+                output = tf.nn.relu(tf.nn.bias_add(output, conv1_b))
                 output = tf.nn.max_pool(output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-                output = tf.nn.lrn(output,)
-                output = tf.layers.batch_normalization(output,trainable=True)
+                b_m_1, b_v_1= tf.nn.moments(output,axes=[0, 1, 2])
+                output = tf.nn.batch_normalization(output, b_m_1, b_v_1, conv1_beta, scale=None, variance_epsilon=1e-8)
+                output = tf.nn.convolution(output, conv2_w, padding='SAME', strides=[1, 1])
+                output = tf.nn.relu(tf.nn.bias_add(output, conv2_b))
+                output = tf.nn.max_pool(output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+                b_m_2, b_v_2 = tf.nn.moments(output, [0, 1, 2])
+                output = tf.nn.batch_normalization(output, b_m_2, b_v_2, conv2_beta, scale=None, variance_epsilon=1e-8)
+                output = tf.nn.convolution(output, conv3_w, padding='SAME', strides=[1, 1])
+                output = tf.nn.relu(tf.nn.bias_add(output, conv3_b))
+                output = tf.nn.max_pool(output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+                b_m_3, b_v_3 = tf.nn.moments(output, [0, 1, 2])
+                output = tf.nn.batch_normalization(output, b_m_3, b_v_3, conv3_beta, scale=None, variance_epsilon=1e-8)
                 output = tf.layers.flatten(output)
                 W_in = tf.get_variable("W_in",
                                         shape=[output.shape[1],linear_layers],

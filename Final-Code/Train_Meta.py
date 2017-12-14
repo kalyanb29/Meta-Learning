@@ -12,7 +12,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 flags = tf.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_integer("num_epochs", 70, "Number of training epochs.") # 10000
+flags.DEFINE_integer("num_epochs", 200, "Number of training epochs.") # 10000
 flags.DEFINE_integer("logging_period", 10, "Log period.") # 100
 flags.DEFINE_integer("evaluation_period", 20, "Evaluation period.")#1000
 flags.DEFINE_integer("evaluation_epochs", 20, "Number of evaluation epochs.")
@@ -25,7 +25,7 @@ flags.DEFINE_integer('num_layer',2,"Number of LSTM layer")
 flags.DEFINE_integer('hidden_size',20,"Number of hidden layer in each LSTM")
 flags.DEFINE_float('lr',0.001,"Initial learning rate")
 
-logs_path = '/Users/kalyanb/PycharmProjects/Final-Code//Log/'
+logs_path = '/Users/kalyanb/PycharmProjects/Final-Code/Log/'
 save_path = '/Users/kalyanb/PycharmProjects/Final-Code/Save/'
 
 def main(_):
@@ -39,7 +39,7 @@ def main(_):
   step, loss_opt, update, reset, cost_tot, cost_op, arraycost, _ = optimizer.metaoptimizer(problem)
 
   with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
-      graph_writer = tf.summary.FileWriter(logs_path + 'MetaLog/', sess.graph)
+      graph_writer = tf.summary.FileWriter(os.path.join(logs_path, FLAGS.problem, '/MetaLog/'), sess.graph)
       sess.run(tf.global_variables_initializer())
       best_evaluation = float("inf")
       start = timer()
@@ -62,23 +62,27 @@ def main(_):
                   losseval.append(evalcost)
               if save_path is not None and evaloss < best_evaluation:
                  print("Saving meta-optimizer to {}".format(save_path))
-                 saver.save(sess, save_path + 'MetaSave/model.ckpt', global_step=0)
+                 saver.save(sess, os.path.join(save_path, FLAGS.problem, '/MetaSave/model.ckpt'), global_step=e+1)
                  best_evaluation = evaloss
                  plotlosseval.append(evalcost)
       slengths = np.arange(FLAGS.num_steps)
+      np.savetxt(os.path.join(save_path, FLAGS.problem, '/MetaSave/plotlosstrain.out'), plotlosstrain, delimiter=',')
+      np.savetxt(os.path.join(save_path, FLAGS.problem, '/MetaSave/plotlosseval.out'), plotlosseval, delimiter=',')
+      np.savetxt(os.path.join(save_path, FLAGS.problem, '/MetaSave/losstrain.out'), losstrain, delimiter=',')
+      np.savetxt(os.path.join(save_path, FLAGS.problem, '/MetaSave/losseval.out'), losseval, delimiter=',')
       plt.figure(figsize=(8, 5))
       plt.plot(slengths, np.mean(plotlosstrain, 0), 'r-', label='Training Loss')
       plt.xlabel('Epoch')
       plt.ylabel('Training Loss')
       plt.legend()
-      savefig('Training.png')
+      savefig(os.path.join(save_path, FLAGS.problem, '/MetaSave/Training.png'))
       plt.close()
       plt.figure(figsize=(8, 5))
       plt.plot(slengths, np.mean(plotlosseval, 0), 'b-', label='Validation Loss')
       plt.xlabel('Epoch')
       plt.ylabel('Validation Loss')
       plt.legend()
-      savefig('Validation.png')
+      savefig(os.path.join(save_path, FLAGS.problem, '/MetaSave/Validation.png'))
       plt.close()
       graph_writer.close()
 

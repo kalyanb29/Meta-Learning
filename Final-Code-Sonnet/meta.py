@@ -14,8 +14,8 @@ import networks
 import util
 
 
-MetaLoss = collections.namedtuple("MetaLoss", "loss, update, reset, fx, farray, x")
-MetaStep = collections.namedtuple("MetaStep", "step, loss, update, reset, fx, farray, x")
+MetaLoss = collections.namedtuple("MetaLoss", "loss, update, reset, fx, farray, lr_opt, x")
+MetaStep = collections.namedtuple("MetaStep", "step, loss, update, reset, fx, farray, lr_opt, x")
 
 
 class MetaOptimizer(object):
@@ -128,10 +128,6 @@ class MetaOptimizer(object):
                 gradients = nest.flatten([tf.gradients(fx[a], x[num_var[b]:num_var[b] + num_var[b+1]])
                          for a, b in zip(range(len(fx)),range(len(num_var)-1))])
 
-                # Stopping the gradient here corresponds to what was done in the
-                # original L2L NIPS submission. However it looks like things like
-                # BatchNorm, etc. don't support second-derivatives so we still need
-                # this term.
                 if not second_derivatives:
                     gradients = [tf.stop_gradient(g) for g in gradients]
 
@@ -139,12 +135,15 @@ class MetaOptimizer(object):
                 deltas, state_next = zip(*[net(g, s) for g, s in zip(gradients, state)])
                 state_next = list(state_next)
 
-            return deltas, state_next
+            ratio = sum([tf.reduce_mean(tf.div(d,g)) for d, g in zip(deltas, gradients)])/len(gradients)
 
-        def time_step(t, fx_array, fx_array_opt, x, state):
+            return deltas, state_next, ratio
+
+        def time_step(t, fx_array, fx_array_opt, lr_optimizee, x, state):
             """While loop body."""
             x_next = list(x)
             state_next = []
+            ratio = []
 
             with tf.name_scope("fx"):
                 fx = [util._make_with_custom_variables(a, x[num_var[b]:num_var[b] + num_var[b+1]])
@@ -161,26 +160,32 @@ class MetaOptimizer(object):
             with tf.name_scope("dx"):
                 for subset, key, s_i in zip(subsets, net_keys, state):
                     x_i = [x[j] for j in subset]
-                    deltas, s_i_next = update(nets[key], fx, x_i, s_i)
+                    deltas, s_i_next, ratio_i = update(nets[key], fx, x_i, s_i)
 
                     for idx, j in enumerate(subset):
                         x_next[j] += deltas[idx]
                     state_next.append(s_i_next)
+                    ratio.append(ratio_i)
+
+            with tf.name_scope("lr_opt"):
+                lr_optimizee = lr_optimizee.write(t, sum(ratio)/len(ratio))
 
             with tf.name_scope("t_next"):
                 t_next = t + 1
 
-            return t_next, fx_array, fx_array_opt, x_next, state_next
+            return t_next, fx_array, fx_array_opt, lr_optimizee, x_next, state_next
 
         # Define the while loop.
         fx_array = tf.TensorArray(tf.float32, size=len_unroll,
                                   clear_after_read=False)
         fx_array_opt = tf.TensorArray(tf.float32, size=len_unroll,
                                       clear_after_read=False)
-        _, fx_array, fx_array_opt, x_final, s_final = tf.while_loop(
+        lr_optimizee = tf.TensorArray(tf.float32, size=len_unroll-1,
+                                      clear_after_read=False)
+        _, fx_array, fx_array_opt, lr_optimizee, x_final, s_final = tf.while_loop(
             cond=lambda t, *_: t < len_unroll-1,
             body=time_step,
-            loop_vars=(0, fx_array, fx_array_opt, x, state),
+            loop_vars=(0, fx_array, fx_array_opt, lr_optimizee, x, state),
             parallel_iterations=1,
             swap_memory=True,
             name="unroll")
@@ -198,6 +203,9 @@ class MetaOptimizer(object):
             fx_array_opt = fx_array_opt.write(len_unroll-1, fxopt)
             farray = fx_array_opt.stack()
 
+        with tf.name_scope("lr_opt"):
+            lr_opt = lr_optimizee.stack()
+
         loss = tf.reduce_sum(fx_array.stack(), name="loss")
 
         # Reset the state; should be called at the beginning of an epoch.
@@ -205,7 +213,7 @@ class MetaOptimizer(object):
             variables = (nest.flatten(state) +
                          x + constants)
             # Empty array as part of the reset process.
-            reset = [tf.variables_initializer(variables), fx_array.close(), fx_array_opt.close()]
+            reset = [tf.variables_initializer(variables), fx_array.close(), fx_array_opt.close(), lr_optimizee.close()]
 
         # Operator to update the parameters and the RNN state after our loop, but
         # during an epoch.
@@ -218,7 +226,7 @@ class MetaOptimizer(object):
             print("Optimizer '{}' variables".format(k))
             print([op.name for op in snt.get_variables_in_module(net)])
 
-        return MetaLoss(loss, update, reset, fxopt, farray, x_final)
+        return MetaLoss(loss, update, reset, fxopt, farray, lr_opt, x_final)
 
     def meta_minimize(self, make_loss, len_unroll, learning_rate=0.01, **kwargs):
         """Returns an operator minimizing the meta-loss.

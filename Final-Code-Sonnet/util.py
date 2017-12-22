@@ -18,14 +18,16 @@ import tensorflow as tf
 import problems
 import networks
 
-def run_epoch(sess, cost_op, farray, ops, reset, num_unrolls):
+def run_epoch(sess, cost_op, farray, lropt, ops, reset, num_unrolls):
     """Runs one optimization epoch."""
     losstot = []
+    lrtot = []
     sess.run(reset)
     for _ in range(num_unrolls):
-        farr, cost = [sess.run([farray, cost_op] + ops)[j] for j in range(2)]
+        farr, cost, lropti = [sess.run([farray, cost_op, lropt] + ops)[j] for j in range(3)]
         losstot.append(np.log10(farr))
-    return np.reshape(losstot, -1), cost
+        lrtot.append(lropti)
+    return np.reshape(losstot, -1), cost, np.reshape(lrtot, -1)
 
 
 def print_stats(header, total_error, total_time):

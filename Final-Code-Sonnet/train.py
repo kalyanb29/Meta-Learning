@@ -42,7 +42,7 @@ flags.DEFINE_integer("logging_period", 10, "Log period.") # 100
 flags.DEFINE_integer("evaluation_period", 20, "Evaluation period.")#1000
 flags.DEFINE_integer("evaluation_epochs", 20, "Number of evaluation epochs.")
 
-flags.DEFINE_string("problem", "cifar", "Type of problem.")
+flags.DEFINE_string("problem", "quadratic", "Type of problem.")
 flags.DEFINE_integer("num_steps", 100,
                      "Number of optimization steps per epoch.") # 100
 flags.DEFINE_integer("unroll_length", 20, "Meta-optimizer unroll length.")
@@ -73,7 +73,7 @@ def main(_):
       net_assignments=net_assignments,
       second_derivatives=FLAGS.second_derivatives)
 
-  step, loss, update, reset, cost_op, farray, _ = minimize
+  step, loss, update, reset, cost_op, farray, lropt, _ = minimize
   with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     # Prevent accidental changes to the graph.
     graph_writer = tf.summary.FileWriter(logs_path, sess.graph)
@@ -81,20 +81,25 @@ def main(_):
     best_evaluation = float("inf")
     start = timer()
     losstrain = []
+    lrtrain = []
     losseval = []
     plotlosstrain = []
+    plotlrtrain = []
     plotlosseval = []
     for e in range(FLAGS.num_epochs):
-      cost, trainloss = util.run_epoch(sess, cost_op, farray, [step, update], reset, num_unrolls)
+      cost, trainloss, lropttrain = util.run_epoch(sess, cost_op, farray, lropt, [step, update], reset, num_unrolls)
       print(cost)
       losstrain.append(cost)
+      lrtrain.append(lropttrain)
       util.print_stats("Training Epoch {}".format(e), trainloss, timer() - start)
       saver = tf.train.Saver()
       if (e + 1) % FLAGS.logging_period == 0:
-        plotlosstrain.append(cost)
+          plotlosstrain.append(cost)
+          plotlrtrain.append(lropttrain)
+
       if (e + 1) % FLAGS.evaluation_period == 0:
         for _ in range(FLAGS.evaluation_epochs):
-          evalcost, evaloss = util.run_epoch(sess, cost_op, farray, [update], reset, num_unrolls)
+          evalcost, evaloss, _ = util.run_epoch(sess, cost_op, farray, lropt, [update], reset, num_unrolls)
           losseval.append(evalcost)
         if save_path is not None and evaloss < best_evaluation:
           print("Saving meta-optimizer to {}".format(save_path))
@@ -103,8 +108,10 @@ def main(_):
           plotlosseval.append(evalcost)
     slengths = np.arange(FLAGS.num_steps)
     np.savetxt(save_path + '/plotlosstrain.out', plotlosstrain, delimiter=',')
+    np.savetxt(save_path + '/plotlrtrain.out', plotlrtrain, delimiter=',')
     np.savetxt(save_path + '/plotlosseval.out', plotlosseval, delimiter=',')
     np.savetxt(save_path + '/losstrain.out', losstrain, delimiter=',')
+    np.savetxt(save_path + '/lrtrain.out', plotlosstrain, delimiter=',')
     np.savetxt(save_path + '/losseval.out', losseval, delimiter=',')
     plt.figure(figsize=(8, 5))
     plt.plot(slengths, np.mean(plotlosstrain, 0), 'r-', label='Training Loss')
@@ -119,6 +126,13 @@ def main(_):
     plt.ylabel('Validation Loss')
     plt.legend()
     savefig(save_path + '/Validation.png')
+    plt.close()
+    plt.figure(figsize=(8, 5))
+    plt.plot(slengths, np.mean(plotlrtrain, 0), 'r-', label='Learning Rate')
+    plt.xlabel('Epoch')
+    plt.ylabel('Average Learning Rate')
+    plt.legend()
+    savefig(save_path + '/LearningRate.png')
     plt.close()
     graph_writer.close()
 

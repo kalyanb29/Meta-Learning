@@ -3,6 +3,7 @@ import tensorflow as tf
 from keras import backend as K
 from tensorflow.python.util import nest
 import multiprocessing
+from itertools import product
 
 import util
 import Preprocess
@@ -46,11 +47,23 @@ class MetaOpt(object):
                 state_h = [[] for _ in range(len(opt_var))]
                 for i in range(len(opt_var)):
                     n_param = int(np.prod(shapes[i]))
-                    state_c[i] = [tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32, name="c_in", trainable=False)
-                                  for _ in range(num_layer)]
-                    state_h[i] = [tf.Variable(tf.zeros([n_param, hidden_size]), dtype=tf.float32, name="h_in", trainable=False)
-                                  for _ in range(num_layer)]
-
+                    for ii in range(n_param):
+                        state_c[i].append(tf.Variable(tf.zeros([num_layer, hidden_size]), dtype=tf.float32, name="c_in", trainable=False))
+                        state_h[i].append(tf.Variable(tf.zeros([num_layer, hidden_size]), dtype=tf.float32, name="h_in", trainable=False))
+        def rnn_cell(input_loop):
+            grad = input_loop[0]
+            state_c = input_loop[1]
+            state_h = input_loop[2]
+            cell_count = input_loop[4]
+            state_in = [tf.contrib.rnn.LSTMStateTuple(state_c[j,], state_h[j,])
+                        for j in range(num_layer)]
+            rnn_cell = tf.contrib.rnn.MultiRNNCell([tf.contrib.rnn.LSTMCell(num_units=hidden_size, reuse=cell_count > 0)
+                                                    for _ in range(num_layer)])
+            cell_count += 1
+            # Individual update with individual state but global cell params
+            rnn_out_all, state_out = rnn_cell(grad, state_in)
+            rnn_out = tf.add(tf.matmul(rnn_out_all, softmax_w), softmax_b)
+            return rnn_out,state_out,cell_count
 
         def update_state(losstot, x, state_c, state_h):
             with tf.name_scope("gradients"):
@@ -72,23 +85,16 @@ class MetaOpt(object):
                     rnn_new_h = [[] for _ in range(num_layer)]
                 # Apply RNN cell for each parameter
                     with tf.variable_scope("RNN"):
-                        rnn_outputs = []
                         rnn_state_c = [[] for _ in range(num_layer)]
                         rnn_state_h = [[] for _ in range(num_layer)]
+                        input_loop = []
                         for ii in range(n_param):
-                            state_in = [tf.contrib.rnn.LSTMStateTuple(state_c[i][j][ii:ii + 1], state_h[i][j][ii:ii + 1])
-                                        for j in range(num_layer)]
-                            rnn_cell = tf.contrib.rnn.MultiRNNCell([tf.contrib.rnn.LSTMCell(num_units=hidden_size, reuse=cell_count > 0)
-                                                                    for _ in range(num_layer)])
-                            cell_count += 1
-                            print(ii)
-                            # Individual update with individual state but global cell params
-                            rnn_out_all, state_out = rnn_cell(flat_g_mod[ii:ii + 1, :], state_in)
-                            rnn_out = tf.add(tf.matmul(rnn_out_all, softmax_w), softmax_b)
-                            rnn_outputs.append(rnn_out)
-                            for j in range(num_layer):
-                                rnn_state_c[j].append(state_out[j].c)
-                                rnn_state_h[j].append(state_out[j].h)
+                            input_loop.append([flat_g_mod[ii:ii + 1, :],state_c[i][ii],state_h[i][ii],cell_count])
+                        pool = multiprocessing.Pool()
+                        rnn_outputs,state_out,cell_count = zip(*pool.map(rnn_cell,input_loop))
+                        for j in range(num_layer):
+                            rnn_state_c[j].append(state_out[j].c)
+                            rnn_state_h[j].append(state_out[j].h)
 
                         # Form output as tensor
                         rnn_outputs = tf.reshape(tf.stack(rnn_outputs, axis=1), g.get_shape())

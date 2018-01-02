@@ -1,0 +1,167 @@
+\begin{thebibliography}{10}
+
+\bibitem{apcluster2011}
+U.~Bodenhofer, A.~Kothmeier, and S.~Hochreiter.
+\newblock {APCluster}: An {R} package for affinity propagation clustering.
+\newblock {\em Bioinformatics}, 27(17):2463--2464, 2011.
+
+\bibitem{Cheng2016many}
+R.~Cheng, Y.~Jin, M.~Olhofer, and B.~Sendhoff.
+\newblock A reference vector guided evolutionary algorithm for many-objective
+  optimization.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, PP(99):1--1,
+  2016.
+
+\bibitem{das1998normal}
+I.~Das and J.~E. Dennis.
+\newblock Normal-boundary intersection: A new method for generating the pareto
+  surface in nonlinear multicriteria optimization problems.
+\newblock {\em SIAM Journal on Optimization}, 8(3):631--657, 1998.
+
+\bibitem{das2011de}
+S.~Das and P.~N. Suganthan.
+\newblock Differential evolution: A survey of the state-of-the-art.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 15(1):4--31,
+  2011.
+
+\bibitem{deb2002fast}
+K.~Deb, A.~Pratap, S.~Agarwal, and T.~Meyarivan.
+\newblock A fast and elitist multiobjective genetic algorithm: {NSGA-II}.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 6(2):182--197,
+  2002.
+
+\bibitem{giakiozis2015}
+I.~Giagkiozis and P.~J. Fleming.
+\newblock Methods for multi-objective optimization: An analysis.
+\newblock {\em Information Sciences}, 293:338--350, 2015.
+
+\bibitem{ishibuchi2010many}
+H.~Ishibuchi, Y.~Hitotsuyanagi, N.~Tsukamoto, and Y.~Nojima.
+\newblock Many-objective test problems to visually examine the behavior of
+  multiobjective evolution in a decision space.
+\newblock In {\em Proceedings of the International Conference on Parallel
+  Problem Solving from Nature}, pages 91--100. Springer, 2010.
+
+\bibitem{ishibuchi2009adaptation}
+H.~Ishibuchi, Y.~Sakane, N.~Tsukamoto, and Y.~Nojima.
+\newblock Adaptation of scalarizing functions in {MOEA/D}: An adaptive
+  scalarizing function-based multiobjective evolutionary algorithm.
+\newblock In {\em Proceedings of the International Conference on Evolutionary
+  Multi-Criterion Optimization}, pages 438--452. Springer, 2009.
+
+\bibitem{ishibuchi2016inverse}
+H.~Ishibuchi, S.~Yu, M.~Hiroyuki, and N.~Yusuke.
+\newblock Performance of decomposition-based many-objective algorithms strongly
+  depends on {Pareto} front shapes.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 2016.
+
+\bibitem{Deb2014adaptive}
+H.~Jain and K.~Deb.
+\newblock An evolutionary many-objective optimization algorithm using
+  reference-point based nondominated sorting approach, part ii: handling
+  constraints and extending to an adaptive approach.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 18(4):602--622,
+  2014.
+
+\bibitem{Li2015dominance}
+K.~Li, K.~Deb, Q.~Zhang, and S.~Kwong.
+\newblock An evolutionary many-objective optimization algorithm based on
+  dominance and decomposition.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 19(5):694--716,
+  2015.
+
+\bibitem{li2015pbi}
+K.~Li, S.~Kwong, Q.~Zhang, and K.~Deb.
+\newblock Interrelationship-based selection for decomposition multiobjective
+  optimization.
+\newblock {\em IEEE Transactions on Cybernetics}, 45(10):2076--2088, 2015.
+
+\bibitem{miettinen2012nonlinear}
+K.~Miettinen.
+\newblock {\em Nonlinear multiobjective optimization}, volume~12.
+\newblock Springer Science \& Business Media, 2012.
+
+\bibitem{wang2017pbi}
+M.~Ming, R.~Wang, Y.~Zha, and T.~Zhang.
+\newblock Pareto adaptive penalty-based boundary intersection method for
+  multi-objective optimization.
+\newblock {\em Information Sciences}, 414:158--174, 2017.
+
+\bibitem{mostaghim2008}
+S.~Mostaghim and H.~Schmeck.
+\newblock Distance based ranking in many-objective particle swarm optimization.
+\newblock In {\em Proceedings of the Parallel Problem Solving from Nature},
+  pages 753--762, 2008.
+
+\bibitem{nikulin2012asf}
+Y.~Nikulin, K.~Miettinen, and M.~Makel{\"a}.
+\newblock A new achievement scalarizing function based on parameterization in
+  multiobjective optimization.
+\newblock {\em OR Spectrum}, 34:69--87, 2012.
+
+\bibitem{sato2014inverted}
+H.~Sato.
+\newblock Inverted {PBI} in {MOEA/D} and its impact on the search performance
+  on multi and many-objective optimization.
+\newblock In {\em Proceedings of the Annual Conference on Genetic and
+  Evolutionary Computation}, pages 645--652. ACM, 2014.
+
+\bibitem{shukla2007nbi}
+P.~K. Shukla.
+\newblock On the {Normal Boundary Intersection} method for generation of
+  efficient front.
+\newblock In {\em Proceedings of the International Conference on Computational
+  Science}, pages 310--317, 2007.
+
+\bibitem{trivedisurvey}
+A.~Trivedi, D.~Srinivasan, K.~Sanyal, and A.~Ghosh.
+\newblock A survey of multi-objective evolutionary algorithms based on
+  decomposition.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 2017.
+
+\bibitem{Voss2008}
+T.~Voss, N.~Beume, G.~Rudolph, and C.~Igel.
+\newblock Scalarization versus indicator-based selection in multi-objective cma
+  evolution strategies.
+\newblock In {\em Proceedings of International Conference on IEEE Congress
+  Evolutionary Computation}, pages 3036--3043, 2008.
+
+\bibitem{Wang2016dec}
+R.~Wang, Q.~Zhang, and T.~Zhang.
+\newblock Decomposition-based algorithms using {Pareto} adaptive scalarizing
+  methods.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 20(6):821--837,
+  2016.
+
+\bibitem{Wang2016ls}
+R.~Wang, Z.~Zhou, H.~Ishibuchi, T.~Liao, and T.~Zhang.
+\newblock Localized weighted sum method for many-objective optimization.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, PP(99), 2016.
+
+\bibitem{while2012hv}
+L.~While, L.~Bradstreet, and L.~Barone.
+\newblock A fast way of calculating exact hypervolumes.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 16(1):86--95,
+  2012.
+
+\bibitem{wierzbicki1980use}
+A.~P. Wierzbicki.
+\newblock The use of reference objectives in multiobjective optimization.
+\newblock In {\em Multiple Criteria Decision Making Theory and Application},
+  pages 468--486. Springer, 1980.
+
+\bibitem{Yuan2016many}
+Y.~Yuan, H.~Xu, B.~Wang, and X.~Yao.
+\newblock A new dominance relation-based evolutionary algorithm for
+  many-objective optimization.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 20(1):16--37,
+  2016.
+
+\bibitem{zhang2007moead}
+Q.~Zhang and H.~Li.
+\newblock {MOEA/D}: A multiobjective evolutionary algorithm based on
+  decomposition.
+\newblock {\em IEEE Transactions on Evolutionary Computation}, 11(6):712--731,
+  2007.
+
+\end{thebibliography}

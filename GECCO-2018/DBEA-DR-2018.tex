@@ -38,20 +38,41 @@ In this paper, we try to investigate an alternate scheme to overcome these chall
 
 \subsection{Distance based ranking}: 
 
-Solutions within a sub-population are sorted based on the modified distance based ranking which is obtained by comparing the objective values of the solutions. The value of the metric for $i^{th}$ solution within a subpopulation of $P$ member is computed as:
+The concept of ranking non-dominated solutions originated via crowding distance based measure in \cite{deb2002fast}. Apart from ranking based on the spatial location, any two nondominated solutions differ with respect to number of objectives and the difference in objective values where one is better than the other. In this context, two metrics are proposed in \cite{mostaghim2008} such as average ranking (AR) and distance based ranking (DR). The AR ranking method only considers the number of objective in which one is better than the other. On  the other hand DR method considers the distances between the objective vectors. The AR method does not consider crowding into account as shown in \cite{mostaghim2008}. On the other hand, DR method computes the absolute difference between objective values of one solution with others which leads to same ranking value for two solutions. The DR method does not differentiate amongst objectives that are better from the ones that are worse. Hence for two solutions with objective values A[0,5,10], and B[9,5,0] will have the same rank based on both AR and DR method. The metric values of solutions A and B are presented in Table \tab{tab:Drexample1}. 
+
+	\begin{table}[!htb]\scriptsize
+		\centering
+		\renewcommand{\arraystretch}{0.9}
+		\caption{Ranking based on AR and DR method}
+		\label{tab:Drexample1}
+		\tabcolsep = 0.1cm
+		\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Metric} & \textbf{A} & \textbf{B} \\ \hline
+		\textbf{AR}     & 9          & 9          \\ \hline
+		\textbf{DR}     & 19         & 19         \\ \hline
+		\end{tabular}
+	\end{table} 
 	
+It is clear that, none of the methods are particularly convenient in terms of differentiating solutions. Hence, an alternative scheme based on improved distance based ranking is proposed where we differentiate the objectives that are dominating from the ones that are dominated. The formulation of the proposed metric ($DR\_m$) is outlined in Equation \ref{eqn:KHT_Eqn:4} where the value of the metric for $i^{th}$ solution among $P$ solutions are presented. An example of the computation of this metric for solutions (A, B, C, D, E and F) in Figure \ref{fig:drexp} where the objective values are listed in Table \ref{tab:Drexample2} is presented below: 
+
 	\begin{equation}
 	DR\_m_i = -\sum_{k,k\neq i}^P\sum_{j=1}^M max(\{(f^i_j - f^k_j),0\}) 
 	\label{eqn:KHT_Eqn:4}
 	\end{equation}
 	
-	This equation for the $i^{th}$ solution only aggregrates the difference values of objectives with other solutions which are worse than the $i^{th}$ solution. The computation of the metric based on modified distance based ranking is shown for some artificial solutions. The objective values of these solutions are given in Table \ref{tab:Drexample}.
+	\begin{figure}[!htb]
+		\centering
+		\includegraphics[width=.4\textwidth]{Figures/drexp.eps}
+		\caption{Solutions}
+		\label{fig:drexp}
+	\end{figure}
 	
 	\begin{table}[!htb]\scriptsize
 		\centering
 		\renewcommand{\arraystretch}{0.9}
 		\caption{Objective values of artificial solutions}
-		\label{tab:Drexample}
+		\label{tab:Drexample2}
 		\tabcolsep = 0.1cm
 		\begin{tabular}{|c|c|c|c|}
 		\hline
@@ -63,19 +84,12 @@ Solutions within a sub-population are sorted based on the modified distance base
 		\textbf{E}         & 4              & 6              & 9              \\ \hline
 		\textbf{F}         & 3              & 5              & 5              \\ \hline
 		\end{tabular}
-	\end{table}
-
-	Based on Equation \ref{eqn:KHT_Eqn:4}, the values of the metric based on modified distance based ranking of Solution A, B, C, D, E and F will be -11, -7, -7, -5, -1, and -8 respectively. Therefore solution A is best in this context followed by solution F, B, C, D and E. The solutions are shown in Figure \ref{fig:drexp}.
+	\end{table}	
 	
-	\begin{figure}[!htb]
-		\centering
-		\includegraphics[width=.4\textwidth]{Figures/drexp.eps}
-		\caption{Solutions}
-		\label{fig:drexp}
-	\end{figure}
+Based on the modified distance metric, the equation for the $i^{th}$ solution only aggregrates the difference values of objectives with other solutions which are worse than the $i^{th}$ solution. The values of the metric based on Equation \ref{eqn:KHT_Eqn:4} for solution A, B, C, D, E and F will be -11, -7, -7, -5, -1, and -8 respectively. Therefore solution A is best in this context followed by solution F, B, C, D and E.
 	
 
-In this paper, a parameter free , and to this end, propose a modified distance based ranking approach as a metric and integrate it within a decomposition based algorithm to distinguish better solutions within a sub-population. The proposed ranking is parameter less and scalable in terms of number of objectives. Section~\ref{sec:proapp} introduces the proposed approach and outlines the details of individual components. Section \ref{sec:expset} and Section \ref{sec:perf} outlines the parameter settings for the selected set of problems and the performance measures chosen for comparison. In Section~\ref{sec:resdis}, performance of the proposed approach is objectively compared with existing state-of-the-art algorithms on a selected set of test problems. The results clearly highlight that such a scheme is more robust than existing scalarization techniques and Pareto-dominance based approaches. Finally, a summary of the work and some potential directions for future development are discussed in Section \ref{sec:conc}.
+In this paper, the proposed modified distance based ranking is integrated within a decomposition based algorithm to distinguish better solutions within a subpopulation. The proposed ranking does not involve any additional parameter and is scalable in terms of number of objectives. The layout of the rest of the paper is  Section~\ref{sec:proapp} introduces the proposed approach and outlines the details of individual components. Section \ref{sec:expset} and Section \ref{sec:perf} outlines the parameter settings for the selected set of problems and the performance measures chosen for comparison. In Section~\ref{sec:resdis}, performance of the proposed approach is objectively compared with existing state-of-the-art algorithms on a selected set of test problems. The results clearly highlight that such a scheme is more robust than existing scalarization techniques and Pareto-dominance based approaches. Finally, a summary of the work and some potential directions for future development are discussed in Section \ref{sec:conc}.
 
 
 \section{Proposed Approach}
@@ -454,7 +468,7 @@ Similarly, performances obtained in terms of HV and IGD values using various sta
 
 \section{Conclusions and Future Work}
 \label{sec:conc}
-In this paper, we presented a ranking mechanism in the context of decomposition based evolutionary algorithm which uses an existing simple metric. The benefits offered by such a metric are presented through performance comparison on 3, 5, 8 and 10 objective instances of normal and inverted DTLZ and WFG series problems with several state-of-the-art algorithms. The proposed approach also capitalizes on the strengths of two most popular forms of recombination operators, i,e, SBX and DE, which are used in alternation along each reference direction and swapped every generation. Such a scheme offers an unbiased opportunity for offspring being created using the above operators. Updating the reference direction at every generation avoids any additional parameter. The overall performance of the proposed approach is better or competitive when compared with state-of-the-art algorithms on a range of unconstrained problems. Effect of this ranking strategy on constrained problems and problems having complicated Pareto front shapes could be studied in future. Also, future study will include the study on the performance of this metric on high dimensional many objective optimization problems.
+In this paper, an alternate environmental selection technique is presented in the context of decomposition based evolutionary algorithm. The proposed metric is parameter free and scalable in terms of number of objectives. The benefits offered by such a metric are investigated through performance comparison on 3, 5, 8 and 10 objective instances of normal and inverted DTLZ and WFG series problems with several state-of-the-art algorithms. The proposed decomposition based approach also capitalizes on the strengths of two most popular forms of recombination operators, i,e, SBX and DE, which are used in alternation along each reference direction and swapped every generation. Such a scheme offers an unbiased opportunity for offspring being created using the above operators. Updating the reference direction at every generation avoids any additional parameter. The overall performance of the proposed approach is better or competitive when compared with state-of-the-art algorithms on a wide range of unconstrained problems. Effect of this ranking strategy on constrained problems and problems having complicated Pareto front shapes could be studied in future. Also, future study will include the study on the performance of this metric on many objective optimization problems with high dimensionality in the variable space.
 
 \bibliographystyle{abbrv}
 \small{\bibliography{DBEAadaptive}}

@@ -1,0 +1,505 @@
+\documentclass[onecolumn,10pt]{asme2ej}
+
+\usepackage{amssymb,fleqn,graphicx,ctable,mathptmx,helvet,hyperref,courier,subfigure,multirow,makeidx,graphicx,lscape,morefloats,algorithmic,algorithm,amsmath,balance,placeins,flafter,epsfig,color}
+\usepackage[noadjust]{cite}
+\usepackage{filecontents}
+\usepackage{enumerate}
+
+\usepackage{titlesec}
+
+
+\title{---------Supplementary Online Material----------------- \emph{Multiple Surrogate Assisted Many-objective Optimization for {\color{blue}Computationally Expensive} Engineering Design}}
+
+\author{Kalyan Shankar Bhattacharjee, Hemant Kumar Singh, Tapabrata Ray}
+\begin{document}
+
+\maketitle    
+
+\begin{abstract}
+	{\it This document contains supplementary results for the above study which could not be included in the main body of the paper due to the page limitations.}
+\end{abstract}
+
+\section{Performance metrics}
+Inverted generation distance~(IGD) and hypervolume~(HV) are the most common metrics used for an quantitative assessment in the multiobjective optimization domain. Computation of IGD requires a reference POF, while computation of HV requires a reference point. The aspect of uniformity of solutions in the reference set can always be questioned. As for hypervolume, the choice of the reference point used for HV computation is crucial and can adversely affect the interpretations about relative performance~\cite{KHTYuan2016many,KHTishibuchi2010many}. For HV computation, there are recent reports that suggest use of a slightly larger than true nadir vector as a reference point~\cite{KHTYuan2016many,KHTishibuchi2010many}. In our experiments, we have used the reference point to be 1.1 multiplied by the theoretical nadir vector for problems. Given a set of solutions and their corresponding objective vectors, we first discard all solutions that are dominated by the reference point. The objective vectors of the remaining solutions are normalized using the ideal and the modified nadir vector and HV is computed using a reference point which is $1.1^M$ in the normalized space~($M$ is the number of objectives). All HV computations reported in this paper are based on exact method~(WFG algorithm)~\cite{KHTwhile2012hv}. HV and IGD computations in this paper are based on solutions obtained from the archive i.e. the set of all fully evaluated solutions so far.
+
+\clearpage
+
+\section{IGD statistics}
+\subsection{IGD statistics obtained for DTLZ1-DTLZ7 problems}
+
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{IGD statistics~(best, mean, and worst) of DTLZ1-7}
+	\label{tab:KHTTab:5}
+	\tabcolsep = 0.03cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Problems}               & \textbf{M} & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ED}}}      & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ASF}}}      & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ED-ED}}}        & \multicolumn{3}{c|}{\textbf{K-RVEA}}             & \multicolumn{3}{c|}{\textbf{RVEA}}             & \multicolumn{3}{c|}{\textbf{ParEGO}}              \\ \hline
+		& \textbf{}  & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}   & \textbf{Worst} & \textbf{Best} & \textbf{Mean}   & \textbf{Worst} & \textbf{Best} & \textbf{Mean}   & \textbf{Worst} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} & \textbf{Best} & \textbf{Mean}    & \textbf{Worst} \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ1}} & 3          & 38.22         & 57.259         & 69.507         & 32.697        & 54.899          & 65.747         & 36.202        & 54.564          & 72.441         & 42.698        & 83.709          & 126.799        & 42.650        & 82.870        & 115.100        & 13.420        & \textbf{52.470}  & 112.700        \\ \cline{2-20} 
+		& 4          & 31.778        & 44.958         & 55.442         & 25.524        & 44.001          & 63.014         & 24.196        & \textbf{40.624} & 52.051         & 38.728        & 61.613          & 95.279         & 39.650        & 59.180        & 97.710         & 18.630        & 45.450           & 87.760         \\ \cline{2-20} 
+		& 6          & 7.3           & \textbf{19.64} & 30.654         & 11.663        & 23.927          & 39.610         & 5.878         & 19.927          & 33.964         & 10.009        & 20.885          & 32.256         & 12.240        & 22.940        & 36.850         & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 8          & 0.711         & \textbf{5.331} & 16.886         & 2.641         & 5.868           & 14.605         & 1.234         & 5.743           & 11.654         & 2.526         & 8.142           & 14.041         & 1.250         & 7.406         & 15.660         & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 10         & 0.192         & 0.331          & 0.465          & 0.220         & 0.349           & 0.549          & 0.177         & \textbf{0.286}  & 0.564          & 0.234         & 0.395           & 0.703          & 0.193         & 0.339         & 1.105          & NaN           & NaN              & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ2}} & 3          & 0.066         & 0.079          & 0.101          & 0.063         & \textbf{0.070}  & 0.086          & 0.063         & 0.074           & 0.089          & 0.086         & 0.109           & 0.167          & 0.227         & 0.288         & 0.335          & 0.151         & 0.191            & 0.243          \\ \cline{2-20} 
+		& 4          & 0.169         & 0.193          & 0.228          & 0.149         & \textbf{0.162}  & 0.180          & 0.15          & 0.176           & 0.2            & 0.198         & 0.221           & 0.261          & 0.280         & 0.332         & 0.383          & 0.289         & 0.337            & 0.408          \\ \cline{2-20} 
+		& 6          & 0.303         & 0.327          & 0.357          & 0.301         & \textbf{0.324}  & 0.356          & 0.301         & 0.325           & 0.352          & 0.375         & 0.397           & 0.448          & 0.375         & 0.404         & 0.440          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 8          & 0.39          & \textbf{0.411} & 0.432          & 0.386         & 0.417           & 0.470          & 0.385         & 0.413           & 0.46           & 0.435         & 0.476           & 0.508          & 0.466         & 0.541         & 0.704          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 10         & 0.45          & 0.469          & 0.492          & 0.463         & 0.483           & 0.508          & 0.447         & \textbf{0.466}  & 0.488          & 0.488         & 0.537           & 0.562          & 0.539         & 0.608         & 0.733          & NaN           & NaN              & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ3}} & 3          & 135.358       & 174.489        & 200.073        & 94.774        & 171.437         & 212.268        & 105.747       & 174.519         & 224.037        & 125.327       & 225.062         & 329.058        & 133.700       & 256.100       & 347.900        & 81.150        & \textbf{145.500} & 261.600        \\ \cline{2-20} 
+		& 4          & 93.751        & 145.538        & 168.362        & 74.369        & 141.142         & 197.430        & 81.118        & 143.169         & 175.271        & 94.966        & 198.689         & 336.823        & 89.950        & 198.600       & 306.300        & 66.930        & \textbf{138.100} & 209.400        \\ \cline{2-20} 
+		& 6          & 37.938        & 77.834         & 110.366        & 31.092        & \textbf{70.577} & 101.804        & 42.032        & 77.769          & 111.722        & 21.191        & 78.399          & 148.230        & 43.540        & 95.970        & 157.700        & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 8          & 4.06          & 22.1           & 52.855         & 7.771         & 20.093          & 51.782         & 6.344         & 21.063          & 45.191         & 7.922         & \textbf{19.320} & 36.220         & 8.569         & 25.270        & 42.170         & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 10         & 0.789         & \textbf{1.085} & 1.68           & 0.752         & 1.209           & 1.800          & 0.636         & 1.188           & 1.723          & 0.832         & 1.271           & 2.180          & 0.761         & 1.228         & 1.836          & NaN           & NaN              & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ4}} & 3          & 0.119         & 0.21           & 0.459          & 0.112         & 0.196           & 0.345          & 0.117         & \textbf{0.195}  & 0.318          & 0.132         & 0.309           & 0.594          & 0.205         & 0.399         & 0.959          & 0.387         & 0.646            & 0.947          \\ \cline{2-20} 
+		& 4          & 0.22          & 0.32           & 0.539          & 0.221         & \textbf{0.306}  & 0.434          & 0.218         & 0.325           & 0.585          & 0.267         & 0.379           & 0.497          & 0.320         & 0.514         & 0.737          & 0.505         & 0.725            & 0.960          \\ \cline{2-20} 
+		& 6          & 0.398         & 0.488          & 0.612          & 0.393         & 0.489           & 0.583          & 0.374         & \textbf{0.465}  & 0.567          & 0.404         & 0.511           & 0.618          & 0.503         & 0.615         & 0.800          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 8          & 0.489         & 0.569          & 0.673          & 0.518         & 0.588           & 0.661          & 0.5           & \textbf{0.555}  & 0.649          & 0.495         & 0.568           & 0.665          & 0.554         & 0.628         & 0.731          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 10         & 0.574         & 0.622          & 0.673          & 0.562         & \textbf{0.609}  & 0.698          & 0.546         & 0.61            & 0.699          & 0.535         & 0.587           & 0.638          & 0.599         & 0.667         & 0.761          & NaN           & NaN              & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ5}} & 3          & 0.01          & \textbf{0.013} & 0.016          & 0.010         & 0.014           & 0.019          & 0.011         & 0.017           & 0.026          & 0.044         & 0.080           & 0.139          & 0.201         & 0.247         & 0.316          & 0.039         & 0.055            & 0.072          \\ \cline{2-20} 
+		& 4          & 0.017         & 0.026          & 0.04           & 0.021         & 0.029           & 0.044          & 0.015         & \textbf{0.025}  & 0.037          & 0.037         & 0.062           & 0.099          & 0.149         & 0.294         & 0.393          & 0.090         & 0.288            & 0.428          \\ \cline{2-20} 
+		& 6          & 0.021         & \textbf{0.03}  & 0.042          & 0.021         & 0.034           & 0.052          & 0.02          & 0.03            & 0.042          & 0.029         & 0.045           & 0.063          & 0.159         & 0.280         & 0.431          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 8          & 0.015         & 0.02           & 0.033          & 0.016         & 0.021           & 0.029          & 0.013         & \textbf{0.017}  & 0.025          & 0.015         & 0.023           & 0.030          & 0.104         & 0.260         & 0.748          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 10         & 0.008         & \textbf{0.01}  & 0.013          & 0.008         & 0.011           & 0.014          & 0.008         & 0.01            & 0.013          & 0.007         & 0.010           & 0.014          & 0.224         & 0.488         & 0.746          & NaN           & NaN              & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ6}} & 3          & 0.055         & 0.98           & 2.117          & 0.115         & 1.413           & 4.373          & 0.064         & \textbf{0.79}   & 2.204          & 2.582         & 3.202           & 4.028          & 3.651         & 4.960         & 5.613          & 5.030         & 6.378            & 6.867          \\ \cline{2-20} 
+		& 4          & 0.11          & 0.911          & 2.669          & 0.106         & 2.365           & 4.503          & 0.03          & \textbf{0.713}  & 2.163          & 1.578         & 2.506           & 3.192          & 3.027         & 4.044         & 5.208          & 5.652         & 5.916            & 6.034          \\ \cline{2-20} 
+		& 6          & 0.036         & 0.464          & 1.862          & 0.164         & 2.256           & 3.110          & 0.062         & \textbf{0.431}  & 1.351          & 0.541         & 1.463           & 1.997          & 1.025         & 2.524         & 3.600          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 8          & 0.052         & \textbf{0.111} & 0.331          & 0.058         & 1.126           & 1.739          & 0.038         & 0.164           & 0.814          & 0.332         & 0.581           & 0.853          & 0.247         & 1.004         & 1.870          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 10         & 0.019         & 0.046          & 0.348          & 0.019         & 0.196           & 0.484          & 0.014         & \textbf{0.041}  & 0.089          & 0.033         & 0.062           & 0.112          & 0.140         & 0.297         & 0.751          & NaN           & NaN              & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ7}} & 3          & 0.072         & 0.218          & 0.849          & 0.067         & \textbf{0.159}  & 0.811          & 0.074         & 0.226           & 0.798          & 0.103         & 0.164           & 0.350          & 0.400         & 0.515         & 0.637          & 0.621         & 0.829            & 1.201          \\ \cline{2-20} 
+		& 4          & 0.183         & 0.258          & 0.59           & 0.158         & \textbf{0.210}  & 0.359          & 0.182         & 0.3             & 0.799          & 0.235         & 0.405           & 0.680          & 0.532         & 0.691         & 0.926          & 0.719         & 0.892            & 1.149          \\ \cline{2-20} 
+		& 6          & 0.428         & 0.524          & 1.005          & 0.482         & \textbf{0.523}  & 0.605          & 0.455         & 0.532           & 0.716          & 0.622         & 0.722           & 0.982          & 0.889         & 1.088         & 1.808          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 8          & 0.636         & \textbf{0.771} & 0.861          & 0.719         & 0.845           & 0.953          & 0.736         & 0.856           & 1.031          & 0.965         & 1.079           & 1.347          & 1.162         & 1.359         & 1.634          & NaN           & NaN              & NaN            \\ \cline{2-20} 
+		& 10         & 0.985         & \textbf{1.053} & 1.112          & 0.935         & 1.173           & 1.335          & 1.109         & 1.221           & 1.356          & 1.089         & 1.185           & 1.333          & 1.343         & 1.900         & 3.327          & NaN           & NaN              & NaN            \\ \hline
+	\end{tabular}
+\end{table*} 
+
+\clearpage
+\subsection{IGD statistics obtained for WFG1-9 problems}
+
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{IGD statistics~(best, mean, and worst) of WFG1-9}
+	\label{tab:KHTTab:6}
+	\tabcolsep = 0.1cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Problems}              & \textbf{M} & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ED}}}      & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ASF}}}     & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ED-ED}}}       & \multicolumn{3}{c|}{\textbf{K-RVEA}}            & \multicolumn{3}{c|}{\textbf{RVEA}}              & \multicolumn{3}{c|}{\textbf{ParEGO}}           \\ \hline
+		& \textbf{}  & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} \\ \hline
+		\multirow{5}{*}{\textbf{WFG1}} & 3          & 1.608         & 1.815          & 2.257          & 1.607         & 1.832          & 2.091          & 1.686         & 1.883          & 2.389          & 1.656         & \textbf{1.794} & 2.139          & 1.775         & 2.108          & 2.394          & 1.697         & 1.798         & 2.318          \\ \cline{2-20} 
+		& 4          & 1.811         & 2.090          & 2.318          & 1.826         & 2.049          & 2.544          & 1.803         & 2.061          & 2.332          & 1.876         & 2.105          & 2.478          & 1.934         & \textbf{2.018} & 2.225          & 1.982         & 2.137         & 2.517          \\ \cline{2-20} 
+		& 6          & 2.245         & 2.409          & 2.650          & 2.257         & \textbf{2.382} & 2.555          & 2.285         & 2.435          & 2.621          & 2.316         & 2.474          & 2.738          & 2.683         & 2.822          & 3.298          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 2.542         & \textbf{2.705} & 3.052          & 2.471         & 2.708          & 2.958          & 2.552         & 2.763          & 2.999          & 2.632         & 2.819          & 3.194          & 2.896         & 3.074          & 3.755          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 2.893         & 3.084          & 3.295          & 2.859         & \textbf{3.036} & 3.303          & 2.814         & 3.070          & 3.349          & 2.972         & 3.143          & 3.456          & 3.275         & 3.529          & 4.162          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG2}} & 3          & 0.348         & 0.456          & 0.575          & 0.388         & 0.438          & 0.497          & 0.369         & 0.450          & 0.508          & 0.273         & \textbf{0.335} & 0.418          & 0.595         & 0.771          & 0.903          & 0.652         & 0.777         & 0.872          \\ \cline{2-20} 
+		& 4          & 0.478         & 0.598          & 0.728          & 0.403         & \textbf{0.508} & 0.646          & 0.532         & 0.619          & 0.732          & 0.356         & 0.548          & 0.605          & 0.601         & 0.831          & 1.031          & 0.914         & 1.098         & 1.407          \\ \cline{2-20} 
+		& 6          & 0.634         & 0.741          & 0.889          & 0.555         & 0.705          & 0.853          & 0.629         & 0.780          & 0.997          & 0.501         & \textbf{0.564} & 0.697          & 0.919         & 1.191          & 1.897          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 0.752         & 0.872          & 1.086          & 0.731         & 0.848          & 1.063          & 0.806         & 0.911          & 1.505          & 0.694         & \textbf{0.759} & 0.894          & 1.040         & 1.727          & 2.940          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 0.956         & \textbf{1.082} & 1.261          & 0.987         & 1.169          & 1.397          & 0.936         & 1.110          & 1.369          & 0.902         & 0.988          & 1.178          & 1.595         & 2.393          & 3.892          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG3}} & 3          & 0.283         & 0.367          & 0.436          & 0.268         & 0.358          & 0.432          & 0.237         & \textbf{0.344} & 0.443          & 0.309         & 0.380          & 0.458          & 0.557         & 0.681          & 1.065          & 0.426         & 0.477         & 0.568          \\ \cline{2-20} 
+		& 4          & 0.307         & 0.453          & 0.552          & 0.313         & 0.413          & 0.519          & 0.384         & 0.496          & 0.615          & 0.149         & \textbf{0.213} & 0.296          & 0.440         & 0.621          & 0.828          & 0.368         & 0.447         & 0.512          \\ \cline{2-20} 
+		& 6          & 0.745         & 0.899          & 1.071          & 0.605         & 0.749          & 0.943          & 0.732         & 0.900          & 1.091          & 0.317         & \textbf{0.513} & 0.691          & 1.094         & 1.486          & 2.572          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 0.566         & 0.762          & 0.952          & 0.493         & 0.640          & 0.808          & 0.693         & 0.816          & 1.028          & 0.435         & \textbf{0.578} & 0.804          & 1.218         & 1.793          & 2.793          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 0.686         & 0.865          & 1.048          & 0.554         & 0.736          & 0.854          & 0.775         & 0.948          & 1.110          & 0.538         & \textbf{0.693} & 0.935          & 1.665         & 3.465          & 6.425          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG4}} & 3          & 0.380         & 0.420          & 0.453          & 0.384         & \textbf{0.411} & 0.475          & 0.377         & 0.418          & 0.457          & 0.390         & 0.436          & 0.488          & 0.533         & 0.582          & 0.657          & 0.509         & 0.569         & 0.658          \\ \cline{2-20} 
+		& 4          & 0.692         & 0.753          & 0.882          & 0.686         & \textbf{0.737} & 0.833          & 0.736         & 0.809          & 0.917          & 0.701         & 0.890          & 1.180          & 1.066         & 1.243          & 1.527          & 1.175         & 1.494         & 2.039          \\ \cline{2-20} 
+		& 6          & 1.782         & 1.864          & 1.953          & 1.748         & 1.847          & 1.941          & 1.800         & 1.891          & 2.008          & 1.676         & \textbf{1.736} & 1.844          & 2.289         & 2.632          & 3.302          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 2.997         & \textbf{3.169} & 3.493          & 3.088         & 3.352          & 3.876          & 3.061         & 3.232          & 3.447          & 2.954         & 3.181          & 3.971          & 4.348         & 5.275          & 8.286          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 4.615         & 5.290          & 7.246          & 4.746         & 6.224          & 8.981          & 4.713         & \textbf{5.050} & 5.603          & 4.733         & 5.305          & 6.208          & 6.487         & 7.741          & 9.607          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG5}} & 3          & 0.309         & \textbf{0.397} & 0.529          & 0.324         & 0.402          & 0.467          & 0.319         & 0.400          & 0.497          & 0.327         & 0.419          & 0.625          & 0.589         & 0.699          & 0.794          & 0.586         & 0.684         & 0.729          \\ \cline{2-20} 
+		& 4          & 0.742         & 0.843          & 0.939          & 0.643         & \textbf{0.744} & 0.870          & 0.745         & 0.895          & 1.004          & 0.704         & 0.815          & 1.007          & 1.016         & 1.171          & 1.351          & 1.120         & 1.301         & 1.493          \\ \cline{2-20} 
+		& 6          & 1.791         & 1.897          & 2.041          & 1.750         & 1.837          & 1.934          & 1.781         & 1.950          & 2.098          & 1.719         & \textbf{1.813} & 1.912          & 2.211         & 2.357          & 2.655          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 2.930         & \textbf{3.119} & 3.425          & 2.991         & 3.134          & 3.547          & 3.078         & 3.206          & 3.355          & 2.997         & 3.150          & 3.833          & 4.145         & 4.496          & 5.106          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 4.550         & 4.884          & 5.523          & 4.768         & 5.343          & 6.097          & 4.631         & \textbf{4.834} & 5.105          & 4.525         & 4.841          & 5.568          & 5.895         & 6.459          & 7.401          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG6}} & 3          & 0.548         & 0.637          & 0.746          & 0.518         & \textbf{0.631} & 0.715          & 0.553         & 0.635          & 0.720          & 0.540         & 0.695          & 0.789          & 0.758         & 0.841          & 0.892          & 0.631         & 0.790         & 0.942          \\ \cline{2-20} 
+		& 4          & 0.869         & 0.958          & 1.060          & 0.725         & \textbf{0.877} & 1.016          & 0.909         & 0.986          & 1.073          & 0.923         & 1.028          & 1.156          & 1.110         & 1.253          & 1.410          & 1.236         & 1.330         & 1.418          \\ \cline{2-20} 
+		& 6          & 2.016         & 2.097          & 2.195          & 1.904         & \textbf{1.991} & 2.093          & 2.059         & 2.134          & 2.251          & 2.095         & 2.211          & 2.372          & 2.318         & 2.460          & 2.802          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 3.197         & 3.330          & 3.464          & 3.145         & \textbf{3.276} & 3.395          & 3.432         & 3.536          & 3.684          & 3.594         & 3.782          & 3.983          & 4.107         & 4.576          & 5.488          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 4.672         & 4.892          & 5.099          & 4.691         & \textbf{4.847} & 4.977          & 4.903         & 5.201          & 5.544          & 5.289         & 5.563          & 5.750          & 5.920         & 6.414          & 7.163          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG7}} & 3          & 0.513         & 0.552          & 0.575          & 0.489         & 0.550          & 0.599          & 0.503         & \textbf{0.548} & 0.578          & 0.522         & 0.560          & 0.600          & 0.598         & 0.667          & 0.729          & 0.563         & 0.645         & 0.716          \\ \cline{2-20} 
+		& 4          & 0.783         & 0.848          & 0.946          & 0.708         & \textbf{0.831} & 0.887          & 0.790         & 0.874          & 0.967          & 0.761         & 0.973          & 1.249          & 1.222         & 1.429          & 1.910          & 1.377         & 1.558         & 1.792          \\ \cline{2-20} 
+		& 6          & 1.844         & 1.926          & 2.018          & 1.820         & 1.950          & 2.024          & 1.847         & 1.963          & 2.039          & 1.772         & \textbf{1.864} & 1.984          & 2.381         & 2.644          & 3.432          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 3.143         & \textbf{3.240} & 3.372          & 3.264         & 3.405          & 3.567          & 3.182         & 3.292          & 3.435          & 3.234         & 3.382          & 3.731          & 4.519         & 5.045          & 5.916          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 4.854         & 5.467          & 7.427          & 5.518         & 6.115          & 7.488          & 4.821         & \textbf{5.207} & 6.559          & 4.950         & 5.405          & 6.694          & 6.649         & 7.433          & 9.046          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG8}} & 3          & 0.605         & 0.660          & 0.717          & 0.571         & \textbf{0.644} & 0.724          & 0.611         & 0.670          & 0.783          & 0.639         & 0.705          & 0.795          & 0.802         & 0.893          & 0.991          & 0.745         & 0.843         & 0.899          \\ \cline{2-20} 
+		& 4          & 1.040         & 1.154          & 1.277          & 1.026         & \textbf{1.121} & 1.259          & 1.084         & 1.213          & 1.300          & 1.280         & 1.427          & 1.592          & 1.561         & 1.684          & 1.876          & 1.619         & 1.786         & 1.954          \\ \cline{2-20} 
+		& 6          & 2.108         & 2.174          & 2.275          & 1.968         & \textbf{2.148} & 2.246          & 2.119         & 2.220          & 2.283          & 2.165         & 2.299          & 2.428          & 2.584         & 2.818          & 3.167          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 3.272         & \textbf{3.400} & 3.511          & 3.335         & 3.445          & 3.563          & 3.420         & 3.539          & 3.670          & 3.480         & 3.592          & 3.837          & 4.708         & 5.149          & 6.108          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 4.765         & \textbf{4.907} & 5.005          & 4.830         & 5.042          & 5.283          & 4.987         & 5.144          & 5.277          & 5.073         & 5.248          & 5.494          & 6.269         & 7.056          & 7.998          & NaN           & NaN           & NaN            \\ \hline
+		\multirow{5}{*}{\textbf{WFG9}} & 3          & 0.503         & \textbf{0.620} & 0.732          & 0.537         & 0.642          & 0.834          & 0.527         & 0.629          & 0.775          & 0.470         & 0.656          & 0.792          & 0.701         & 0.822          & 0.953          & 0.490         & 0.640         & 0.869          \\ \cline{2-20} 
+		& 4          & 0.797         & \textbf{0.955} & 1.247          & 0.820         & 0.990          & 1.328          & 0.819         & 0.979          & 1.314          & 0.828         & 1.099          & 1.443          & 1.210         & 1.349          & 1.506          & 0.985         & 1.232         & 1.448          \\ \cline{2-20} 
+		& 6          & 1.831         & 2.044          & 2.510          & 1.862         & 2.101          & 2.580          & 1.850         & \textbf{2.003} & 2.287          & 1.785         & 2.099          & 3.081          & 2.321         & 2.568          & 3.352          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 8          & 3.092         & 3.622          & 4.647          & 3.195         & 3.791          & 4.503          & 3.103         & \textbf{3.496} & 4.211          & 3.110         & 3.873          & 5.126          & 4.259         & 4.853          & 5.672          & NaN           & NaN           & NaN            \\ \cline{2-20} 
+		& 10         & 5.357         & 6.279          & 7.215          & 5.528         & 6.623          & 7.492          & 4.954         & \textbf{5.861} & 6.636          & 5.021         & 6.159          & 8.068          & 6.164         & 7.209          & 9.154          & NaN           & NaN           & NaN            \\ \hline
+	\end{tabular}
+\end{table*}
+
+\clearpage
+
+\subsection{IGD statistics obtained for DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1} problems}
+
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{IGD statistics~(best, mean, and worst) of DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1}}
+	\label{tab:KHTTab:7}
+	\tabcolsep = 0.03cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Problems}                                     & \textbf{M} & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ED}}}        & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ASF}}}        & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ED-ED}}}      & \multicolumn{3}{c|}{\textbf{K-RVEA}}               \\ \hline
+		& \textbf{}  & \textbf{Best} & \textbf{Mean}    & \textbf{Worst} & \textbf{Best} & \textbf{Mean}     & \textbf{Worst} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} & \textbf{Best} & \textbf{Mean}     & \textbf{Worst} \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ1\textsuperscript{-1}}} & 3          & 42.866        & 65.394           & 78.893         & 46.246        & \textbf{64.981}   & 83.149         & 59.130        & 72.359        & 95.132         & 74.502        & 84.601            & 99.595         \\ \cline{2-14} 
+		& 4          & 74.634        & \textbf{85.607}  & 100.255        & 73.706        & 88.919            & 99.946         & 84.433        & 97.583        & 114.420        & 86.283        & 100.255           & 111.087        \\ \cline{2-14} 
+		& 6          & 136.782       & 151.043          & 166.223        & 135.354       & 149.997           & 166.124        & 139.842       & 155.629       & 172.516        & 121.038       & \textbf{133.477}  & 150.650        \\ \cline{2-14} 
+		& 8          & 151.716       & 174.816          & 189.181        & 161.357       & \textbf{174.706}  & 185.369        & 169.316       & 184.184       & 193.758        & 156.159       & 177.837           & 185.420        \\ \cline{2-14} 
+		& 10         & 176.544       & 190.863          & 202.639        & 180.408       & \textbf{190.357}  & 203.428        & 191.928       & 198.020       & 211.895        & 184.394       & 194.013           & 208.754        \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ2\textsuperscript{-1}}} & 3          & 0.377         & 0.555            & 0.771          & 0.371         & 0.534             & 0.761          & 0.473         & 0.632         & 0.846          & 0.439         & \textbf{0.532}    & 0.646          \\ \cline{2-14} 
+		& 4          & 0.701         & 0.914            & 1.090          & 0.700         & 0.891             & 1.006          & 0.810         & 0.992         & 1.146          & 0.658         & \textbf{0.791}    & 0.915          \\ \cline{2-14} 
+		& 6          & 1.477         & 1.606            & 1.698          & 1.515         & 1.596             & 1.681          & 1.526         & 1.612         & 1.709          & 1.266         & \textbf{1.357}    & 1.445          \\ \cline{2-14} 
+		& 8          & 1.802         & 1.950            & 2.057          & 1.862         & 1.941             & 2.019          & 1.868         & 1.961         & 2.085          & 1.756         & \textbf{1.834}    & 1.909          \\ \cline{2-14} 
+		& 10         & 2.025         & \textbf{2.184}   & 2.292          & 2.103         & 2.190             & 2.301          & 2.130         & 2.226         & 2.323          & 2.031         & 2.205             & 2.298          \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ3\textsuperscript{-1}}} & 3          & 449.944       & 536.144          & 613.007        & 415.195       & \textbf{522.256}  & 591.138        & 446.320       & 544.276       & 644.275        & 598.910       & 666.319           & 730.355        \\ \cline{2-14} 
+		& 4          & 598.892       & \textbf{683.621} & 766.584        & 623.193       & 694.789           & 757.791        & 557.947       & 698.914       & 773.050        & 737.554       & 785.650           & 827.294        \\ \cline{2-14} 
+		& 6          & 964.069       & 1036.972         & 1088.493       & 990.216       & 1034.419          & 1070.411       & 960.639       & 1038.746      & 1078.974       & 935.810       & \textbf{1006.935} & 1086.322       \\ \cline{2-14} 
+		& 8          & 1154.329      & 1232.447         & 1283.507       & 1174.687      & \textbf{1225.227} & 1290.521       & 1166.996      & 1247.673      & 1301.139       & 1140.382      & 1232.060          & 1289.777       \\ \cline{2-14} 
+		& 10         & 1308.860      & 1395.855         & 1453.558       & 1314.338      & \textbf{1390.115} & 1452.036       & 1367.405      & 1419.355      & 1479.143       & 1329.477      & 1419.592          & 1468.607       \\ \hline
+		\multirow{5}{*}{\textbf{DTLZ4\textsuperscript{-1}}} & 3          & 0.391         & \textbf{0.627}   & 0.901          & 0.416         & 0.646             & 0.927          & 0.465         & 0.673         & 0.976          & 0.509         & 0.888             & 1.203          \\ \cline{2-14} 
+		& 4          & 0.704         & 0.967            & 1.223          & 0.732         & \textbf{0.900}    & 1.365          & 0.825         & 1.066         & 1.378          & 1.001         & 1.228             & 1.529          \\ \cline{2-14} 
+		& 6          & 1.333         & 1.624            & 1.870          & 1.332         & \textbf{1.598}    & 1.836          & 1.318         & 1.687         & 1.892          & 1.430         & 1.774             & 1.974          \\ \cline{2-14} 
+		& 8          & 1.737         & 1.999            & 2.112          & 1.712         & \textbf{1.996}    & 2.146          & 1.914         & 2.083         & 2.182          & 1.981         & 2.129             & 2.244          \\ \cline{2-14} 
+		& 10         & 2.146         & 2.280            & 2.372          & 2.064         & \textbf{2.244}    & 2.355          & 2.113         & 2.265         & 2.340          & 2.142         & 2.274             & 2.358          \\ \hline
+	\end{tabular}
+\end{table*}
+
+\clearpage
+
+\subsection{IGD statistics obtained for WFG1\textsuperscript{-1}-WFG9\textsuperscript{-1} problems}
+
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{IGD statistics~(best, mean, and worst) of WFG1\textsuperscript{-1}-WFG9\textsuperscript{-1}}
+	\label{tab:KHTTab:8}
+	\tabcolsep = 0.01cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{}                                    & \textbf{M} & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ED}}}      & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ASF-ASF}}}      & \multicolumn{3}{c|}{\textbf{SaMaO\textsubscript{ED-ED}}}       & \multicolumn{3}{c|}{\textbf{K-RVEA}}            \\ \hline
+		& \textbf{}  & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}   & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} \\ \hline
+		\multirow{5}{*}{\textbf{WFG1\textsuperscript{-1}}} & 3          & 1.189         & \textbf{1.711} & 2.045          & 1.295         & 1.760           & 2.025          & 1.023         & 1.725          & 2.163          & 1.090         & 1.731          & 2.026          \\ \cline{2-14} 
+		& 4          & 1.296         & \textbf{1.829} & 2.218          & 1.178         & 1.853           & 2.266          & 1.524         & 1.884          & 2.243          & 1.372         & 1.835          & 2.231          \\ \cline{2-14} 
+		& 6          & 1.456         & \textbf{1.810} & 2.093          & 1.560         & 1.814           & 2.176          & 1.536         & 1.880          & 2.254          & 1.611         & 1.942          & 2.273          \\ \cline{2-14} 
+		& 8          & 1.502         & \textbf{1.916} & 2.364          & 1.676         & 1.965           & 2.289          & 1.546         & 1.945          & 2.244          & 1.820         & 2.032          & 2.267          \\ \cline{2-14} 
+		& 10         & 1.775         & \textbf{2.061} & 2.386          & 1.633         & 2.087           & 2.459          & 1.929         & 2.093          & 2.444          & 1.891         & 2.111          & 2.473          \\ \hline
+		\multirow{5}{*}{\textbf{WFG2\textsuperscript{-1}}} & 3          & 0.380         & 0.422          & 0.465          & 0.378         & 0.420           & 0.454          & 0.355         & 0.420          & 0.473          & 0.363         & \textbf{0.418} & 0.467          \\ \cline{2-14} 
+		& 4          & 0.709         & 0.748          & 0.798          & 0.702         & 0.740           & 0.798          & 0.706         & 0.748          & 0.797          & 0.665         & \textbf{0.733} & 0.791          \\ \cline{2-14} 
+		& 6          & 1.146         & 1.391          & 1.670          & 1.145         & 1.381           & 1.670          & 1.143         & 1.390          & 1.672          & 1.154         & \textbf{1.328} & 1.669          \\ \cline{2-14} 
+		& 8          & 1.461         & 1.940          & 2.583          & 1.439         & \textbf{1.905}  & 2.633          & 1.468         & 2.051          & 2.635          & 1.469         & 2.064          & 2.635          \\ \cline{2-14} 
+		& 10         & 1.896         & 2.678          & 3.663          & 1.910         & \textbf{2.585}  & 3.667          & 1.957         & 2.804          & 3.667          & 1.967         & 2.847          & 3.667          \\ \hline
+		\multirow{5}{*}{\textbf{WFG3\textsuperscript{-1}}} & 3          & 1.463         & 1.497          & 1.602          & 1.382         & 1.486           & 1.580          & 1.270         & \textbf{1.324} & 1.417          & 1.379         & 1.430          & 1.475          \\ \cline{2-14} 
+		& 4          & 2.670         & 2.721          & 2.758          & 2.571         & 2.702           & 2.750          & 2.455         & \textbf{2.549} & 2.621          & 2.503         & 2.621          & 2.692          \\ \cline{2-14} 
+		& 6          & 5.537         & 5.667          & 5.786          & 5.581         & 5.663           & 5.748          & 5.530         & \textbf{5.611} & 5.692          & 5.551         & 5.617          & 5.698          \\ \cline{2-14} 
+		& 8          & 9.304         & 9.431          & 9.570          & 9.277         & 9.422           & 9.508          & 9.317         & 9.405          & 9.505          & 9.291         & \textbf{9.388} & 9.488          \\ \cline{2-14} 
+		& 10         & 13.718        & 13.893         & 13.976         & 13.683        & \textbf{13.866} & 13.952         & 13.764        & 13.888         & 13.985         & 13.752        & 13.867         & 13.989         \\ \hline
+		\multirow{5}{*}{\textbf{WFG4\textsuperscript{-1}}} & 3          & 0.812         & 0.874          & 0.917          & 0.755         & \textbf{0.870}  & 0.917          & 0.823         & 0.873          & 0.916          & 0.861         & 0.899          & 0.946          \\ \cline{2-14} 
+		& 4          & 1.214         & 1.281          & 1.373          & 1.212         & \textbf{1.273}  & 1.367          & 1.204         & 1.290          & 1.408          & 1.244         & 1.310          & 1.421          \\ \cline{2-14} 
+		& 6          & 2.647         & 2.934          & 3.371          & 2.590         & \textbf{2.918}  & 3.314          & 2.572         & 2.979          & 3.374          & 2.652         & 3.007          & 3.263          \\ \cline{2-14} 
+		& 8          & 4.644         & 5.394          & 6.172          & 4.727         & \textbf{5.349}  & 6.172          & 4.759         & 5.596          & 6.297          & 5.140         & 5.676          & 6.147          \\ \cline{2-14} 
+		& 10         & 7.438         & 8.518          & 9.571          & 7.554         & \textbf{8.433}  & 9.343          & 7.957         & 8.731          & 9.637          & 8.283         & 8.927          & 9.612          \\ \hline
+		\multirow{5}{*}{\textbf{WFG5\textsuperscript{-1}}} & 3          & 0.585         & 0.624          & 0.647          & 0.600         & \textbf{0.621}  & 0.650          & 0.584         & 0.624          & 0.655          & 0.610         & 0.630          & 0.647          \\ \cline{2-14} 
+		& 4          & 0.881         & \textbf{0.904} & 0.943          & 0.882         & 0.905           & 0.930          & 0.883         & 0.910          & 0.942          & 0.885         & 0.908          & 0.943          \\ \cline{2-14} 
+		& 6          & 1.948         & 2.022          & 2.182          & 1.939         & 2.021           & 2.174          & 1.938         & 2.027          & 2.171          & 1.935         & \textbf{2.014} & 2.163          \\ \cline{2-14} 
+		& 8          & 3.670         & 3.872          & 4.290          & 3.623         & \textbf{3.862}  & 4.123          & 3.684         & 3.914          & 4.313          & 3.691         & 3.912          & 4.305          \\ \cline{2-14} 
+		& 10         & 5.818         & 6.323          & 6.876          & 5.790         & \textbf{6.288}  & 6.856          & 5.909         & 6.390          & 6.914          & 5.900         & 6.403          & 6.928          \\ \hline
+		\multirow{5}{*}{\textbf{WFG6\textsuperscript{-1}}} & 3          & 0.462         & 0.471          & 0.485          & 0.439         & \textbf{0.466}  & 0.483          & 0.450         & 0.466          & 0.481          & 0.461         & 0.473          & 0.489          \\ \cline{2-14} 
+		& 4          & 0.761         & 0.780          & 0.807          & 0.753         & \textbf{0.775}  & 0.797          & 0.754         & 0.778          & 0.804          & 0.754         & 0.777          & 0.806          \\ \cline{2-14} 
+		& 6          & 1.889         & 2.005          & 2.174          & 1.879         & \textbf{1.987}  & 2.167          & 1.885         & 2.006          & 2.160          & 1.917         & 2.000          & 2.171          \\ \cline{2-14} 
+		& 8          & 3.645         & 3.942          & 4.300          & 3.646         & \textbf{3.924}  & 4.139          & 3.707         & 4.018          & 4.381          & 3.737         & 4.019          & 4.372          \\ \cline{2-14} 
+		& 10         & 5.978         & 6.473          & 6.794          & 5.936         & \textbf{6.419}  & 6.766          & 6.050         & 6.597          & 7.120          & 6.057         & 6.607          & 7.140          \\ \hline
+		\multirow{5}{*}{\textbf{WFG7\textsuperscript{-1}}} & 3          & 0.592         & 0.683          & 0.729          & 0.553         & 0.676           & 0.733          & 0.555         & \textbf{0.669} & 0.723          & 0.683         & 0.714          & 0.735          \\ \cline{2-14} 
+		& 4          & 1.014         & 1.048          & 1.086          & 0.979         & \textbf{1.039}  & 1.084          & 0.987         & 1.040          & 1.092          & 1.019         & 1.060          & 1.116          \\ \cline{2-14} 
+		& 6          & 2.159         & 2.332          & 2.514          & 2.205         & \textbf{2.310}  & 2.472          & 2.207         & 2.366          & 2.553          & 2.250         & 2.376          & 2.589          \\ \cline{2-14} 
+		& 8          & 3.886         & 4.288          & 4.661          & 3.809         & \textbf{4.245}  & 4.656          & 4.058         & 4.467          & 4.963          & 4.063         & 4.490          & 5.007          \\ \cline{2-14} 
+		& 10         & 6.195         & 6.844          & 7.500          & 6.195         & \textbf{6.810}  & 7.500          & 6.553         & 7.156          & 7.902          & 6.509         & 7.232          & 7.863          \\ \hline
+		\multirow{5}{*}{\textbf{WFG8\textsuperscript{-1}}} & 3          & 0.329         & 0.358          & 0.377          & 0.327         & \textbf{0.346}  & 0.388          & 0.330         & 0.354          & 0.379          & 0.362         & 0.389          & 0.420          \\ \cline{2-14} 
+		& 4          & 0.701         & 0.731          & 0.770          & 0.694         & \textbf{0.726}  & 0.769          & 0.701         & 0.729          & 0.769          & 0.700         & 0.733          & 0.770          \\ \cline{2-14} 
+		& 6          & 1.876         & 2.000          & 2.153          & 1.859         & \textbf{1.968}  & 2.146          & 1.855         & 2.004          & 2.137          & 1.908         & 2.006          & 2.134          \\ \cline{2-14} 
+		& 8          & 3.703         & 4.006          & 4.391          & 3.661         & \textbf{3.934}  & 4.175          & 3.735         & 4.065          & 4.420          & 3.765         & 4.060          & 4.412          \\ \cline{2-14} 
+		& 10         & 6.067         & 6.554          & 6.980          & 6.002         & \textbf{6.496}  & 6.962          & 6.066         & 6.677          & 7.188          & 6.102         & 6.695          & 7.224          \\ \hline
+		\multirow{5}{*}{\textbf{WFG9\textsuperscript{-1}}} & 3          & 0.331         & 0.347          & 0.362          & 0.330         & 0.347           & 0.366          & 0.331         & 0.350          & 0.366          & 0.333         & \textbf{0.346} & 0.365          \\ \cline{2-14} 
+		& 4          & 0.684         & 0.722          & 0.759          & 0.687         & \textbf{0.719}  & 0.756          & 0.688         & 0.725          & 0.760          & 0.703         & 0.729          & 0.767          \\ \cline{2-14} 
+		& 6          & 1.936         & 2.096          & 2.222          & 1.914         & \textbf{2.083}  & 2.187          & 1.962         & 2.102          & 2.223          & 1.980         & 2.104          & 2.250          \\ \cline{2-14} 
+		& 8          & 3.782         & \textbf{4.131} & 4.582          & 3.817         & 4.151           & 4.552          & 3.891         & 4.184          & 4.584          & 3.828         & 4.214          & 4.612          \\ \cline{2-14} 
+		& 10         & 6.103         & 6.724          & 7.386          & 6.077         & \textbf{6.685}  & 7.292          & 5.941         & 6.805          & 7.432          & 6.068         & 6.885          & 7.543          \\ \hline
+	\end{tabular}
+\end{table*}
+
+
+\clearpage
+
+\section{HV statistics}
+ 
+\subsection{HV statistics obtained for DTLZ1-DTLZ7 problems}
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{HV statistics~(best, mean, and worst) of DTLZ1-7}
+	\label{tab:KHTTab:1}
+	\tabcolsep = 0.03cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\textbf{Problems}               & \textbf{M} & \multicolumn{3}{l|}{\textbf{SaMaO-ASF+ED}}      & \multicolumn{3}{l|}{\textbf{SaMaO-ASF+ASF}}     & \multicolumn{3}{l|}{\textbf{SaMaO-ED+ED}}       & \multicolumn{3}{l|}{\textbf{K-RVEA}}            \\ \hline
+	\textbf{}                       & \textbf{}  & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ1}} & 3          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 4          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 6          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 8          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 10         & 2.294         & 1.257          & 0.288          & 2.222         & 1.266          & 0.144          & 2.240         & \textbf{1.553} & 0.026          & 1.922         & 0.844          & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ2}} & 3          & 0.722         & 0.702          & 0.666          & 0.718         & 0.699          & 0.657          & 0.719         & \textbf{0.704} & 0.674          & 0.648         & 0.608          & 0.504          \\ \cline{2-14} 
+	& 4          & 0.966         & 0.919          & 0.842          & 0.934         & 0.876          & 0.807          & 0.968         & \textbf{0.931} & 0.880          & 0.857         & 0.808          & 0.679          \\ \cline{2-14} 
+	& 6          & 1.390         & \textbf{1.307} & 1.172          & 1.302         & 1.246          & 1.118          & 1.357         & 1.294          & 1.203          & 1.215         & 1.163          & 1.108          \\ \cline{2-14} 
+	& 8          & 1.837         & \textbf{1.744} & 1.615          & 1.770         & 1.657          & 1.556          & 1.804         & 1.724          & 1.553          & 1.713         & 1.611          & 1.503          \\ \cline{2-14} 
+	& 10         & 2.336         & \textbf{2.256} & 2.168          & 2.307         & 2.208          & 2.090          & 2.329         & 2.243          & 2.093          & 2.338         & 2.134          & 2.031          \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ3}} & 3          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 4          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 6          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 8          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 10         & 1.346         & \textbf{0.564} & 0.000          & 1.423         & 0.493          & 0.000          & 1.289         & 0.410          & 0.000          & 0.850         & 0.254          & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ4}} & 3          & 0.611         & 0.446          & 0.011          & 0.623         & 0.440          & 0.166          & 0.607         & \textbf{0.451} & 0.115          & 0.551         & 0.223          & 0.000          \\ \cline{2-14} 
+	& 4          & 0.822         & 0.577          & 0.096          & 0.863         & 0.582          & 0.229          & 0.813         & \textbf{0.590} & 0.348          & 0.627         & 0.324          & 0.050          \\ \cline{2-14} 
+	& 6          & 1.168         & 0.850          & 0.429          & 1.237         & 0.876          & 0.588          & 1.184         & \textbf{0.920} & 0.567          & 1.119         & 0.725          & 0.318          \\ \cline{2-14} 
+	& 8          & 1.599         & 1.309          & 0.961          & 1.548         & 1.301          & 1.108          & 1.615         & \textbf{1.405} & 0.802          & 1.668         & 1.337          & 0.749          \\ \cline{2-14} 
+	& 10         & 2.161         & 1.993          & 1.665          & 2.243         & 2.019          & 1.680          & 2.230         & 2.024          & 1.687          & 2.344         & \textbf{2.180} & 2.001          \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ5}} & 3          & 0.259         & \textbf{0.256} & 0.252          & 0.258         & 0.254          & 0.242          & 0.255         & 0.250          & 0.243          & 0.211         & 0.163          & 0.102          \\ \cline{2-14} 
+	& 4          & 0.208         & \textbf{0.199} & 0.173          & 0.209         & 0.195          & 0.170          & 0.208         & 0.198          & 0.189          & 0.186         & 0.159          & 0.115          \\ \cline{2-14} 
+	& 6          & 0.194         & 0.180          & 0.159          & 0.191         & 0.176          & 0.152          & 0.197         & \textbf{0.186} & 0.171          & 0.194         & 0.177          & 0.144          \\ \cline{2-14} 
+	& 8          & 0.220         & 0.212          & 0.164          & 0.220         & 0.212          & 0.179          & 0.222         & 0.213          & 0.187          & 0.222         & \textbf{0.215} & 0.198          \\ \cline{2-14} 
+	& 10         & 0.259         & \textbf{0.255} & 0.240          & 0.258         & 0.254          & 0.231          & 0.260         & 0.254          & 0.215          & 0.260         & 0.245          & 0.214          \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ6}} & 3          & 0.234         & 0.045          & 0.000          & 0.190         & 0.046          & 0.000          & 0.219         & \textbf{0.063} & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 4          & 0.187         & 0.042          & 0.000          & 0.179         & 0.018          & 0.000          & 0.199         & \textbf{0.045} & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 6          & 0.199         & 0.069          & 0.000          & 0.173         & 0.007          & 0.000          & 0.191         & \textbf{0.070} & 0.000          & 0.000         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 8          & 0.218         & \textbf{0.163} & 0.000          & 0.210         & 0.023          & 0.000          & 0.215         & 0.115          & 0.000          & 0.004         & 0.000          & 0.000          \\ \cline{2-14} 
+	& 10         & 0.255         & \textbf{0.239} & 0.000          & 0.254         & 0.138          & 0.000          & 0.256         & 0.225          & 0.050          & 0.258         & 0.225          & 0.061          \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ7}} & 3          & 0.424         & 0.388          & 0.263          & 0.425         & \textbf{0.398} & 0.271          & 0.425         & 0.384          & 0.267          & 0.396         & 0.375          & 0.337          \\ \cline{2-14} 
+	& 4          & 0.462         & 0.431          & 0.369          & 0.460         & \textbf{0.438} & 0.401          & 0.457         & 0.422          & 0.336          & 0.414         & 0.383          & 0.346          \\ \cline{2-14} 
+	& 6          & 0.485         & \textbf{0.432} & 0.367          & 0.464         & 0.424          & 0.346          & 0.477         & 0.410          & 0.347          & 0.389         & 0.367          & 0.324          \\ \cline{2-14} 
+	& 8          & 0.515         & 0.428          & 0.313          & 0.509         & \textbf{0.446} & 0.384          & 0.441         & 0.341          & 0.128          & 0.385         & 0.350          & 0.308          \\ \cline{2-14} 
+	& 10         & 0.456         & 0.353          & 0.205          & 0.524         & \textbf{0.480} & 0.443          & 0.359         & 0.133          & 0.017          & 0.417         & 0.361          & 0.301          \\ \hline
+	\end{tabular}
+\end{table*}
+
+\clearpage
+
+\subsection{HV statistics obtained for WFG1-9 problems}
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{HV statistics~(best, mean, and worst) of WFG1-9}
+	\label{tab:KHTTab:2}
+	\tabcolsep = 0.1cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\textbf{Problems}              & \textbf{M} & \multicolumn{3}{l|}{\textbf{SaMaO-ASF+ED}}      & \multicolumn{3}{l|}{\textbf{SaMaO-ASF+ASF}}     & \multicolumn{3}{l|}{\textbf{SaMaO-ED+ED}}       & \multicolumn{3}{l|}{\textbf{K-RVEA}}            \\ \hline
+	\textbf{}                      & \textbf{}  & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} & \textbf{Best} & \textbf{Mean}  & \textbf{Worst} \\ \hline
+	\multirow{5}{*}{\textbf{WFG1}} & 3          & 0.355         & \textbf{0.227} & 0.000          & 0.303         & 0.196          & 0.041          & 0.326         & 0.173          & 0.000          & 0.291         & 0.216          & 0.138          \\ \cline{2-14} 
+	& 4          & 0.468         & 0.377          & 0.208          & 0.459         & 0.352          & 0.018          & 0.460         & \textbf{0.379} & 0.184          & 0.433         & 0.368          & 0.283          \\ \cline{2-14} 
+	& 6          & 0.472         & 0.381          & 0.209          & 0.477         & 0.364          & 0.208          & 0.474         & 0.376          & 0.204          & 0.479         & \textbf{0.391} & 0.280          \\ \cline{2-14} 
+	& 8          & 0.568         & 0.458          & 0.269          & 0.548         & 0.437          & 0.271          & 0.557         & \textbf{0.463} & 0.340          & 0.544         & 0.437          & 0.259          \\ \cline{2-14} 
+	& 10         & 0.596         & 0.496          & 0.301          & 0.662         & 0.480          & 0.243          & 0.639         & 0.519          & 0.389          & 0.619         & \textbf{0.553} & 0.370          \\ \hline
+	\multirow{5}{*}{\textbf{WFG2}} & 3          & 1.052         & 0.969          & 0.915          & 1.041         & 0.977          & 0.919          & 1.036         & 0.969          & 0.912          & 1.057         & \textbf{1.012} & 0.942          \\ \cline{2-14} 
+	& 4          & 1.317         & 1.176          & 0.950          & 1.312         & \textbf{1.207} & 0.986          & 1.253         & 1.145          & 0.974          & 1.316         & 1.116          & 1.051          \\ \cline{2-14} 
+	& 6          & 1.672         & 1.566          & 1.392          & 1.697         & 1.608          & 1.482          & 1.660         & 1.554          & 1.287          & 1.659         & \textbf{1.619} & 1.580          \\ \cline{2-14} 
+	& 8          & 2.111         & 2.063          & 1.994          & 2.122         & 2.055          & 1.879          & 2.105         & 1.995          & 1.392          & 2.110         & \textbf{2.073} & 2.016          \\ \cline{2-14} 
+	& 10         & 2.565         & 2.454          & 2.274          & 2.562         & 2.456          & 2.336          & 2.553         & 2.417          & 1.956          & 2.564         & \textbf{2.528} & 2.483          \\ \hline
+	\multirow{5}{*}{\textbf{WFG3}} & 3          & 0.732         & 0.688          & 0.657          & 0.733         & 0.700          & 0.665          & 0.751         & 0.691          & 0.655          & 0.748         & \textbf{0.713} & 0.663          \\ \cline{2-14} 
+	& 4          & 0.837         & 0.780          & 0.712          & 0.848         & 0.801          & 0.749          & 0.803         & 0.756          & 0.711          & 0.908         & \textbf{0.889} & 0.851          \\ \cline{2-14} 
+	& 6          & 0.985         & 0.934          & 0.855          & 1.048         & 1.007          & 0.946          & 1.016         & 0.935          & 0.872          & 1.149         & \textbf{1.090} & 1.025          \\ \cline{2-14} 
+	& 8          & 1.404         & 1.334          & 1.240          & 1.439         & 1.363          & 1.282          & 1.401         & 1.321          & 1.226          & 1.443         & \textbf{1.404} & 1.320          \\ \cline{2-14} 
+	& 10         & 1.710         & 1.656          & 1.591          & 1.733         & 1.665          & 1.611          & 1.701         & 1.623          & 1.544          & 1.790         & \textbf{1.717} & 1.629          \\ \hline
+	\multirow{5}{*}{\textbf{WFG4}} & 3          & 0.532         & 0.501          & 0.464          & 0.544         & \textbf{0.506} & 0.453          & 0.532         & 0.503          & 0.455          & 0.520         & 0.489          & 0.447          \\ \cline{2-14} 
+	& 4          & 0.784         & 0.699          & 0.631          & 0.754         & \textbf{0.700} & 0.622          & 0.740         & 0.674          & 0.616          & 0.762         & 0.681          & 0.612          \\ \cline{2-14} 
+	& 6          & 1.159         & 1.056          & 0.937          & 1.093         & 1.021          & 0.932          & 1.122         & 1.021          & 0.888          & 1.207         & \textbf{1.136} & 1.033          \\ \cline{2-14} 
+	& 8          & 1.643         & 1.467          & 1.196          & 1.611         & 1.421          & 1.288          & 1.626         & 1.456          & 1.262          & 1.689         & \textbf{1.568} & 1.364          \\ \cline{2-14} 
+	& 10         & 2.074         & 1.715          & 1.547          & 2.029         & 1.620          & 1.429          & 1.980         & 1.669          & 1.498          & 1.949         & \textbf{1.830} & 1.700          \\ \hline
+	\multirow{5}{*}{\textbf{WFG5}} & 3          & 0.615         & \textbf{0.546} & 0.421          & 0.592         & 0.533          & 0.478          & 0.607         & 0.542          & 0.460          & 0.573         & 0.523          & 0.355          \\ \cline{2-14} 
+	& 4          & 0.723         & 0.654          & 0.581          & 0.816         & \textbf{0.696} & 0.559          & 0.715         & 0.625          & 0.556          & 0.779         & 0.684          & 0.607          \\ \cline{2-14} 
+	& 6          & 1.164         & 1.036          & 0.912          & 1.200         & \textbf{1.040} & 0.925          & 1.166         & 0.992          & 0.918          & 1.116         & 1.017          & 0.894          \\ \cline{2-14} 
+	& 8          & 1.565         & 1.462          & 1.390          & 1.560         & \textbf{1.464} & 1.279          & 1.513         & 1.377          & 1.205          & 1.531         & 1.421          & 1.298          \\ \cline{2-14} 
+	& 10         & 1.819         & 1.690          & 1.549          & 1.819         & 1.696          & 1.485          & 1.690         & 1.551          & 1.405          & 1.901         & \textbf{1.704} & 1.470          \\ \hline
+	\multirow{5}{*}{\textbf{WFG6}} & 3          & 0.447         & \textbf{0.359} & 0.277          & 0.440         & 0.352          & 0.293          & 0.400         & 0.351          & 0.274          & 0.428         & 0.348          & 0.280          \\ \cline{2-14} 
+	& 4          & 0.676         & 0.541          & 0.451          & 0.760         & \textbf{0.568} & 0.443          & 0.667         & 0.535          & 0.401          & 0.634         & 0.557          & 0.467          \\ \cline{2-14} 
+	& 6          & 0.940         & 0.740          & 0.624          & 1.078         & \textbf{0.855} & 0.680          & 0.921         & 0.743          & 0.614          & 0.953         & 0.803          & 0.635          \\ \cline{2-14} 
+	& 8          & 1.664         & 1.516          & 1.170          & 1.669         & \textbf{1.525} & 1.380          & 1.577         & 1.345          & 0.861          & 1.533         & 1.340          & 1.194          \\ \cline{2-14} 
+	& 10         & 1.987         & 1.754          & 1.234          & 2.011         & \textbf{1.783} & 1.469          & 1.881         & 1.585          & 1.114          & 1.843         & 1.675          & 1.513          \\ \hline
+	\multirow{5}{*}{\textbf{WFG7}} & 3          & 0.466         & 0.413          & 0.373          & 0.460         & 0.410          & 0.360          & 0.487         & \textbf{0.418} & 0.387          & 0.428         & 0.397          & 0.362          \\ \cline{2-14} 
+	& 4          & 0.719         & \textbf{0.649} & 0.571          & 0.744         & 0.635          & 0.579          & 0.752         & 0.642          & 0.555          & 0.744         & 0.643          & 0.580          \\ \cline{2-14} 
+	& 6          & 1.158         & 0.940          & 0.746          & 1.081         & 0.942          & 0.847          & 1.101         & 0.950          & 0.776          & 1.160         & \textbf{1.028} & 0.933          \\ \cline{2-14} 
+	& 8          & 1.716         & 1.475          & 1.226          & 1.569         & 1.463          & 1.337          & 1.585         & 1.385          & 1.154          & 1.640         & \textbf{1.515} & 1.348          \\ \cline{2-14} 
+	& 10         & 1.927         & \textbf{1.767} & 1.528          & 1.852         & 1.711          & 1.590          & 1.780         & 1.605          & 1.375          & 2.009         & 1.744          & 1.487          \\ \hline
+	\multirow{5}{*}{\textbf{WFG8}} & 3          & 0.369         & 0.340          & 0.303          & 0.396         & 0.345          & 0.300          & 0.356         & 0.329          & 0.284          & 0.409         & \textbf{0.369} & 0.333          \\ \cline{2-14} 
+	& 4          & 0.475         & 0.403          & 0.332          & 0.527         & 0.433          & 0.358          & 0.472         & 0.369          & 0.291          & 0.501         & \textbf{0.441} & 0.376          \\ \cline{2-14} 
+	& 6          & 0.702         & 0.597          & 0.539          & 0.827         & \textbf{0.679} & 0.584          & 0.705         & 0.596          & 0.499          & 0.686         & 0.604          & 0.530          \\ \cline{2-14} 
+	& 8          & 1.253         & 1.053          & 0.836          & 1.383         & \textbf{1.138} & 0.975          & 1.312         & 1.031          & 0.829          & 1.253         & 1.064          & 0.909          \\ \cline{2-14} 
+	& 10         & 1.683         & 1.367          & 1.135          & 1.718         & \textbf{1.438} & 1.192          & 1.541         & 1.296          & 1.022          & 1.480         & 1.260          & 1.055          \\ \hline
+	\multirow{5}{*}{\textbf{WFG9}} & 3          & 0.475         & \textbf{0.361} & 0.287          & 0.449         & 0.346          & 0.264          & 0.443         & 0.359          & 0.275          & 0.487         & 0.345          & 0.250          \\ \cline{2-14} 
+	& 4          & 0.723         & \textbf{0.587} & 0.465          & 0.709         & 0.577          & 0.410          & 0.717         & 0.581          & 0.462          & 0.700         & 0.570          & 0.443          \\ \cline{2-14} 
+	& 6          & 1.091         & 0.849          & 0.618          & 1.068         & 0.865          & 0.669          & 1.022         & 0.868          & 0.607          & 1.046         & \textbf{0.922} & 0.716          \\ \cline{2-14} 
+	& 8          & 1.560         & \textbf{1.390} & 1.188          & 1.503         & 1.386          & 1.244          & 1.528         & 1.381          & 1.224          & 1.639         & 1.359          & 1.131          \\ \cline{2-14} 
+	& 10         & 1.835         & \textbf{1.652} & 1.466          & 1.794         & 1.589          & 1.326          & 1.774         & 1.644          & 1.434          & 1.880         & 1.620          & 1.296          \\ \hline
+\end{tabular}
+\end{table*}
+
+\clearpage
+
+\subsection{HV statistics obtained for DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1} problems}
+
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{HV statistics~(best, mean, and worst) of DTLZ1\textsuperscript{-1}-DTLZ4\textsuperscript{-1}}
+	\label{tab:KHTTab:3}
+	\tabcolsep = 0.03cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\textbf{Problems}                                     & \textbf{M} & \multicolumn{3}{c|}{\textbf{SaMaO-ASF+ED}}          & \multicolumn{3}{c|}{\textbf{SaMaO-ASF+ASF}}         & \multicolumn{3}{c|}{\textbf{SaMaO-ED+ED}}           & \multicolumn{3}{c|}{\textbf{K-RVEA}}                \\ \hline
+	\textbf{}                                             & \textbf{}  & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ1\textsuperscript{-1}}} & 3          & 0.226         & \textbf{0.183}     & 0.159          & 0.215         & 0.182              & 0.147          & 0.191         & 0.174              & 0.141          & 0.164         & 0.150              & 0.132          \\ \cline{2-14} 
+	& 4          & 0.047         & \textbf{0.042}     & 0.037          & 0.049         & 0.040              & 0.033          & 0.044         & 0.037              & 0.030          & 0.038         & 0.033              & 0.030          \\ \cline{2-14} 
+	& 6          & 1.070E-03     & 7.911E-04          & 5.654E-04      & 1.045E-03     & \textbf{7.983E-04} & 5.570E-04      & 8.316E-04     & 6.083E-04          & 4.277E-04      & 9.584E-04     & 7.435E-04          & 5.507E-04      \\ \cline{2-14} 
+	& 8          & 2.011E-05     & \textbf{1.304E-05} & 9.186E-06      & 1.666E-05     & 1.301E-05          & 9.096E-06      & 1.135E-05     & 7.146E-06          & 5.280E-06      & 1.252E-05     & 7.868E-06          & 5.626E-06      \\ \cline{2-14} 
+	& 10         & 2.185E-07     & 1.472E-07          & 8.670E-08      & 2.191E-07     & \textbf{1.623E-07} & 8.590E-08      & 1.085E-07     & 7.820E-08          & 4.930E-08      & 1.078E-07     & 8.599E-08          & 5.020E-08      \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ2\textsuperscript{-1}}} & 3          & 0.659         & \textbf{0.624}     & 0.571          & 0.668         & 0.623              & 0.559          & 0.652         & 0.615              & 0.559          & 0.625         & 0.604              & 0.558          \\ \cline{2-14} 
+	& 4          & 0.341         & 0.307              & 0.262          & 0.352         & 0.281              & 0.252          & 0.331         & 0.293              & 0.240          & 0.351         & \textbf{0.328}     & 0.303          \\ \cline{2-14} 
+	& 6          & 0.040         & 0.031              & 0.021          & 0.036         & 0.029              & 0.020          & 0.041         & 0.030              & 0.021          & 0.063         & \textbf{0.057}     & 0.052          \\ \cline{2-14} 
+	& 8          & 3.088E-03     & 1.652E-03          & 6.177E-04      & 0.003         & 0.001              & 0.001          & 3.151E-03     & 1.897E-03          & 9.443E-04      & 5.612E-03     & \textbf{4.010E-03} & 2.243E-03      \\ \cline{2-14} 
+	& 10         & 1.514E-04     & 5.109E-05          & 2.090E-05      & 0.000         & 0.000              & 0.000          & 8.057E-05     & 2.865E-05          & 4.526E-06      & 2.625E-04     & \textbf{7.385E-05} & 8.563E-06      \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ3\textsuperscript{-1}}} & 3          & 0.455         & 0.396              & 0.333          & 0.467         & \textbf{0.400}     & 0.339          & 0.477         & 0.387              & 0.327          & 0.332         & 0.296              & 0.266          \\ \cline{2-14} 
+	& 4          & 0.210         & \textbf{0.158}     & 0.124          & 0.203         & 0.154              & 0.127          & 0.193         & 0.158              & 0.118          & 0.147         & 0.121              & 0.102          \\ \cline{2-14} 
+	& 6          & 0.021         & \textbf{0.015}     & 0.010          & 0.027         & 0.014              & 0.010          & 0.023         & 0.015              & 0.010          & 0.017         & 0.013              & 0.009          \\ \cline{2-14} 
+	& 8          & 1.600E-03     & \textbf{8.929E-04} & 5.133E-04      & 1.983E-03     & 8.898E-04          & 4.214E-04      & 1.596E-03     & 7.387E-04          & 4.136E-04      & 1.191E-03     & 5.789E-04          & 2.905E-04      \\ \cline{2-14} 
+	& 10         & 6.979E-05     & \textbf{3.706E-05} & 1.102E-05      & 0.000         & 0.000              & 0.000          & 4.477E-05     & 1.682E-05          & 3.452E-06      & 3.199E-05     & 1.233E-05          & 4.708E-06      \\ \hline
+	\multirow{5}{*}{\textbf{DTLZ4\textsuperscript{-1}}} & 3          & 0.565         & \textbf{0.435}     & 0.330          & 0.549         & 0.421              & 0.308          & 0.522         & 0.418              & 0.299          & 0.540         & 0.343              & 0.232          \\ \cline{2-14} 
+	& 4          & 0.246         & 0.156              & 0.075          & 0.219         & \textbf{0.172}     & 0.094          & 0.207         & 0.129              & 0.035          & 0.140         & 0.087              & 0.034          \\ \cline{2-14} 
+	& 6          & 0.015         & 0.005              & 0.001          & 1.886E-02     & \textbf{7.335E-03} & 1.516E-03      & 2.339E-02     & 5.204E-03          & 9.794E-04      & 4.253E-03     & 1.217E-03          & 3.320E-04      \\ \cline{2-14} 
+	& 8          & 2.510E-04     & 6.143E-05          & 1.657E-05      & 1.780E-04     & \textbf{6.363E-05} & 1.135E-05      & 1.251E-04     & 4.382E-05          & 9.654E-06      & 3.232E-05     & 9.970E-06          & 3.923E-06      \\ \cline{2-14} 
+	& 10         & 1.368E-06     & 2.911E-07          & 6.060E-08      & 0.000         & 0.000              & 0.000          & 4.841E-06     & \textbf{5.568E-07} & 1.019E-07      & 2.498E-07     & 1.020E-07          & 4.010E-08      \\ \hline
+\end{tabular}
+\end{table*}
+
+\clearpage
+\section{HV statistics obtained for WFG1\textsuperscript{-1}-WFG9\textsuperscript{-1} problems}
+
+\begin{table*}[!htb]\scriptsize
+	\centering
+	\caption{HV statistics~(best, mean, and worst) of WFG1\textsuperscript{-1}-WFG9\textsuperscript{-1}}
+	\label{tab:KHTTab:4}
+	\tabcolsep = 0.01cm
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\textbf{Problems}                                    & \textbf{M} & \multicolumn{3}{c|}{\textbf{SaMaO-ASF+ED}}          & \multicolumn{3}{c|}{\textbf{SaMaO-ASF+ASF}}         & \multicolumn{3}{c|}{\textbf{SaMaO-ED+ED}}           & \multicolumn{3}{c|}{\textbf{K-RVEA}}                \\ \hline
+	\textbf{}                                            & \textbf{}  & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} & \textbf{Best} & \textbf{Mean}      & \textbf{Worst} \\ \hline
+	\multirow{5}{*}{\textbf{WFG1\textsuperscript{-1}}} & 3          & 0.044         & 0.033              & 0.023          & 0.068         & 0.035              & 0.025          & 0.066         & 0.035              & 0.023          & 0.053         & \textbf{0.038}     & 0.026          \\ \cline{2-14} 
+	& 4          & 4.973E-03     & 3.517E-03          & 2.326E-03      & 7.168E-03     & 3.444E-03          & 2.346E-03      & 0.005         & 0.003              & 0.002          & 6.229E-03     & \textbf{4.265E-03} & 2.523E-03      \\ \cline{2-14} 
+	& 6          & 6.969E-05     & 4.158E-05          & 2.840E-05      & 1.152E-04     & \textbf{4.693E-05} & 2.675E-05      & 7.502E-05     & 4.288E-05          & 2.527E-05      & 7.060E-05     & 4.443E-05          & 3.201E-05      \\ \cline{2-14} 
+	& 8          & 8.044E-07     & 4.465E-07          & 2.730E-07      & 8.205E-07     & 4.439E-07          & 2.868E-07      & 9.937E-07     & \textbf{5.060E-07} & 3.370E-07      & 5.875E-07     & 4.402E-07          & 2.735E-07      \\ \cline{2-14} 
+	& 10         & 6.800E-09     & 4.184E-09          & 3.000E-09      & 7.100E-09     & 4.180E-09          & 3.000E-09      & 9.100E-09     & \textbf{5.192E-09} & 2.900E-09      & 6.200E-09     & 4.632E-09          & 2.800E-09      \\ \hline
+	\multirow{5}{*}{\textbf{WFG2\textsuperscript{-1}}} & 3          & 0.106         & 0.084              & 0.063          & 0.103         & 0.081              & 0.066          & 0.115         & \textbf{0.086}     & 0.065          & 0.096         & 0.076              & 0.066          \\ \cline{2-14} 
+	& 4          & 3.092E-03     & \textbf{6.706E-04} & 0.000E+00      & 3.035E-03     & 6.118E-04          & 0.000          & 0.002         & 0.000              & 0.000          & 1.753E-03     & 4.299E-04          & 0.000          \\ \cline{2-14} 
+	& 6          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          \\ \cline{2-14} 
+	& 8          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          \\ \cline{2-14} 
+	& 10         & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{WFG3\textsuperscript{-1}}} & 3          & 0.107         & 0.102              & 0.097          & 0.113         & 0.104              & 0.097          & 0.113         & \textbf{0.109}     & 0.103          & 0.113         & 0.108              & 0.103          \\ \cline{2-14} 
+	& 4          & 0.017         & \textbf{0.015}     & 0.013          & 0.018         & 0.015              & 0.013          & 0.016         & 0.014              & 0.011          & 0.017         & 0.015              & 0.012          \\ \cline{2-14} 
+	& 6          & 1.002E-04     & 3.418E-05          & 0.000          & 1.163E-04     & \textbf{3.972E-05} & 0.000          & 0.000         & 0.000              & 0.000          & 8.883E-05     & 2.743E-05          & 0.000          \\ \cline{2-14} 
+	& 8          & 5.226E-07     & \textbf{2.090E-08} & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          \\ \cline{2-14} 
+	& 10         & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{WFG4\textsuperscript{-1}}} & 3          & 0.333         & 0.294              & 0.274          & 0.349         & \textbf{0.295}     & 0.275          & 0.323         & 0.294              & 0.280          & 0.299         & 0.285              & 0.274          \\ \cline{2-14} 
+	& 4          & 0.111         & \textbf{0.095}     & 0.087          & 0.106         & 0.094              & 0.077          & 0.107         & 0.093              & 0.079          & 0.102         & 0.088              & 0.071          \\ \cline{2-14} 
+	& 6          & 3.463E-03     & \textbf{1.621E-03} & 0.000E+00      & 3.722E-03     & 1.327E-03          & 0.000E+00      & 3.438E-03     & 1.156E-03          & 0.000          & 3.267E-03     & 1.106E-03          & 0.000          \\ \cline{2-14} 
+	& 8          & 1.405E-04     & \textbf{1.706E-05} & 0.000E+00      & 1.161E-04     & 6.266E-06          & 0.000E+00      & 3.976E-05     & 2.215E-06          & 0.000          & 8.330E-06     & 5.799E-07          & 0.000          \\ \cline{2-14} 
+	& 10         & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{WFG5\textsuperscript{-1}}} & 3          & 0.424         & 0.409              & 0.394          & 0.427         & \textbf{0.411}     & 0.394          & 0.422         & 0.408              & 0.395          & 0.415         & 0.405              & 0.396          \\ \cline{2-14} 
+	& 4          & 0.190         & \textbf{0.179}     & 0.172          & 0.191         & 0.178              & 0.165          & 0.182         & 0.174              & 0.166          & 0.185         & 0.176              & 0.169          \\ \cline{2-14} 
+	& 6          & 0.015         & \textbf{0.013}     & 0.009          & 0.015         & 0.012              & 0.009          & 0.015         & 0.012              & 0.009          & 0.014         & 0.012              & 0.010          \\ \cline{2-14} 
+	& 8          & 9.167E-04     & \textbf{5.124E-04} & 1.400E-04      & 8.968E-04     & 4.636E-04          & 7.753E-05      & 5.474E-04     & 2.664E-04          & 3.043E-05      & 4.371E-04     & 2.514E-04          & 3.043E-05      \\ \cline{2-14} 
+	& 10         & 3.546E-05     & \textbf{9.060E-06} & 3.498E-07      & 2.449E-05     & 8.480E-06          & 0.000E+00      & 9.760E-06     & 2.496E-06          & 0.000          & 9.760E-06     & 2.434E-06          & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{WFG6\textsuperscript{-1}}} & 3          & 0.495         & 0.486              & 0.477          & 0.517         & \textbf{0.490}     & 0.481          & 0.498         & 0.489              & 0.482          & 0.500         & 0.489              & 0.481          \\ \cline{2-14} 
+	& 4          & 0.232         & 0.226              & 0.217          & 0.235         & 0.226              & 0.218          & 0.235         & 0.227              & 0.212          & 0.242         & \textbf{0.228}     & 0.215          \\ \cline{2-14} 
+	& 6          & 0.023         & \textbf{0.020}     & 0.016          & 0.022         & 0.020              & 0.016          & 0.022         & 0.019              & 0.015          & 0.023         & 0.019              & 0.016          \\ \cline{2-14} 
+	& 8          & 1.355E-03     & \textbf{8.550E-04} & 4.116E-04      & 1.470E-03     & 8.297E-04          & 3.650E-04      & 8.879E-04     & 5.049E-04          & 1.163E-04      & 7.671E-04     & 4.939E-04          & 1.163E-04      \\ \cline{2-14} 
+	& 10         & 4.013E-05     & 1.319E-05          & 1.182E-06      & 5.199E-05     & \textbf{2.074E-05} & 1.182E-06      & 2.447E-05     & 6.041E-06          & 0.000          & 2.447E-05     & 6.123E-06          & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{WFG7\textsuperscript{-1}}} & 3          & 0.400         & 0.366              & 0.355          & 0.433         & 0.372              & 0.349          & 0.442         & \textbf{0.376}     & 0.350          & 0.376         & 0.361              & 0.355          \\ \cline{2-14} 
+	& 4          & 0.147         & \textbf{0.140}     & 0.128          & 0.172         & 0.140              & 0.124          & 0.149         & 0.139              & 0.121          & 0.150         & 0.137              & 0.117          \\ \cline{2-14} 
+	& 6          & 0.012         & \textbf{0.007}     & 0.004          & 0.009         & 0.007              & 0.003          & 0.008         & 0.006              & 0.003          & 8.579E-03     & 5.981E-03          & 2.862E-03      \\ \cline{2-14} 
+	& 8          & 4.778E-04     & 2.066E-04          & 0.000          & 5.189E-04     & \textbf{2.271E-04} & 0.000          & 2.677E-04     & 7.983E-05          & 0.000          & 2.677E-04     & 7.785E-05          & 0.000          \\ \cline{2-14} 
+	& 10         & 1.104E-05     & \textbf{1.609E-06} & 0.000          & 9.613E-06     & 1.503E-06          & 0.000          & 2.518E-06     & 1.245E-07          & 0.000          & 2.518E-06     & 1.300E-07          & 0.000          \\ \hline
+	\multirow{5}{*}{\textbf{WFG8\textsuperscript{-1}}} & 3          & 0.603         & 0.577              & 0.555          & 0.611         & \textbf{0.595}     & 0.559          & 0.605         & 0.582              & 0.563          & 0.581         & 0.560              & 0.539          \\ \cline{2-14} 
+	& 4          & 0.284         & 0.274              & 0.262          & 0.307         & 0.277              & 0.263          & 0.291         & 0.275              & 0.263          & 0.294         & \textbf{0.279}     & 0.261          \\ \cline{2-14} 
+	& 6          & 0.038         & \textbf{0.033}     & 0.028          & 0.038         & 0.033              & 0.028          & 0.036         & 0.031              & 0.026          & 0.037         & 0.031              & 0.024          \\ \cline{2-14} 
+	& 8          & 0.004         & \textbf{0.002}     & 0.001          & 0.003         & 0.002              & 0.001          & 0.002         & 0.002              & 0.001          & 1.867E-03     & 1.407E-03          & 8.694E-04      \\ \cline{2-14} 
+	& 10         & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 0.000         & 0.000              & 0.000          & 7.795E-05     & \textbf{3.676E-05} & 1.613E-05      \\ \hline
+	\multirow{5}{*}{\textbf{WFG9\textsuperscript{-1}}} & 3          & 0.586         & \textbf{0.571}     & 0.563          & 0.582         & 0.570              & 0.562          & 0.580         & 0.569              & 0.558          & 0.585         & 0.571              & 0.560          \\ \cline{2-14} 
+	& 4          & 0.287         & 0.272              & 0.256          & 0.293         & \textbf{0.273}     & 0.254          & 0.294         & 0.272              & 0.257          & 0.287         & 0.270              & 0.249          \\ \cline{2-14} 
+	& 6          & 0.032         & 0.025              & 0.021          & 0.030         & \textbf{0.026}     & 0.021          & 0.032         & 0.025              & 0.020          & 0.028         & 0.024              & 0.020          \\ \cline{2-14} 
+	& 8          & 2.232E-03     & 1.188E-03          & 4.300E-04      & 2.259E-03     & \textbf{1.242E-03} & 4.678E-04      & 1.713E-03     & 9.214E-04          & 2.833E-04      & 1.268E-03     & 8.107E-04          & 2.895E-04      \\ \cline{2-14} 
+	& 10         & 9.420E-05     & 2.823E-05          & 4.879E-06      & 9.008E-05     & \textbf{2.834E-05} & 1.201E-06      & 8.089E-05     & 1.793E-05          & 1.215E-06      & 5.747E-05     & 1.667E-05          & 1.201E-06      \\ \hline
+\end{tabular}
+\end{table*}
+
+\clearpage
+
+\section{Results obtained for the engineering design optimization problem}
+
+We present the results after 500, 1000, 2000 and 4000 function evaluations. It is interesting to observe from the matrix plots in Fig.~\ref{fig:500}-Fig.~\ref{fig:4000} that SaMaO\textsubscript{ASF-ED} delivered a diverse set of non-dominated designs with all possible engine types at every checkpoint, whereas MaO could only deliver non-dominated designs involving one type of engine at 500 evaluations, two types of engines at 1000 evaluations and all types of engines at 2000 evaluations and onwards. 
+
+\begin{figure*}[!htb]
+	\centering    
+	\subfigure[]{\label{fig:fig4}\includegraphics[width = 1.05\textwidth]{figures/fig10.eps}}
+	\subfigure[]{\label{fig:fig6}\includegraphics[width = 1.05\textwidth]{figures/fig9.eps}}    
+	\caption{Results obtained after 500 function evaluations: (a) MaO, (b) SaMaO\textsubscript{ASF-ED}}
+	\label{fig:500}
+\end{figure*}
+ 
+\begin{figure*}[!htb]
+	\centering    
+	\subfigure[]{\label{fig:fig4}\includegraphics[width = 1.05\textwidth]{figures/fig4.eps}}
+	\subfigure[]{\label{fig:fig6}\includegraphics[width = 1.05\textwidth]{figures/fig6.eps}}    
+	\caption{Results obtained after 1000 function evaluations: (a) MaO, (b) SaMaO\textsubscript{ASF-ED}}
+	\label{fig:1000}
+\end{figure*}
+
+\begin{figure*}[!htb]
+	\centering    
+	\subfigure[]{\label{fig:fig4}\includegraphics[width = 1.05\textwidth]{figures/fig12.eps}}
+	\subfigure[]{\label{fig:fig6}\includegraphics[width = 1.05\textwidth]{figures/fig11.eps}}    
+	\caption{Results obtained after 2000 function evaluations: (a) MaO, (b) SaMaO\textsubscript{ASF-ED}}
+	\label{fig:2000}
+\end{figure*}
+ 
+\begin{figure*}[!htb]
+	\centering    
+	\subfigure[]{\label{fig:fig5}\includegraphics[width = 1.05\textwidth]{figures/fig5.eps}}
+	\subfigure[]{\label{fig:fig7}\includegraphics[width = 1.05\textwidth]{figures/fig7.eps}}    
+	\caption{Results obtained after 4000 function evaluations: (a) MaO, (b) SaMaO\textsubscript{ASF-ED}}
+	\label{fig:4000}
+\end{figure*}
+
+\clearpage
+
+We also compare the HV delievered by SaMaO\textsubscript{ASF-ED} and MaO at the start, 200, 500, 1000, 2000, 3000 and 4000 evaluation budget which is shown in Fig.~\ref{fig:HV}:
+
+\begin{figure}[!htb]
+	\centering    
+	\includegraphics[scale = 0.8]{figures/fig13.eps}   
+	\caption{Comparison of MaO and SaMaO\textsubscript{ASF-ED} in terms of HV values delivered at different evaluations}
+	\label{fig:HV}
+\end{figure}
+
+In this comparison, the reference point for HV computation is taken as 1.1 times the nadir point computed using the combined set of solutions obtained at the end of 4000 evaluations using both SaMaO\textsubscript{ASF-ED} and MaO. The obtained ideal and nadir point at the end of 4000 evaluation budget is:\\ 
+$Z^I$: 1.0E+04$\times$(3.6010, 0.1423, -0.1110, -0.0001, -0.1524) and $Z^N$: 1.0E+04$\times$(9.7369, 0.1917, 0, -0.00003, -0.0254).
+ 
+
+
+
+
+\scriptsize
+\bibliographystyle{asmems4} 
+\balance
+\bibliography{KHTchapter}
+
+
+\end{document}

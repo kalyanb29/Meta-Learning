@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{KHTYuan2016many}
+Yuan, Y., Xu, H., Wang, B., and Yao, X., 2016.
+\newblock ``A new dominance relation-based evolutionary algorithm for
+  many-objective optimization''.
+\newblock {\em IEEE Transactions on Evolutionary Computation, {\bf 20}}(1),
+  pp.~16--37.
+
+\bibitem{KHTishibuchi2010many}
+Ishibuchi, H., Hitotsuyanagi, Y., Tsukamoto, N., and Nojima, Y., 2010.
+\newblock ``Many-objective test problems to visually examine the behavior of
+  multiobjective evolution in a decision space''.
+\newblock In {\em Proceedings of the International Conference on Parallel
+  Problem Solving from Nature}. Springer, pp.~91--100.
+
+\bibitem{KHTwhile2012hv}
+While, L., Bradstreet, L., and Barone, L., 2012.
+\newblock ``A fast way of calculating exact hypervolumes''.
+\newblock {\em IEEE Transactions on Evolutionary Computation, {\bf 16}}(1),
+  pp.~86--95.
+
+\end{thebibliography}

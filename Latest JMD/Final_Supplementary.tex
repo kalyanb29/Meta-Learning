@@ -444,7 +444,7 @@ Inverted generation distance~(IGD) and hypervolume~(HV) are the most common metr
 
 \section{Results obtained for the engineering design optimization problem}
 
-We present the results after 500, 1000, 2000 and 4000 function evaluations. It is interesting to observe from the matrix plots in Fig.~\ref{fig:500}-Fig.~\ref{fig:4000} that SaMaO\textsubscript{ASF-ED} delivered a diverse set of non-dominated designs with all possible engine types at every checkpoint, whereas MaO could only deliver non-dominated designs involving one type of engine at 500 evaluations, two types of engines at 1000 evaluations and all types of engines at 2000 evaluations and onwards. 
+We present the results after 500, 1000 and 2000 function evaluations. It is interesting to observe from the matrix plots in Fig.~\ref{fig:500}-Fig.~\ref{fig:2000} that SaMaO\textsubscript{ASF-ED} delivered a diverse set of non-dominated designs with all possible engine types at every checkpoint, whereas MaO could only deliver non-dominated designs involving one type of engine at 500 evaluations, two types of engines at 1000 evaluations and all types of engines at 2000 evaluations. 
 
 \begin{figure*}[!htb]
 	\centering    
@@ -469,18 +469,10 @@ We present the results after 500, 1000, 2000 and 4000 function evaluations. It i
 	\caption{Results obtained after 2000 function evaluations: (a) MaO, (b) SaMaO\textsubscript{ASF-ED}}
 	\label{fig:2000}
 \end{figure*}
- 
-\begin{figure*}[!htb]
-	\centering    
-	\subfigure[]{\label{fig:fig5}\includegraphics[width = 1.05\textwidth]{figures/fig5.eps}}
-	\subfigure[]{\label{fig:fig7}\includegraphics[width = 1.05\textwidth]{figures/fig7.eps}}    
-	\caption{Results obtained after 4000 function evaluations: (a) MaO, (b) SaMaO\textsubscript{ASF-ED}}
-	\label{fig:4000}
-\end{figure*}
 
 \clearpage
 
-We also compare the HV delievered by SaMaO\textsubscript{ASF-ED} and MaO at the start, 200, 500, 1000, 2000, 3000 and 4000 evaluation budget which is shown in Fig.~\ref{fig:HV}:
+We also compare the HV delievered by SaMaO\textsubscript{ASF-ED} and MaO at the start, 200, 500, 1000 and 2000 evaluation budget which is shown in Fig.~\ref{fig:HV}:
 
 \begin{figure}[!htb]
 	\centering    
@@ -489,7 +481,7 @@ We also compare the HV delievered by SaMaO\textsubscript{ASF-ED} and MaO at the 
 	\label{fig:HV}
 \end{figure}
 
-In this comparison, the reference point for HV computation is taken as 1.1 times the nadir point computed using the combined set of solutions obtained at the end of 4000 evaluations using both SaMaO\textsubscript{ASF-ED} and MaO. The obtained ideal and nadir point at the end of 4000 evaluation budget is:\\ 
+In this comparison, the reference point for HV computation is taken as 1.1 times the nadir point computed using the combined set of solutions obtained at the end of 2000 evaluations using both SaMaO\textsubscript{ASF-ED} and MaO. The obtained ideal and nadir point at the end of 2000 evaluation budget is:\\ 
 $Z^I$: 1.0E+04$\times$(3.6010, 0.1423, -0.1110, -0.0001, -0.1524) and $Z^N$: 1.0E+04$\times$(9.7369, 0.1917, 0, -0.00003, -0.0254).
  
 

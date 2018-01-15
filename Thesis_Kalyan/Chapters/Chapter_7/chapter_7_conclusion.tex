@@ -1,0 +1,31 @@
+\chapter{Conclusions and Future Work}
+\label{chapter:6}
+
+
+The thesis set out with an aim to improve methods that can handle generic bilevel optimization problems. Towards this end, a number of different approaches were proposed and investigated. The benefits of these approaches was demonstrated through comprehensive numerical experiments and an comparison with the established techniques in the field of evolutionary bilevel optimization. 
+
+The investigation of three key approaches, i.e., \emph{memetic}, \emph{surrogate-assited} and \emph{non-nested} led to the development of three algorithms:
+0
+\begin{enumerate}
+\item Bilevel Memetic Algorithm~(BLMA): In this algorithm, a hybrid memetic approach was developed where a global or a local search are used at upper and lower levels depending on the phase of the search. This is different from the traditional hybridization used in bilevel literature where a global search is only used at upper level and a local search only at the lower level. The proposed approach attempts to move step-wise from global searches at both level to local searches at both levels, emphasizing global exploration followed by local enhancements. The approach was also further extended to deal with multiple followers at the lower level (BLMA\textsubscript{MF}).
+\item Surrogate-Assisted Bilevel Algorithm~(SABLA): In this algrithm, multiple surrogate models are periodically built and the best one is used to guide the lower level optimization in lieu of true function evaluations to reduce the computational effort substantially. In the literature, the use of surrogate models has been scarcely explored in dealing with such problems, and have in general used simpler models for mapping lower level optima to upper level variables. The use of multiple surrogate models in the proposed algorithm enables flexibility to approximate different types of functions more accurately. It shows significant reduction in numbers of function evaluations while obtaining competitive results with other algorithms.   
+\item Non-nested Evolutionary Algorithm~(NNEA): In this algorithm, the bilevel problem is first re-formulated as a single-level problem with an estimate of lower level optimality as an additional constraint. This type of formulation has been used in classical literature but not within evolutionary methods. Additionally, the presented optimality measure uses a simple neighborhood based scheme which is easy to evaluate and free from mathematical assumptions inherent in classical approaches. The algorithm showed competitive results with other compared algorithms for a number of non-linear problems studied. 
+\end{enumerate}
+
+Within the above approaches, a number of further improvements were incorporated at the component level to strengthen the search, such as the concept of re-evaluation and nested local search. Their effectiveness was established through component-wise analysis. Lastly, exploratory studies were presented on multi-objective bilevel problems, setting out the scope of further improvements through use of some of the above strategies to extend the current work. 
+
+\section{Future Work}
+
+While the thesis presents some efforts in improving the state-of-the-art in evolutionary bilevel optimization, a number of further directions could be identified to pursue. These include~(but not limited to):
+
+\begin{enumerate}
+\item Most of the existing work in the field is directed towards single-objective bilevel problems whereas multi-objective bilevel optimization has not recieved commensurate attention. One of the possible reasons is lack of challenging benchmark problems in the domain, which was evident from the fact that simple nested strategies could also easily obtain the Pareto front in the previous chapter. Thus design of good benchmark problems that incorporate representative challenges of multi-objective multi-level problems as well as development of algorithms to deal with them presents a prominent future research direction.
+
+\item In this thesis, the surrogate modeling was used to approximate the lower level objective and constraints. In contrast, other existing approaches tend to use approximations at the upper level (i.e. mapping between optimal $\mathbf{x}_l$ and $\mathbf{x}_u$). In order to gain signficant reduction in true function evaluations, it would be worth investigating if both of these strategies can be combined in an appropriate way. 
+
+\item All the studies considered in this thesis operate in a \emph{deterministic} paradigm, i.e., no uncertainties have been assumed in the variables or objective functions. In real life, solutions that are robust/reliable in presence of such uncertainties are sought instead of the global optimum. Handling uncertainties is thus another important issue that needs more attention in the field. 
+
+\item Lastly, all studies in this thesis consider real-valued continuous variables, which may restrict the usage of some of the search techniques used (such as interior point). Better representations as well as more specialized search techniques could be employed to extend the presented work to problems with discrete variables. 
+
+\end{enumerate} 
+

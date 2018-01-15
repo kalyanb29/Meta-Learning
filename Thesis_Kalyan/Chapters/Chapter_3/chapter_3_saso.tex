@@ -1,0 +1,679 @@
+\chapter{Surrogate Assisted Optimization}
+\label{chapter:3}
+
+\begin{tcolorbox}
+\textit{The works presented in this chapter have been published in the following articles:}
+\begin{enumerate}
+\small
+\item \textbf{Islam,~M.~M.}, {Singh,~H.~K.},  {Ray,~T.}, and {Sinha,~A.} ``An Enhanced memetic algorithm for single-objective bilevel optimization problems,'' {\em Evolutionary Computation}, MIT press, 2016~\textbf{(Impact factor: 3.6)}.
+\item \textbf{Islam,~M.~M.}, {Singh,~H.~K.}, and {Ray,~T.}, ``A Memetic Algorithm for Solving Bilevel Optimization Problems with Multiple Followers,,'' in {\em Proceedings of IEEE Congress on Evolutionary Computation (CEC)}, Vancouver, Canada, pp. 1901--1908, 2016.
+\item  \textbf{Islam,~M.~M.}, {Singh, H.K.} and {Ray, T.}``A Memetic Algorithm for the Solution of Single Objective Bilevel Optimization Problems,,'' in {\em Proceedings of IEEE Congress on Evolutionary Computation (CEC)}, Sendai, Japan, pp. 1643-1650, 2015.
+
+\end{enumerate}
+
+\end{tcolorbox}
+
+
+\section{Introduction}
+\label{sec:intro}
+
+
+
+
+
+
+\section{Background}
+\label{sec:back}
+
+\section{SASO}
+
+Literature review with regards to surrogate assisted optimization. Refer to seminal and review papers. Highlight more recent ones and take one from me too.
+
+Provide the overall structure of the optimization framework. List the pseudocode. Highlight the components and discuss them in seperate components or sub pseudocodes.
+The performance of the scheme has to be done with the following (a) Condition 1: With minimum prescribed MSE (b) Condition 2: With maximum distance condition (c) without enforcing 1 and 2 and (d) with condition 1 and 2 enforced. Comparison should be provided with other algorithms and against function evals required to get to the first feasible and the final solution at the end. The comparison with respect to number of successful runs to be indicated. The feasibility ratio of the problems and complete problem descriptions to be listed in Appendix.
+
+Questions to look out for
+(a) Is there any benefit in the rate of convergence ?
+(b) Are the results statistically better ?
+(c) Are any of the strategies better or influencing the performance.
+(d) Use of local best surrogate and how that is beneficial to be illustrated using an example.
+(e) Use of one type of surrogate is good for one and bad for the other to be established.
+(f) Effect of neighbourhood size and suggestions to select an appropriate one.
+(g) For one problem show that use of global RSM is worse than global RBF and vice versa.
+
+Why multiple surrogates ? Why local and not global ? Local + Multiple is the way to go. 
+Effects of neighbourhood size, MSE threshold, distance threshold. What effects does it have ? Here you are discussion options 1 through to 4. 
+
+Finally provide directions in which the algorithm could be further improved...i.e. pathway to selective evaluation.
+Why a particular surrogate is being selected in a problem ? Can you relate this ?
+The type of surrogate chosen for objective is different from that for constraint.
+Get performance profile for your algos.
+
+\section{Surrogate assisted framework} 
+\label{sec:saf}
+
+The pseudo-code of our Surrogate Assisted Evolutionary Algorithm~(SAEA) is presented  below as Algorithm~\ref{alg:SAEA}. The details of its key components are described below.
+
+\begin{algorithm}[!ht]\footnotesize
+	\caption{SAEA}
+	\textbf{Input:} $TFE_{max}$\hspace{1mm}(maximum number of function evaluations), $surr\_add\_crit$\hspace{1mm}(criterion for adding new solutions to the archive), $surr\_train\_ratio$\hspace{1mm}(ratio of training and validation), $surr\_error\_thres$\hspace{1mm}(maximum surrogate prediction error), $ratio\_ea$\hspace{1mm}(initial portion of total function evaluation reserved for EA), $num\_neighbor$\hspace{1mm}(number of neighbor for local surrogate), $partial\_eval\_thres$\hspace{1mm}(partial evaluation threshold) \\
+	\textbf{Option:} $surr\_type$\hspace{1mm}(types of surrogate models), $choose\_surr$\hspace{1mm}(best among all or first best among all), $surr\_aspect$\hspace{1mm}(local or global), $subea\_type$\hspace{1mm}(type of local search), $surr\_neighbor$\hspace{1mm}(based on neighbor distance threshold or not), $surr\_error$\hspace{1mm}(based on error threshold or not), $partial\_eval$\hspace{1mm}(partial evaluation) \\
+	\begin{algorithmic}[1]
+		\STATE $TFE$ = 0, $j$ = 1
+		\STATE $nx$ = variable dimension, $nf$ = number of objectives, and $ng$ = number of constraints of the problem
+		\STATE Initialize the population using LHS sampling $P^j$; $\left|P^j\right|$ = $2(1 + nx)$
+		\STATE Evaluate $P^j$ and update $TFE$
+		\STATE \textbf{Compute} minimum reference distance to prevent extrapolation in surrogate
+		\STATE \textbf{Sort} all individuals in $P^j$
+		\STATE Update $Archive$ using $P^j$
+		\STATE \textbf{Initialize} surrogate $Surr$ using input parameters
+		
+		\WHILE{$(TFE\le ratio\_ea\times TFE_{max})$}
+		\STATE Create $C$ offsprings from $P^j$ using binary tournament via recombination where $\left|C\right|$ = $\left|P^j\right|$
+		\STATE Update $num\_neighbor$ to be number of individuals in $Archive$ up to a maximum of 4$*nx$
+		\STATE \textbf{Assign} evaluation flag to each individual in $C$ and partition them into $C\_surr$ and $C\_eval$
+		\FOR{$i = 1:\left|C\_surr\right|$}
+		\STATE \textbf{Get} $num\_neighbor$ number of neighbors for $C\_surr^i$ and set the range of $Surr$ as the range of variable of the neighbor set
+		\STATE \textbf{Add} neighbors to the surrogate model based on $surr\_add\_crit$
+		\STATE \textbf{Train} the surrogate model based on $choose\_surr$ and $surr\_train\_ratio$ options and calculate normalized RMS error based on validation
+		\STATE \textbf{Run} local optimization based on $subea\_type$ using surrogate model which are eligible based on $surr\_error\_thres$ and $surr\_error$ and store the best individual in $C\_surr\_accept$ else add $C\_surr^i$ to the $C\_surr\_reject$ and store their normalized RMS error values
+		\ENDFOR		
+		\STATE \textbf{Construct} the offspring set $C\_set$ from $C\_eval$, $C\_surr\_accept$ and $C\_surr\_reject$ for true evaluation
+		\STATE \textbf{Evaluate} $C\_set$ based on $partial\_eval$ option
+		\STATE \textbf{Arrange} individuals in $C\_set$+$P^j$
+		\STATE Update $TFE$
+		\STATE Take top $\left|P^j\right|$ individuals from $C\_set$+$P^j$ to be $P^{j+1}$
+		\STATE $j$ = $j$ + 1
+		\ENDWHILE			
+		
+	\end{algorithmic}
+	\label{alg:SAEA}
+\end{algorithm}
+
+\begin{itemize}  
+	
+	\item \textbf{Compute:} To calculate the reference distance beyond which solutions need true evaluation, a total of $TFE_{max}$ individuals were generated using latin hypercube sampling~(LHS) in the variable space. These individuals were normalized using the variable range and the unique pairwise distances were calculated. Minimum pairwise distance is considered to be the reference distance.
+	
+	\item \textbf{Sort:} Ranking of individuals are based on feasibility first strategy. For every individual solutions, at the initialization stage, every constraint and objective is evaluated. Based on sum of constraint violations infeasible individuals are sorted and feasible individuals are ranked based on their objective values.   
+	
+	\item \textbf{Initialize:} Initialization of a surrogate framework depends on various parameters such as type of surrogates~($surr\_type$), threshold of selection of points in the normalized space~($surr\_add\_crit$), local or global aspect~($surr\_aspect$), number of neighboring solutions for training and validation~($num\_neighbor$), ratio of solutions for training and validation~($surr\_train\_ratio$), and quality of surrogate model based on normalized RMS error threshold~($surr\_error\_thres$) obtained from validation. In our framework several types of surrogate models are considered here such as radial basis function, response surface methods (first and second order), kriging, and neural network. Following values are considered for several parameters discussed above. $surr\_add\_crit$ = 1e-5, $num\_neighbor$ = min($\left|Archive\right|$,4$*nx$), $surr\_train\_ratio$ = 0.8, and $surr\_error\_thres$ = 1e-3. 
+	
+	\item \textbf{Assign:} For each offspring a flag is assigned, which determines whether a particular individual is eligible to participate in surrogate assisted evaluation or true evaluation. In this process, only unique individuals based on variable values are taken into consideration. For each individual $num\_neighbor$ number of neighbors are chosen in a normalized variable space from $Archive$. The minimum neighboring distance is also computed for each individual. If this distance is more than the reference distance from the \textbf{Compute} stage and $surr\_neighbor$ option is true, then only the associated individual is eligible for true evaluation. $C\_eval$ consists of the individuals eligible for true evaluation whereas the rest goes to $C\_surr$ which indicates surrogate assisted evaluation. 
+	
+	\item \textbf{Get:} Based on the option $surr\_aspect$ local or global model can be chosen. In the context of local surrogates, $num\_neighbor$ number of neighbors are chosen from $Archive$ based on the true variable space for each individual in $C\_surr$, . These neighboring individuals will participate in constructing local surrogate models for each objective and constraint for that particular individual. The variable range of these local surrogates is limited to the range of the neighboring solutions to prevent any extrapolation. On the other hand, global models of surrogates consist of all the individuals from $Archive$ spanning the whole variable space.
+	
+	\item \textbf{Add:} In this process, all the neighboring individuals are added for construction of surrogate models. Individuals having real valued objectives or constraints are added to the model based on $surr\_add\_crit$ value. This process is carried out in a normalized variable space and it adds diversity to the training samples of the surrogate models.
+	
+	\item \textbf{Train:} Individual surrogate has been constructed for each constraint and objective. Training consists of two phases: (a) training and (b) validation. In this process, $surr\_train\_ratio$ times total number of neighboring individuals are taken for training and rest are kept for validation based on which the normalized RMS error is computed for each surrogate model. Individuals for training are chosen by clustering the total number of neighboring individuals in the variable space using k-medoids method. Once the training individuals are chosen, depending on the option $choose\_surr$, (a) all types of surrogate models~(mentioned in \textbf{Initialize}) are constructed and the model with minimum normalized RMS error in the validation stage is chosen, or (b) surrogate models are constructed one by one based on the types of surrogate and the first one encountered having normalized RMS error less than $surr\_error\_thres$ is chosen. This process is repeated for each constraint and objective. 
+	
+	\item \textbf{Run:} Based on the surrogate models constructed in the previous stage, a local optimization is carried out within the variable space enclosed by the neighbors of each individual in $C\_surr$. $subea\_type$ indicates the type of optimization algorithm: sequential quadratic programming~(SQP) or non-dominated sorting genetic algorithm~(NSGA-II). In our paper, NSGA-II has been chosen. The parameters chosen to run this algorithm are: population size = 100, number of generations = 20, crossover probability = 0.9, mutation probability = 0.1, crossover distribution index = 20 and mutation distribution index = 30. For SQP option, the parameters are: maximum number of iteration = 3000 and maximum number of function evaluation = 3000. This local optimization will provide a better individual with a better fitness within the neighborhood of the solution from $C\_surr$. This process is carried out based on option $surr\_error$: (a) if $surr\_error$ option is true, the individuals from $C\_surr$ having maximum normalized RMS error of their chosen surrogate models less than $surr\_error\_thres$ are considered to eligible for local optimization. Best individual obtained using this process will be a subset of $C\_surr\_accept$ and the rest will be of $C\_surr\_reject$, (b) otherwise, all individuals will go through this process and similarly $C\_surr\_accept$ and $C\_surr\_reject$ will be constructed. 
+	
+	\item \textbf{Construct:} The final offspring set for evaluation is constructed from $C\_eval$, $C\_surr\_accept$ and $C\_surr\_reject$. The individual with the minimum normalized RMS error from $C\_surr\_reject$ and the best individual from $C\_surr\_accept$~(following the feasibility first principle) are appended with $C\_eval$ to construct the final offspring set $C\_set$ for true evaluation.
+	
+	\item \textbf{Evaluate:} Based on $partial\_eval$ option this offspring set $C\_set$ either goes through full evaluation of each objective and constraint or partial evaluation of objective and constraint based on feasibility prediction. \\ 
+	Full evaluation consists of all constraint and objective evaluation of an individual. In the context of feasibility first principle, infeasible individuals are ordered based on the value of sum of constraint violations and feasible individuals are ordered based on their objective values. Hence, objective values of infeasible individuals are essentially unnecessary information. To avoid these unnecessary evaluation, partial evaluation comes into play.\\
+	
+\end{itemize}
+
+
+
+
+
+
+
+\section{Numerical Examples}
+\label{sec:numex} 
+
+\subsection{Benchmark Functions}
+
+\subsection{Engineering Design Examples}
+
+\section{Results and Discussion}
+\label{sec:results}
+
+
+
+\begin{table*}[!htb]\scriptsize
+	\caption{Cost for obtaining first feasible-part-1-test problems}
+	\label{tab:firstfeascostt1}
+	\centering
+	\begin{tabular}{lllllll}
+		\specialrule{.2em}{.1em}{.1em}   
+		\multicolumn{1}{l}{\textbf{Problems}}     & \multicolumn{1}{l}{\textbf{Algo}} & \multicolumn{1}{l}{\textbf{Best}} & \multicolumn{1}{l}{\textbf{Mean}} & \multicolumn{1}{l}{\textbf{Median}} & \multicolumn{1}{l}{\textbf{Worst}} & \textbf{Std} \\ \hline
+		\multirow{8}{*}{\textbf{G1}}                & Surr1100      & 29.00         & 31.60         & \textbf{30.50}  & 37.00          & 2.93         \\ 
+		& Surr1011      & 35.00         & 55.15         & 60.00           & 79.00          & 14.64        \\
+		& Surr1010      & 29.00         & 31.60         & \textbf{30.50}  & 38.00          & 3.03         \\ 
+		& Surr1001      & 35.00         & 54.79         & 54.00           & 84.00          & 15.73        \\
+		& IDEA          & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& NSGA-II       & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& DEACS         & 366.00        & 558.67        & 552.00          & 762.00         & 117.63       \\
+		& SRES          & NaN           & NaN           & NaN             & NaN            & NaN          \\ \hline
+		\multirow{8}{*}{\textbf{G2}}                & Surr1100      & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\ 
+		& Surr1011      & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\  
+		& Surr1010      & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\  
+		& Surr1001      & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\ 
+		& IDEA          & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\ 
+		& NSGA-II       & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\  
+		& DEACS         & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\ 
+		& SRES          & 3.00          & 3.00          & 3.00            & 3.00           & 0.00         \\ \hline
+		\multirow{8}{*}{\textbf{G3}}                & Surr1100      & 51.00         & 63.67         & 65.50           & 77.00          & 9.42         \\ 
+		& Surr1011      & 51.00         & 89.00         & 100.00          & 100.00         & 19.74        \\  
+		& Surr1010      & 34.00         & 63.40         & \textbf{62.00}  & 100.00         & 26.96        \\ 
+		& Surr1001      & 37.00         & 69.33         & 67.00           & 100.00         & 20.96        \\ 
+		& IDEA          & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& NSGA-II       & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& DEACS         & NaN           & NaN           & NaN             & NaN            & NaN          \\  
+		& SRES          & NaN           & NaN           & NaN             & NaN            & NaN          \\ \hline
+		\multirow{8}{*}{\textbf{G4}}                & Surr1100      & 12.00         & 12.00         & 12.00           & 12.00          & 0.00         \\  
+		& Surr1011      & 12.00         & 12.00         & 12.00           & 12.00          & 0.00         \\ 
+		& Surr1010      & 12.00         & 12.00         & 12.00           & 12.00          & 0.00         \\  
+		& Surr1001      & 12.00         & 12.00         & 12.00           & 12.00          & 0.00         \\ 
+		& IDEA          & 7.00          & 22.75         & 21.00           & 56.00          & 15.55        \\  
+		& NSGA-II       & 7.00          & 22.75         & 21.00           & 56.00          & 15.55        \\  
+		& DEACS         & 7.00          & 22.75         & 21.00           & 56.00          & 15.55        \\  
+		& SRES          & 7.00          & 22.75         & 21.00           & 56.00          & 15.55        \\ \hline
+		\multirow{8}{*}{\textbf{G5}}                & Surr1100      & 16.00         & 19.50         & \textbf{20.00}  & 24.00          & 1.96         \\ 
+		& Surr1011      & 47.00         & 61.08         & 62.00           & 73.00          & 7.79         \\ 
+		& Surr1010      & 27.00         & 47.63         & 43.00           & 81.00          & 15.45        \\ 
+		& Surr1001      & 25.00         & 36.37         & 37.00           & 52.00          & 6.00         \\ 
+		& IDEA          & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& NSGA-II       & NaN           & NaN           & NaN             & NaN            & NaN          \\  
+		& DEACS         & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& SRES          & NaN           & NaN           & NaN             & NaN            & NaN          \\ \specialrule{.2em}{.1em}{.1em} 
+	\end{tabular}
+\end{table*}
+\clearpage
+\vspace{-5cm}
+\begin{table*}[!htb]\scriptsize
+	\caption{Cost for obtaining first feasible-part-2-test problems}
+	\label{tab:firstfeascostt2}
+	\centering
+	\begin{tabular}{lllllll}
+		\specialrule{.2em}{.1em}{.1em} 
+		\multicolumn{1}{l}{\textbf{Problems}}       & \multicolumn{1}{l}{\textbf{Algo}} & \multicolumn{1}{l}{\textbf{Best}} & \multicolumn{1}{l}{\textbf{Mean}} & \multicolumn{1}{l}{\textbf{Median}} & \multicolumn{1}{l}{\textbf{Worst}} & \textbf{Std} \\ \hline
+		\multirow{8}{*}{\textbf{G6}}                & Surr1100      & 11.00         & 41.65         & \textbf{35.00}  & 100.00         & 27.57        \\  
+		& Surr1011      & 24.00         & 67.22         & 71.00           & 100.00         & 28.81        \\  
+		& Surr1010      & 11.00         & 55.00         & 56.00           & 100.00         & 32.85        \\ 
+		& Surr1001      & 28.00         & 56.12         & 52.00           & 100.00         & 20.77        \\  
+		& IDEA          & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& NSGA-II       & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& DEACS         & NaN           & NaN           & NaN             & NaN            & NaN          \\  
+		& SRES          & NaN           & NaN           & NaN             & NaN            & NaN          \\ \hline
+		\multirow{8}{*}{\textbf{G7}}                & Surr1100      & 23.00         & 27.60         & \textbf{28.00}  & 33.00          & 2.60         \\  
+		& Surr1011      & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& Surr1010      & 65.00         & 65.00         & 65.00           & 65.00          & 0.00         \\
+		& Surr1001      & 32.00         & 51.60         & 52.00           & 72.00          & 10.24        \\  
+		& IDEA          & NaN           & NaN           & NaN             & NaN            & NaN          \\  
+		& NSGA-II       & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& DEACS         & NaN           & NaN           & NaN             & NaN            & NaN          \\
+		& SRES          & NaN           & NaN           & NaN             & NaN            & NaN          \\ \hline
+		\multirow{8}{*}{\textbf{G8}}                & Surr1100      & 7.00          & 7.75          & \textbf{8.00}   & 8.00           & 0.44         \\ 
+		& Surr1011      & 8.00          & 12.10         & 12.50           & 15.00          & 1.89         \\ 
+		& Surr1010      & 7.00          & 7.80          & \textbf{8.00}   & 8.00           & 0.41         \\  
+		& Surr1001      & 8.00          & 11.65         & 12.00           & 15.00          & 1.87         \\  
+		& IDEA          & 21.00         & 162.69        & 165.00          & 300.00         & 74.87        \\  
+		& NSGA-II       & 21.00         & 162.69        & 165.00          & 300.00         & 74.87        \\ 
+		& DEACS         & 43.00         & 116.00        & 121.00          & 225.00         & 48.29        \\ 
+		& SRES          & 39.00         & 139.31        & 109.50          & 279.00         & 90.18        \\ \hline
+		\multirow{8}{*}{\textbf{G9}}                & Surr1100      & 16.00         & 24.35         & \textbf{20.50}  & 55.00          & 9.96         \\ 
+		& Surr1011      & 16.00         & 47.00         & 46.00           & 73.00          & 16.87        \\ 
+		& Surr1010      & 16.00         & 46.06         & 48.50           & 100.00         & 19.98        \\
+		& Surr1001      & 16.00         & 36.35         & 31.00           & 57.00          & 12.35        \\  
+		& IDEA          & 50.00         & 237.94        & 185.00          & 500.00         & 151.44       \\ 
+		& NSGA-II       & 50.00         & 237.94        & 185.00          & 500.00         & 151.44       \\ 
+		& DEACS         & 50.00         & 211.89        & 237.00          & 405.00         & 112.68       \\  
+		& SRES          & 40.00         & 178.08        & 205.00          & 400.00         & 104.53       \\ \hline
+		\multirow{8}{*}{\textbf{G10}}               & Surr1100      & 22.00         & 27.85         & \textbf{28.00}  & 36.00          & 3.56         \\ 
+		& Surr1011      & 100.00        & 100.00        & 100.00          & 100.00         & 0.00         \\ 
+		& Surr1010      & 68.00         & 85.46         & 79.00           & 100.00         & 14.43        \\ 
+		& Surr1001      & 36.00         & 55.82         & 50.00           & 84.00          & 15.59        \\ 
+		& IDEA          & NaN           & NaN           & NaN             & NaN            & NaN          \\
+		& NSGA-II       & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& DEACS         & NaN           & NaN           & NaN             & NaN            & NaN          \\ 
+		& SRES          & NaN           & NaN           & NaN             & NaN            & NaN          \\ \hline
+		\multirow{8}{*}{\textbf{G11}}               & Surr1100      & 6.00          & 7.70          & \textbf{8.00}   & 8.00           & 0.57         \\  
+		& Surr1011      & 6.00          & 12.50         & 13.00           & 15.00          & 2.48         \\  
+		& Surr1010      & 6.00          & 7.75          & \textbf{8.00}   & 8.00           & 0.55         \\ 
+		& Surr1001      & 6.00          & 12.00         & 13.00           & 15.00          & 2.47         \\  
+		& IDEA          & 12.00         & 192.00        & 199.50          & 285.00         & 85.23        \\  
+		& NSGA-II       & 12.00         & 192.00        & 199.50          & 285.00         & 85.23        \\  
+		& DEACS         & 12.00         & 100.75        & 64.50           & 248.00         & 78.37        \\ 
+		& SRES          & 106.00        & 106.00        & 106.00          & 106.00         & 0.00         \\ \specialrule{.2em}{.1em}{.1em} 
+	\end{tabular}
+\end{table*}
+\clearpage
+
+\begin{table*}[!htb]\scriptsize
+	\caption{Cost for obtaining first feasible-part-1-engineering design}
+	\label{tab:firstfeascoste1}
+	\centering
+	\begin{tabular}{lllllll}
+		\specialrule{.2em}{.1em}{.1em} 
+		\multicolumn{1}{l}{\textbf{Problems}}       & \multicolumn{1}{l}{\textbf{Algo}} & \multicolumn{1}{l}{\textbf{Best}} & \multicolumn{1}{l}{\textbf{Mean}} & \multicolumn{1}{l}{\textbf{Median}} & \multicolumn{1}{l}{\textbf{Worst}} & \textbf{Std} \\ \hline																					
+		\multirow{8}{*}{\textbf{Belleville Spring}} & Surr1100      & 66.00         & 93.20         & 100.00          & 100.00         & 15.21        \\  
+		& Surr1011      & 46.00         & 62.71         & 52.00           & 100.00         & 19.53        \\  
+		& Surr1010      & 31.00         & 47.67         & \textbf{47.00}  & 73.00          & 16.33        \\  
+		& Surr1001      & 33.00         & 67.56         & 56.00           & 100.00         & 25.77        \\  
+		& IDEA          & 368.00        & 368.00        & 368.00          & 368.00         & 0.00         \\  
+		& NSGA-II       & 368.00        & 368.00        & 368.00          & 368.00         & 0.00         \\  
+		& DEACS         & 167.00        & 450.21        & 437.50          & 783.00         & 191.86       \\  
+		& SRES          & 152.00        & 338.67        & 340.00          & 640.00         & 177.06       \\ \hline
+		\multirow{8}{*}{\textbf{Car Side Impact}}   & Surr1100      & 24.00         & 24.00         & 24.00           & 24.00          & 0.00         \\  
+		& Surr1011      & 24.00         & 24.00         & 24.00           & 24.00          & 0.00         \\  
+		& Surr1010      & 24.00         & 24.00         & 24.00           & 24.00          & 0.00         \\  
+		& Surr1001      & 24.00         & 24.00         & 24.00           & 24.00          & 0.00         \\
+		& IDEA          & 11.00         & 64.35         & 55.00           & 176.00         & 47.52        \\  
+		& NSGA-II       & 11.00         & 64.35         & 55.00           & 176.00         & 47.52        \\  
+		& DEACS         & 11.00         & 64.35         & 55.00           & 176.00         & 47.52        \\ 
+		& SRES          & 11.00         & 64.35         & 55.00           & 176.00         & 47.52        \\ \hline
+		\multirow{8}{*}{\textbf{Disk Clutch Brake}} & Surr1100      & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\ 
+		& Surr1011      & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\ 
+		& Surr1010      & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\ 
+		& Surr1001      & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\  
+		& IDEA          & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\
+		& NSGA-II       & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\  
+		& DEACS         & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\  
+		& SRES          & 9.00          & 12.15         & 9.00            & 18.00          & 4.40         \\ \hline
+		\multirow{8}{*}{\textbf{Helical Spring}}    & Surr1100      & 12.00         & 30.63         & \textbf{29.00}  & 64.00          & 14.66        \\  
+		& Surr1011      & 33.00         & 77.70         & 90.00           & 100.00         & 27.01        \\  
+		& Surr1010      & 21.00         & 68.11         & 72.00           & 100.00         & 33.27        \\ 
+		& Surr1001      & 22.00         & 44.07         & 42.00           & 100.00         & 17.73        \\  
+		& IDEA          & 500.00        & 770.00        & 830.00          & 980.00         & 245.56       \\ 
+		& NSGA-II       & 500.00        & 770.00        & 830.00          & 980.00         & 245.56       \\ 
+		& DEACS         & 500.00        & 716.20        & 723.00          & 940.00         & 169.30       \\ 
+		& SRES          & 580.00        & 580.00        & 580.00          & 580.00         & 0.00         \\ \hline
+		\multirow{8}{*}{\textbf{Speed Reducer}}     & Surr1100      & 17.00         & 19.55         & \textbf{19.00}  & 26.00          & 2.61         \\ 
+		& Surr1011      & 49.00         & 62.13         & 64.00           & 72.00          & 10.34        \\  
+		& Surr1010      & 21.00         & 53.50         & 52.50           & 79.00          & 16.21        \\ 
+		& Surr1001      & 22.00         & 31.80         & 29.50           & 48.00          & 7.05         \\  
+		& IDEA          & 528.00        & 937.33        & 960.00          & 1176.00        & 201.29       \\  
+		& NSGA-II       & 528.00        & 937.33        & 960.00          & 1176.00        & 201.29       \\ 
+		& DEACS         & 297.00        & 574.21        & 490.50          & 1028.00        & 237.13       \\  
+		& SRES          & 72.00         & 168.00        & 168.00          & 264.00         & 135.76       \\ \hline
+		\multirow{8}{*}{\textbf{Step Cone Pulley}}  & Surr1100      & 23.00         & 28.30         & \textbf{28.00}  & 33.00          & 2.62         \\  
+		& Surr1011      & 76.00         & 96.57         & 100.00          & 100.00         & 9.07         \\  
+		& Surr1010      & 53.00         & 69.06         & 69.00           & 100.00         & 10.82        \\
+		& Surr1001      & 42.00         & 56.00         & 54.00           & 72.00          & 8.95         \\ 
+		& IDEA          & NaN           & NaN           & NaN             & NaN            & NaN          \\  
+		& NSGA-II       & NaN           & NaN           & NaN             & NaN            & NaN          \\  
+		& DEACS         & NaN           & NaN           & NaN             & NaN            & NaN          \\  
+		& SRES          & NaN           & NaN           & NaN             & NaN            & NaN          \\ \hline
+		\multirow{8}{*}{\textbf{Pressure Vessel}}   & Surr1100      & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\ 
+		& Surr1011      & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\ 
+		& Surr1010      & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\ 
+		& Surr1001      & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\  
+		& IDEA          & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\  
+		& NSGA-II       & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\ 
+		& DEACS         & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\ 
+		& SRES          & 5.00          & 10.00         & 7.50            & 25.00          & 6.28         \\ \hline
+		\multirow{8}{*}{\textbf{Welded Beam}}       & Surr1100      & 6.00          & 10.10         & 10.00           & 12.00          & 0.45         \\  
+		& Surr1011      & 6.00          & 10.95         & 10.00           & 29.00          & 4.25         \\ 
+		& Surr1010      & 6.00          & 10.50         & 10.00           & 20.00          & 2.24         \\ 
+		& Surr1001      & 6.00          & 10.60         & 10.00           & 22.00          & 2.68         \\ 
+		& IDEA          & 6.00          & 32.70         & 27.00           & 156.00         & 33.01        \\ 
+		& NSGA-II       & 6.00          & 32.70         & 27.00           & 156.00         & 33.01        \\ 
+		& DEACS         & 6.00          & 29.70         & 27.00           & 96.00          & 22.15        \\ 
+		& SRES          & 6.00          & 32.70         & 27.00           & 156.00         & 33.01        \\ \specialrule{.2em}{.1em}{.1em} 
+	\end{tabular}
+\end{table*}
+\clearpage
+
+\begin{table*}[!htb]\tiny
+	\caption{Statistics at the end of cost-part-1-test problem}
+	\label{tab:allcostt1}
+	\centering
+	\begin{tabular}{lllllllll}
+		\specialrule{.2em}{.1em}{.1em} 
+		\multicolumn{1}{l}{\textbf{Problems}} & \multicolumn{1}{l}{\textbf{Algo}} & \multicolumn{1}{l}{\textbf{Type}} & \multicolumn{1}{l}{\textbf{Best}} & \multicolumn{1}{l}{\textbf{Mean}} & \multicolumn{1}{l}{\textbf{Median}} & \multicolumn{1}{l}{\textbf{Worst}} & \multicolumn{1}{l}{\textbf{Std}} & \textbf{Success} \\ \hline
+		\multirow{16}{*}{\textbf{G1}}           & \multirow{2}{*}{Surr1100}          & Obj                                & -14.99984                          & -14.99979                          & \textbf{-14.99979}                            & -14.99978                           & 0.00002                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1011}          & Obj                                & -14.99984                          & -13.47247                          & -13.82792                            & -10.31050                           & 1.34248                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1010}          & Obj                                & -14.99980                          & -14.99979                          & \textbf{-14.99979}                            & -14.99978                           & 0.00001                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1001}          & Obj                                & -14.99984                          & -12.82921                          & -13.81794                            & -9.28995                            & 1.86456                           & 19               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 1                \\
+		& \multirow{2}{*}{IDEA}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 6.62064                            & 66.67781                           & 62.74652                             & 191.90823                           & 45.03860                          & 20               \\
+		& \multirow{2}{*}{NSGA-II}           & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 6.62064                            & 66.67781                           & 62.74652                             & 191.90823                           & 45.03860                          & 20               \\
+		& \multirow{2}{*}{DEACS}             & Obj                                & -5.94066                           & -2.55263                           & -2.46102                             & 0.25047                             & 1.92431                           & 15               \\
+		&                                    & CV                                 & 0.00000                            & 1.94114                            & 0.00000                              & 14.90718                            & 4.03964                           & 5                \\
+		& \multirow{2}{*}{SRES}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 125.57268                          & 202.42526                          & 201.87706                            & 317.95291                           & 55.16329                          & 20               \\ \hline
+		\multirow{16}{*}{\textbf{G2}}           & Surr1100                           & Obj                                & -0.32340                           & -0.24060                           & \textbf{-0.23664}                             & -0.18994                            & 0.02936                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & -0.21900                           & -0.17486                           & -0.17537                             & -0.13454                            & 0.02205                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1010                           & Obj                                & -0.22404                           & -0.17542                           & -0.17152                             & -0.13998                            & 0.02335                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1001                           & Obj                                & -0.21528                           & -0.18871                           & -0.18997                             & -0.15879                            & 0.01500                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & -0.22740                           & -0.18230                           & -0.17660                             & -0.14479                            & 0.02107                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& NSGA-II                            & Obj                                & -0.22740                           & -0.18230                           & -0.17660                             & -0.14479                            & 0.02107                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& DEACS                              & Obj                                & -0.17856                           & -0.15533                           & -0.15404                             & -0.13737                            & 0.01205                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& SRES                               & Obj                                & 0.04304                            & 0.05457                            & 0.05458                              & 0.06491                             & 0.00570                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\ \hline
+		\multirow{16}{*}{\textbf{G3}}           & Surr1100                           & Obj                                & -0.14676                           & -0.05880                           & \textbf{-0.05117}                             & -0.00048                            & 0.04435                           & 6                \\
+		&                                    & CV                                 & 0.00000                            & 0.00240                            & 0.00083                              & 0.01316                             & 0.00330                           & 14               \\
+		& Surr1011                           & Obj                                & -0.04785                           & -0.00725                           & -0.00075                             & -0.00001                            & 0.01658                           & 7                \\
+		&                                    & CV                                 & 0.00000                            & 0.01513                            & 0.00585                              & 0.09856                             & 0.02337                           & 13               \\
+		& Surr1010                           & Obj                                & -0.07518                           & -0.03418                           & -0.03417                             & 0.00000                             & 0.02445                           & 5                \\
+		&                                    & CV                                 & 0.00000                            & 0.00320                            & 0.00250                              & 0.01166                             & 0.00346                           & 15               \\
+		& Surr1001                           & Obj                                & -0.03441                           & -0.00820                           & -0.00211                             & -0.00003                            & 0.01211                           & 6                \\
+		&                                    & CV                                 & 0.00000                            & 0.00764                            & 0.00337                              & 0.05638                             & 0.01321                           & 14               \\
+		& IDEA                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.00433                            & 0.04600                            & 0.04132                              & 0.10136                             & 0.02886                           & 20               \\
+		& NSGA-II                            & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.00433                            & 0.04600                            & 0.04132                              & 0.10136                             & 0.02886                           & 20               \\
+		& DEACS                              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.04281                            & 0.27467                            & 0.24318                              & 0.70330                             & 0.17513                           & 20               \\
+		& SRES                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.14296                            & 0.71614                            & 0.76482                              & 1.10419                             & 0.26759                           & 20               \\ \hline
+		\multirow{16}{*}{\textbf{G4}}           & Surr1100                           & Obj                                & -30665.53900                       & -30620.29800                       & \textbf{-30649.61500}                         & -30534.61100                        & 49.54176                          & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & -30665.53900                       & -30189.71600                       & -30243.16300                         & -29297.71200                        & 330.72280                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1010                           & Obj                                & -30665.53900                       & -30329.62200                       & -30463.12400                         & -29478.01700                        & 351.21984                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1001                           & Obj                                & -30665.53900                       & -30590.91000                       & -30577.44300                         & -30474.42500                        & 70.18538                          & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & -29939.46100                       & -29221.29900                       & -29364.09200                         & -28303.36700                        & 458.17235                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& NSGA-II                            & Obj                                & -30200.41000                       & -29280.86700                       & -29316.13800                         & -28266.61000                        & 471.82945                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& DEACS                              & Obj                                & -30563.31800                       & -29511.50200                       & -29469.02600                         & -28857.03100                        & 413.91065                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& SRES                               & Obj                                & -28691.89200                       & -27688.99000                       & -27972.66200                         & -25212.81600                        & 972.40895                         & 18               \\
+		&                                    & CV                                 & 0.00000                            & 0.00864                            & 0.00000                              & 0.14693                             & 0.03222                           & 2                \\ \hline
+		\multirow{16}{*}{\textbf{G5}}           & Surr1100                           & Obj                                & 5125.12090                         & 5243.97580                         & \textbf{5128.46100}                           & 5550.63590                          & 161.14628                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & 5128.46170                         & 5295.46360                         & 5186.36570                           & 5937.12470                          & 223.13474                         & 12               \\
+		&                                    & CV                                 & 0.00000                            & 0.00201                            & 0.00000                              & 0.02172                             & 0.00509                           & 8                \\
+		& Surr1010                           & Obj                                & 5125.43870                         & 5188.68470                         & 5148.26020                           & 5506.87950                          & 95.62368                          & 19               \\
+		&                                    & CV                                 & 0.00000                            & 0.00007                            & 0.00000                              & 0.00149                             & 0.00032                           & 1                \\
+		& Surr1001                           & Obj                                & 5125.10290                         & 5205.50620                         & 5142.00550                           & 5556.92770                          & 112.40425                         & 19               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00001                             & 0.00000                           & 1                \\
+		& IDEA                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 143.17005                          & 317.03942                          & 285.25127                            & 839.29497                           & 152.48844                         & 20               \\
+		& NSGA-II                            & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 143.17005                          & 317.03942                          & 285.25127                            & 839.29497                           & 152.48844                         & 20               \\
+		& DEACS                              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 105.55868                          & 364.49365                          & 372.74322                            & 670.57585                           & 154.66656                         & 20               \\
+		& SRES                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 345.18310                          & 782.44356                          & 748.84869                            & 1526.62740                          & 292.00361                         & 20               \\ \specialrule{.2em}{.1em}{.1em} 
+	\end{tabular}
+\end{table*}
+\clearpage
+
+%\newgeometry{top=0.3cm,bottom=0.3cm}
+\begin{table*}[!htb]\tiny
+	\caption{Statistics at the end of cost-part-2-test problem}
+	\label{tab:allcostt2}
+	\centering
+	\begin{tabular}{lllllllll}
+		\specialrule{.2em}{.1em}{.1em} 
+		\multicolumn{1}{l}{\textbf{Problems}} & \multicolumn{1}{l}{\textbf{Algo}} & \multicolumn{1}{l}{\textbf{Type}} & \multicolumn{1}{l}{\textbf{Best}} & \multicolumn{1}{l}{\textbf{Mean}} & \multicolumn{1}{l}{\textbf{Median}} & \multicolumn{1}{l}{\textbf{Worst}} & \multicolumn{1}{l}{\textbf{Std}} & \textbf{Success} \\ \hline
+		\multirow{16}{*}{\textbf{G6}}           & Surr1100                           & Obj                                & -6961.81390                        & -5221.59250                        & -4958.64490                          & -2044.17020                         & 1433.42760                        & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & -6961.81390                        & -5435.58010                        & \textbf{-6344.63650}                          & -1685.49350                         & 1715.64820                        & 18               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 2                \\
+		& Surr1010                           & Obj                                & -6961.81390                        & -5231.08960                        & -5417.39930                          & -1441.83370                         & 1740.27790                        & 17               \\
+		&                                    & CV                                 & 0.00000                            & 0.41236                            & 0.00000                              & 8.11865                             & 1.76817                           & 3                \\
+		& Surr1001                           & Obj                                & -6961.81390                        & -5376.35880                        & -5622.69580                          & -1793.30320                         & 1391.45710                        & 17               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 3                \\
+		& IDEA                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 1.64983                            & 1583.31210                         & 655.92725                            & 12844.41100                         & 2800.28550                        & 20               \\
+		& NSGA-II                            & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 1.64983                            & 1583.31210                         & 655.92725                            & 12844.41100                         & 2800.28550                        & 20               \\
+		& DEACS                              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 4.22110                            & 9.84405                            & 11.00000                             & 32.05586                            & 5.71758                           & 20               \\
+		& SRES                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 1210.39420                         & 66602.87800                        & 46742.55500                          & 249659.17000                        & 67757.27000                       & 20               \\ \hline
+		\multirow{16}{*}{\textbf{G7}}                & \multirow{2}{*}{Surr1100}          & Obj                                & 24.53284                           & 27.54430                           & \textbf{26.61397}                    & 35.14414                            & 3.18291                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1011}          & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 19.00233                           & 86.00365                           & 85.83025                             & 176.03046                           & 48.10467                          & 20               \\
+		& \multirow{2}{*}{Surr1010}          & Obj                                & 165.16823                          & 165.16823                          & 165.16823                            & 165.16823                           & 0.00000                           & 1                \\
+		&                                    & CV                                 & 0.00000                            & 81.46540                           & 72.13221                             & 228.89109                           & 55.51534                          & 19               \\
+		& \multirow{2}{*}{Surr1001}          & Obj                                & 29.38537                           & 71.84641                           & 63.40508                             & 129.14441                           & 29.36751                          & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{IDEA}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 16.19799                           & 134.80829                          & 142.43044                            & 298.92745                           & 69.99629                          & 20               \\
+		& \multirow{2}{*}{NSGA-II}           & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 16.19799                           & 134.80829                          & 142.43044                            & 298.92745                           & 69.99629                          & 20               \\
+		& \multirow{2}{*}{DEACS}             & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 20.68243                           & 177.83267                          & 170.37986                            & 331.55922                           & 86.00225                          & 20               \\
+		& \multirow{2}{*}{SRES}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 128.15213                          & 305.35718                          & 292.42106                            & 434.21383                           & 94.57699                          & 20               \\ \hline
+		\multirow{16}{*}{\textbf{G8}}                & \multirow{2}{*}{Surr1100}          & Obj                                & -0.09583                           & -0.04176                           & -0.02914                             & -0.02581                            & 0.02703                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1011}          & Obj                                & -0.09583                           & -0.06494                           & \textbf{-0.09566}                    & -0.02574                            & 0.03413                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1010}          & Obj                                & -0.09583                           & -0.06132                           & -0.05640                             & -0.02581                            & 0.03337                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1001}          & Obj                                & -0.09583                           & -0.05179                           & -0.02914                             & -0.02581                            & 0.03233                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{IDEA}              & Obj                                & -0.09297                           & -0.02134                           & -0.01661                             & 0.00001                             & 0.02457                           & 13               \\
+		&                                    & CV                                 & 0.00000                            & 0.38369                            & 0.00000                              & 3.85434                             & 0.91653                           & 7                \\
+		& \multirow{2}{*}{NSGA-II}           & Obj                                & -0.09297                           & -0.02408                           & -0.02163                             & 0.00969                             & 0.02759                           & 13               \\
+		&                                    & CV                                 & 0.00000                            & 0.38369                            & 0.00000                              & 3.85434                             & 0.91653                           & 7                \\
+		& \multirow{2}{*}{DEACS}             & Obj                                & -0.09559                           & -0.04705                           & -0.03605                             & -0.00391                            & 0.03253                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{SRES}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.59177                            & 8.42859                            & 7.30376                              & 22.15710                            & 5.54060                           & 20               \\ \hline
+		\multirow{16}{*}{\textbf{G9}}                & \multirow{2}{*}{Surr1100}          & Obj                                & 814.06449                          & 1428.73570                         & 1388.30220                           & 2723.43520                          & 420.52825                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1011}          & Obj                                & 1062.85040                         & 3101.79010                         & 1756.05070                           & 10186.70000                         & 2764.67350                        & 15               \\
+		&                                    & CV                                 & 0.00000                            & 1.76852                            & 0.00000                              & 29.00752                            & 6.31401                           & 5                \\
+		& \multirow{2}{*}{Surr1010}          & Obj                                & 769.63652                          & 2761.49200                         & \textbf{1248.54910}                  & 17893.03800                         & 3900.30960                        & 18               \\
+		&                                    & CV                                 & 0.00000                            & 0.13283                            & 0.00000                              & 2.64610                             & 0.57659                           & 2                \\
+		& \multirow{2}{*}{Surr1001}          & Obj                                & 1034.51660                         & 2348.39960                         & 1619.71320                           & 6635.44590                          & 1812.53000                        & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{IDEA}              & Obj                                & 1007.96290                         & 1173841.50000                      & 6276.38830                           & 6515712.30000                       & 2120660.80000                     & 17               \\
+		&                                    & CV                                 & 0.00000                            & 11.47180                           & 0.00000                              & 99.94657                            & 28.41483                          & 3                \\
+		& \multirow{2}{*}{NSGA-II}           & Obj                                & 1374.45960                         & 805329.78000                       & 5844.51560                           & 7002452.40000                       & 1900108.50000                     & 17               \\
+		&                                    & CV                                 & 0.00000                            & 11.47180                           & 0.00000                              & 99.94657                            & 28.41483                          & 3                \\
+		& \multirow{2}{*}{DEACS}             & Obj                                & 1128.67430                         & 13704.56900                        & 2177.07970                           & 187266.86000                        & 42207.76300                       & 18               \\
+		&                                    & CV                                 & 0.00000                            & 4.64391                            & 0.00000                              & 55.94448                            & 14.25231                          & 2                \\
+		& \multirow{2}{*}{SRES}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 63.53189                           & 230.93358                          & 191.97920                            & 601.59830                           & 144.94366                         & 20               \\ \hline
+		\multirow{16}{*}{\textbf{G10}}               & \multirow{2}{*}{Surr1100}          & Obj                                & 7055.39800                         & 7153.35170                         & \textbf{7107.76170}                  & 7379.65270                          & 94.52204                          & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1011}          & Obj                                & 15461.41500                        & 17606.07900                        & 17606.07900                          & 19750.74200                         & 2144.66350                        & 2                \\
+		&                                    & CV                                 & 0.00000                            & 0.42928                            & 0.44635                              & 1.25530                             & 0.33874                           & 18               \\
+		& \multirow{2}{*}{Surr1010}          & Obj                                & 12463.60000                        & 17300.96000                        & 16800.70100                          & 24904.49100                         & 3006.56340                        & 13               \\
+		&                                    & CV                                 & 0.00000                            & 0.13466                            & 0.00000                              & 0.86262                             & 0.26341                           & 7                \\
+		& \multirow{2}{*}{Surr1001}          & Obj                                & 7272.22830                         & 10460.58500                        & 9800.41630                           & 14070.37600                         & 2148.52540                        & 17               \\
+		&                                    & CV                                 & 0.00000                            & 0.10605                            & 0.00000                              & 1.09163                             & 0.27507                           & 3                \\
+		& \multirow{2}{*}{IDEA}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.44944                            & 1.79910                            & 1.72176                              & 4.30312                             & 0.83636                           & 20               \\
+		& \multirow{2}{*}{NSGA-II}           & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.44944                            & 1.79910                            & 1.72176                              & 4.30312                             & 0.83636                           & 20               \\
+		& \multirow{2}{*}{DEACS}             & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.28108                            & 2.20962                            & 1.84804                              & 4.13332                             & 0.96867                           & 20               \\
+		& \multirow{2}{*}{SRES}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 1.85662                            & 3.03136                            & 3.05968                              & 4.62480                             & 0.78304                           & 20               \\ \hline
+		\multirow{16}{*}{\textbf{G11}}               & \multirow{2}{*}{Surr1100}          & Obj                                & 0.74900                            & 0.74900                            & \textbf{0.74900}                     & 0.74907                             & 0.00002                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1011}          & Obj                                & 0.74900                            & 0.74900                            & \textbf{0.74900}                     & 0.74900                             & 0.00000                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1010}          & Obj                                & 0.74900                            & 0.74900                            & \textbf{0.74900}                     & 0.74900                             & 0.00000                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{Surr1001}          & Obj                                & 0.74900                            & 0.74902                            & \textbf{0.74900}                     & 0.74922                             & 0.00005                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& \multirow{2}{*}{IDEA}              & Obj                                & 0.75195                            & 0.86447                            & 0.87064                              & 0.98183                             & 0.09059                           & 8                \\
+		&                                    & CV                                 & 0.00000                            & 0.00471                            & 0.00145                              & 0.02235                             & 0.00665                           & 12               \\
+		& \multirow{2}{*}{NSGA-II}           & Obj                                & 0.75195                            & 0.86457                            & 0.87147                              & 0.98204                             & 0.09057                           & 8                \\
+		&                                    & CV                                 & 0.00000                            & 0.00471                            & 0.00145                              & 0.02235                             & 0.00665                           & 12               \\
+		& \multirow{2}{*}{DEACS}             & Obj                                & 0.79959                            & 0.96217                            & 1.00000                              & 1.00000                             & 0.06443                           & 16               \\
+		&                                    & CV                                 & 0.00000                            & 0.00088                            & 0.00000                              & 0.00670                             & 0.00195                           & 4                \\
+		& \multirow{2}{*}{SRES}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.00143                            & 0.08371                            & 0.03829                              & 0.24834                             & 0.07976                           & 20               \\ \specialrule{.2em}{.1em}{.1em} 
+		
+	\end{tabular}
+\end{table*}
+\clearpage
+
+\begin{table*}[!htb]\tiny
+	\caption{Statistics at the end of cost-part-1-engineering design}
+	\label{tab:allcoste1}
+	\centering
+	\begin{tabular}{lllllllll}
+		\specialrule{.2em}{.1em}{.1em} 
+		\multicolumn{1}{l}{\textbf{Problems}} & \multicolumn{1}{l}{\textbf{Algo}} & \multicolumn{1}{l}{\textbf{Type}} & \multicolumn{1}{l}{\textbf{Best}} & \multicolumn{1}{l}{\textbf{Mean}} & \multicolumn{1}{l}{\textbf{Median}} & \multicolumn{1}{l}{\textbf{Worst}} & \multicolumn{1}{l}{\textbf{Std}} & \textbf{Success} \\ \hline
+		\multirow{16}{*}{\textbf{Belleville Spring}} & \multirow{2}{*}{Surr1100}          & Obj                                & 1.98055                            & 3.03536                            & \textbf{2.01608}                     & 6.88318                             & 1.92757                           & 5                \\
+		&                                    & CV                                 & 0.00000                            & 315.16110                          & 0.46022                              & 5423.93960                          & 1176.35570                        & 15               \\
+		& \multirow{2}{*}{Surr1011}          & Obj                                & 2.30224                            & 3.88840                            & 3.67487                              & 5.70274                             & 1.24742                           & 7                \\
+		&                                    & CV                                 & 0.00000                            & 0.39272                            & 0.09765                              & 2.50782                             & 0.67310                           & 13               \\
+		& \multirow{2}{*}{Surr1010}          & Obj                                & 2.12086                            & 3.40209                            & 3.19293                              & 5.44645                             & 1.11738                           & 6                \\
+		&                                    & CV                                 & 0.00000                            & 115.22349                          & 0.10571                              & 1244.05640                          & 346.28801                         & 14               \\
+		& \multirow{2}{*}{Surr1001}          & Obj                                & 1.97968                            & 3.26118                            & 2.48446                              & 6.37123                             & 1.43933                           & 9                \\
+		&                                    & CV                                 & 0.00000                            & 0.15080                            & 0.01297                              & 1.35400                             & 0.36077                           & 11               \\
+		& \multirow{2}{*}{IDEA}              & Obj                                & 4.85650                            & 4.85650                            & 4.85650                              & 4.85650                             & 0.00000                           & 1                \\
+		&                                    & CV                                 & 0.00000                            & 294.02881                          & 0.11828                              & 4043.52350                          & 947.84919                         & 19               \\
+		& \multirow{2}{*}{NSGA-II}           & Obj                                & 4.72589                            & 4.72589                            & 4.72589                              & 4.72589                             & 0.00000                           & 1                \\
+		&                                    & CV                                 & 0.00000                            & 294.02881                          & 0.11828                              & 4043.52350                          & 947.84919                         & 19               \\
+		& \multirow{2}{*}{DEACS}             & Obj                                & 2.89292                            & 4.67358                            & 4.44652                              & 7.76495                             & 1.29140                           & 14               \\
+		&                                    & CV                                 & 0.00000                            & 158.11553                          & 0.00000                              & 3158.84590                          & 688.41486                         & 6                \\
+		& \multirow{2}{*}{SRES}              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.03958                            & 1769.53060                         & 313.15144                            & 11213.79900                         & 2839.20460                        & 20               \\ \hline
+		\multirow{16}{*}{\textbf{Car Side Impact}}   & Surr1100                           & Obj                                & 23.58760                           & 23.62279                           & \textbf{23.61151}                    & 23.74757                            & 0.03695                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & 23.61396                           & 23.90348                           & 23.82022                             & 24.91821                            & 0.30584                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1010                           & Obj                                & 23.61396                           & 23.90348                           & 23.82022                             & 24.91821                            & 0.30584                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1001                           & Obj                                & 23.58760                           & 23.62298                           & 23.61562                             & 23.69905                            & 0.03187                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & 25.99384                           & 28.92911                           & 28.65408                             & 31.34976                            & 1.41981                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& NSGA-II                            & Obj                                & 26.59437                           & 28.68134                           & 28.52197                             & 31.37079                            & 1.26328                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& DEACS                              & Obj                                & 25.98521                           & 28.16728                           & 28.10713                             & 30.02259                            & 1.03256                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& SRES                               & Obj                                & 29.26926                           & 31.06753                           & 30.86640                             & 33.88695                            & 1.24067                           & 13               \\
+		&                                    & CV                                 & 0.00000                            & 0.00589                            & 0.00000                              & 0.03593                             & 0.01011                           & 7                \\ \hline
+		\multirow{16}{*}{\textbf{Disk Clutch Brake}} & Surr1100                           & Obj                                & 0.31366                            & 0.31875                            & \textbf{0.31758}                     & 0.33326                             & 0.00542                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & 0.31366                            & 0.36993                            & 0.35110                              & 0.50945                             & 0.05352                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1010                           & Obj                                & 0.31758                            & 0.45328                            & 0.42314                              & 0.64986                             & 0.09253                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1001                           & Obj                                & 0.31366                            & 0.32590                            & 0.31954                              & 0.37649                             & 0.01467                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & 0.32150                            & 0.40366                            & 0.37399                              & 0.64221                             & 0.08845                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& NSGA-II                            & Obj                                & 0.33551                            & 0.46192                            & 0.43373                              & 0.68808                             & 0.10681                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& DEACS                              & Obj                                & 0.34071                            & 0.47292                            & 0.45860                              & 0.64221                             & 0.07629                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& SRES                               & Obj                                & 0.55174                            & 0.93756                            & 0.81362                              & 1.38689                             & 0.26475                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\ \hline
+		\multirow{16}{*}{\textbf{Helical Spring}}    & Surr1100                           & Obj                                & 2.65696                            & 2.85786                            & \textbf{2.73224}                     & 3.74526                             & 0.28010                           & 19               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 1                \\
+		& Surr1011                           & Obj                                & 2.79945                            & 4.83486                            & 4.71767                              & 6.58822                             & 1.56239                           & 10               \\
+		&                                    & CV                                 & 0.00000                            & 0.13039                            & 0.01867                              & 0.63011                             & 0.18930                           & 10               \\
+		& Surr1010                           & Obj                                & 2.74206                            & 4.32024                            & 3.46606                              & 6.59009                             & 1.67853                           & 9                \\
+		&                                    & CV                                 & 0.00000                            & 0.18949                            & 0.01867                              & 0.73311                             & 0.26849                           & 11               \\
+		& Surr1001                           & Obj                                & 2.65698                            & 3.21669                            & 2.79945                              & 6.58822                             & 1.06945                           & 15               \\
+		&                                    & CV                                 & 0.00000                            & 0.08499                            & 0.00000                              & 0.40517                             & 0.15372                           & 5                \\
+		& IDEA                               & Obj                                & 3.80246                            & 3.88687                            & 3.88737                              & 3.97077                             & 0.06871                           & 3                \\
+		&                                    & CV                                 & 0.00000                            & 0.63828                            & 0.71220                              & 1.36849                             & 0.36882                           & 17               \\
+		& NSGA-II                            & Obj                                & 3.76564                            & 3.87339                            & 3.88376                              & 3.97077                             & 0.08406                           & 3                \\
+		&                                    & CV                                 & 0.00000                            & 0.63828                            & 0.71220                              & 1.36849                             & 0.36882                           & 17               \\
+		& DEACS                              & Obj                                & 3.11340                            & 4.16635                            & 3.34029                              & 7.46723                             & 1.66289                           & 5                \\
+		&                                    & CV                                 & 0.00000                            & 0.36312                            & 0.30734                              & 1.40630                             & 0.33968                           & 15               \\
+		& SRES                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.48579                            & 1.49057                            & 1.55608                              & 2.73395                             & 0.51057                           & 20               \\ \specialrule{.2em}{.1em}{.1em} 
+		
+	\end{tabular}
+\end{table*}
+\clearpage
+
+\begin{table*}[!htb]\tiny
+	\caption{Statistics at the end of cost-part-2-engineering design}
+	\label{tab:allcoste2}
+	\centering
+	\begin{tabular}{lllllllll}
+		\specialrule{.2em}{.1em}{.1em} 
+		\multicolumn{1}{l}{\textbf{Problems}} & \multicolumn{1}{l}{\textbf{Algo}} & \multicolumn{1}{l}{\textbf{Type}} & \multicolumn{1}{l}{\textbf{Best}} & \multicolumn{1}{l}{\textbf{Mean}} & \multicolumn{1}{l}{\textbf{Median}} & \multicolumn{1}{l}{\textbf{Worst}} & \multicolumn{1}{l}{\textbf{Std}} & \textbf{Success} \\ \hline
+		\multirow{16}{*}{\textbf{Speed Reducer}}     & Surr1100                           & Obj                                & 2994.35500                         & 2994.40730                         & \textbf{2994.36710}                  & 2994.89820                          & 0.11890                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & 3381.11010                         & 4176.50080                         & 4242.76130                           & 5373.99920                          & 577.11281                         & 8                \\
+		&                                    & CV                                 & 0.00000                            & 0.00177                            & 0.00073                              & 0.01062                             & 0.00267                           & 12               \\
+		& Surr1010                           & Obj                                & 3032.42540                         & 3932.27080                         & 4125.42860                           & 4793.30610                          & 548.02948                         & 16               \\
+		&                                    & CV                                 & 0.00000                            & 0.00101                            & 0.00000                              & 0.01423                             & 0.00312                           & 4                \\
+		& Surr1001                           & Obj                                & 2994.35500                         & 2998.36300                         & 2995.30970                           & 3012.29320                          & 5.18496                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & 3303.22260                         & 3666.12890                         & 3554.00230                           & 4600.97460                          & 389.26206                         & 9                \\
+		&                                    & CV                                 & 0.00000                            & 0.00845                            & 0.00102                              & 0.03340                             & 0.01056                           & 11               \\
+		& NSGA-II                            & Obj                                & 3323.76440                         & 3704.83600                         & 3720.09850                           & 4600.97460                          & 381.53785                         & 9                \\
+		&                                    & CV                                 & 0.00000                            & 0.00845                            & 0.00102                              & 0.03340                             & 0.01056                           & 11               \\
+		& DEACS                              & Obj                                & 3132.44910                         & 4198.56220                         & 4146.69100                           & 5643.08130                          & 809.42923                         & 14               \\
+		&                                    & CV                                 & 0.00000                            & 0.01603                            & 0.00000                              & 0.13792                             & 0.03774                           & 6                \\
+		& SRES                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.00650                            & 0.11734                            & 0.11633                              & 0.24491                             & 0.05476                           & 20               \\ \hline
+		\multirow{16}{*}{\textbf{Step Cone Pulley}}  & Surr1100                           & Obj                                & 5.49338                            & 569.71365                          & 16.05831                             & 6014.45270                          & 1610.27110                        & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & 0.02078                            & 807.73114                          & \textbf{0.02879}                     & 6461.60260                          & 2136.96250                        & 8                \\
+		&                                    & CV                                 & 0.00000                            & 0.02702                            & 0.00002                              & 0.48991                             & 0.10634                           & 12               \\
+		& Surr1010                           & Obj                                & 0.01995                            & 3294.36940                         & 2236.29540                           & 9639.92870                          & 2891.26720                        & 17               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00007                             & 0.00002                           & 3                \\
+		& Surr1001                           & Obj                                & 0.03867                            & 800.25128                          & 153.02886                            & 3723.85130                          & 1177.76850                        & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.07861                            & 0.57610                            & 0.54105                              & 1.33966                             & 0.33914                           & 20               \\
+		& NSGA-II                            & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.07861                            & 0.57610                            & 0.54105                              & 1.33966                             & 0.33914                           & 20               \\
+		& DEACS                              & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.20623                            & 0.73318                            & 0.59771                              & 1.64164                             & 0.37136                           & 20               \\
+		& SRES                               & Obj                                & NaN                                & NaN                                & NaN                                  & NaN                                 & NaN                               & 0                \\
+		&                                    & CV                                 & 0.63951                            & 1.43459                            & 1.45512                              & 2.15173                             & 0.42554                           & 20               \\ \hline
+		\multirow{16}{*}{\textbf{Pressure Vessel}}   & Surr1100                           & Obj                                & 6059.71430                         & 6267.00630                         & \textbf{6090.52620}                  & 6968.48260                          & 292.19300                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & 10210.89000                        & 21177.75800                        & 17372.66300                          & 46939.60000                         & 9835.96060                        & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1010                           & Obj                                & 7802.20790                         & 17959.58000                        & 15907.19000                          & 41722.88200                         & 8985.91150                        & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1001                           & Obj                                & 6059.71430                         & 6308.73510                         & 6327.66810                           & 6851.84200                          & 226.08736                         & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & 10837.89600                        & 23253.94800                        & 19915.51000                          & 65217.40400                         & 11903.72900                       & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& NSGA-II                            & Obj                                & 12037.65400                        & 31911.46000                        & 23590.81800                          & 105082.25000                        & 21667.61800                       & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& DEACS                              & Obj                                & 9616.59390                         & 23362.93600                        & 23810.70700                          & 41026.12400                         & 7344.95840                        & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& SRES                               & Obj                                & 23347.31000                        & 71921.78600                        & 69071.37500                          & 170899.28000                        & 40981.42100                       & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\ \hline
+		\multirow{16}{*}{\textbf{Welded Beam}}       & Surr1100                           & Obj                                & 2.38096                            & 2.46434                            & \textbf{2.39611}                     & 2.81760                             & 0.12016                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1011                           & Obj                                & 2.62531                            & 4.44832                            & 3.95918                              & 8.13404                             & 1.54016                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1010                           & Obj                                & 2.69169                            & 4.75205                            & 4.04339                              & 9.30878                             & 1.96391                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& Surr1001                           & Obj                                & 2.38096                            & 3.32045                            & 2.96969                              & 7.49882                             & 1.11321                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& IDEA                               & Obj                                & 3.46741                            & 7.14901                            & 5.83746                              & 16.14736                            & 3.06184                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& NSGA-II                            & Obj                                & 3.48650                            & 7.34493                            & 6.37956                              & 12.69538                            & 2.58835                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& DEACS                              & Obj                                & 3.06817                            & 5.56547                            & 5.69788                              & 7.33443                             & 1.02840                           & 20               \\
+		&                                    & CV                                 & 0.00000                            & 0.00000                            & 0.00000                              & 0.00000                             & 0.00000                           & 0                \\
+		& SRES                               & Obj                                & 5.96588                            & 12.68743                           & 12.33208                             & 22.24679                            & 4.47801                           & 19               \\
+		&                                    & CV                                 & 0.00000                            & 0.00082                            & 0.00000                              & 0.01630                             & 0.00355                           & 1                \\ \specialrule{.2em}{.1em}{.1em} 
+	\end{tabular}
+\end{table*}
+
+\section{Summary and Future Directions}
+\label{sec:sum}
+
+
+\section{Conclusion}
+\label{sec:conc}
+
+
+\small

@@ -1,0 +1,122 @@
+\chapter{Introduction}
+\label{chapter:1}
+
+\section{Background}
+
+
+A generic optimization problem involves maximization or minimization of a given objective(s), subject to certain constraint(s). Such problems are common encountered in many fields, such as engineering~(e.g. maximization of efficiency, minimization of weight), logistics~(e.g. minimization of time for scheduling/routing), economics~(maximization of returns, minimization of risk) and more. 
+
+In presence of only one objective function, the problem is referred to as a Single-Objective~(SO) optimization problem, whereas if it has multiple conflicting objectives, it is termed as a Multi-Objective~(MO) optimization problem. A bilevel optimization problem is an extended version of a traditional SO or MO problem, where the optimization needs to be performed at two levels - upper and lower. The general idea is visually presented in Figure~\ref{fig:exam_chp_1}, while more detailed mathematical formulations will be presented in the next chapter. The upper level decision variables are decided first, which affects the lower level problem to be optimized. Therefore, the upper level problem is also termed as the \emph{leader} problem, since the lower level problem~(follower) responds to the upper level decisions. Various types of bilevel problems could be formulated depending on the number of objectives at each level. The most commonly studied form is the single-objective bilevel problem in which both upper and lower level problems have one objective each. A special case of such problems is the \emph{multi-follower} problem in which the lower level contains multiple problems with single-objective each that need to be in equilibrium. The problems with two or more objectives at upper and lower levels are termed as multi-objective bilevel problems. There could be problems with a mix, i.e., only one of the levels is single-objective while other is multi-objective. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=1\textwidth]{figures/misc/final_bl_example_2.eps}
+\caption{{A single-objective bilevel optimization problem. For each upper level vector $\mathbf{x}_u$, a corresponding lower level problem is optimized to obtain $\mathbf{x}^*_l$} that is used for calculation of $F_u$. The eventual aim is to find the optimum of $F_u$.}
+\label{fig:exam_chp_1}
+\end{figure}
+
+The difficulty of a bilevel problem could result from several factors, such as the number of variables, number of objective/constraints, the non-linearity and multi-modality of the involved functions. A notable difficulty specific to bilevel problems is the nature of conflict between the upper and lower levels. For certain bilevel problems, a lower level optimum may result in a an upper level objective value which is better than the true optimum. This creates obvious difficulties for any optimization algorithm which could be misled by such ``false superior'' objective values at the upper level. For so-called ``co-operative'' problems, this situation is not encountered, which makes them comparatively easier to solve.  
+
+
+
+
+\section{Applications of bilevel optimization}
+
+
+One of the first known applications of bilevel programming was in Stackelberg game~\cite{candler1982linear}. A Stackelberg game is a scenario in economics where leader and follower firms/individuals are operating in a same market. The main aim of both leader and follower is to maximize their individual profits. Mathematically, it is represented as shown in Equation~\ref{S_game}.
+	
+		\begin{equation}
+  \begin{array}{lr}
+   \text{Maximize}\hspace{2mm} F(x_u, x_l)=P(x_u, x_l)-C(x_u), \hspace{2mm} \\
+   \text{Maximize}\hspace{2mm} f(x_u, x_l)=P(x_u, x_l)-C(x_l), \hspace{2mm} \\
+  \hspace{4mm}\text{S.t.}\hspace{8mm} x_u+x_l>=Q,\\
+	\hspace{4mm} \text{where},\hspace{3mm}  0 \leq x_u,x_l \leq Q.\\
+  %\hspace{10mm} p, q, Q>=0.\\
+  \end{array}
+  \label{S_game}
+  \end{equation}
+	
+	
+
+	
+Here, $Q$ is overall demand in the market to be fulfilled. The upper level variable $x_u$ and lower level variable $x_l$ denote their respective production quantities. $P(.)$ denotes total price obtained from sales whereas $C(.)$ is the cost of the production~(the difference being the profit). The system reaches at optima when the leader and follower are at Stackelberg equilibrium. The optimal strategy of the leader and follower $(x_u^*, x_l^*)$ in this simple linear-quadratic model can be found by using differentiation~\cite{sinha2013multi}. 
+
+The application of bilevel optimization since has spanned several other domains~\cite{sinha2017review}, some of which are briefly discussed in the following list.
+                        
+\begin{itemize}
+\def\labelitemi{$\bullet$}
+
+\item{} \textbf{Structural optimization}: The optimization of  structural shape has been formulated in the literature as a bilevel problem, where the lower level consists of equilibrium conditions defined through minimization of elastic energy, and the upper level involves minimization of a cost function~\cite{herskovits2000contact,christiansen2001stochastic}. 
+
+\item{} \textbf{Transportation}: A typical bilevel problem in transportation network~\cite{wang2014transportation,sinha2015transportation,brotcorne2001bilevel,migdalas1995bilevel} consists of an administration firm at upper level which raises revenue from toll collection on a road network. At the lower level are the users who are interested in using the shortest path and/or most cost effective path for their travel. 
+
+\item{}\textbf{Management}: In management, bilevel optimization problem occurs in managing network facility locations and co-ordination of the profits of multi-level businesses (e.g. conglomerates with one entity encompassing several businesses), where the interests pertaining to the parent firm as well as smaller businesses need to be optimized~\cite{sinha2013efficient,cassidy1971efficient}.
+
+\item{}\textbf{Economics}: Apart from the Stackelberg games example discussed earlier, other bilevel problems in economics include principal agent problem, taxation and policy decision~\cite{sinha2013multi}. Environmental economics is another application area of bilevel optimization. A simple example is operation of a mining company, which leads to generation of revenue,  but also pollution. In this case an environmental regulatory authority acts as a leader and the mining company acts as a follower. Generally the leader has two objectives which are maximizing its revenue by taxation and minimizing the environmental damage. The follower may have the sole objective of maximizing profit.
+
+\item{}\textbf{Chemical Industry}: Usually, the chemical reaction~\cite{smith139chemical} has to operate at an equilibrium between the reactant and product. In this problem maximizing the quantity of a particular product is the leader objective function while the lower level problem involves optimizing the entropy function to ensure that an equilibrium is established.
+\item{}\textbf{Defence}: Homeland security applications, interdicting nuclear weapon project, pre-planning of defensive missile interceptors to counter and attack threat~\cite{brown2005two} are the areas of defense where bilevel programming is often applied.		
+\end{itemize}
+
+
+
+\section{Motivation}
+
+Based on a review of the literature in the field, this thesis is driven by two primary goals: 
+
+\begin{itemize}
+
+\item An extensive literature exists in handling functions of linear and quadratic nature, solved using exact mathematical programming techniques. A comprehensive bibliographic review of prominent works in this area until 1994 was compiled in \cite{vicente1994bilevel}. These works have demonstrated the significance of such problems as well as a range of their applications in real-life. Building on this foundation, the contemporary need is to be able to handle objective function(s) and constraint(s) that do not require any assumptions their mathematical properties, for example, linearity, convexity, continuity, which currently intractable. This is particularly relevant as many of the practical applications may require non-linear or black-box computer simulations or physical experiments instead of known analytical functions to evaluate the objective(s)/constraint(s). Methods to handle such problems are still being researched and have substantial scope of further development. Recent works towards this achieving this have been reviewed in \cite{colson2007overview,angelo2015study,Sinha2013,sinha2017review} and tend to use evolutionary methods combined with other heuristic/exact strategies. The work presented in this thesis contributes towards these ongoing developments in the field. 
+
+
+\item Given that using analytical techniques may not always be conducive to generic non-linear/black-box problems, the use of metaheuristics such as evolutionary algorithms seems a viable~(or in some cases the only) approach. However, the number of function evaluations used for optimization can be one of the concerns while using such approaches. Population based methods in particular tend to evaluate a large number of solutions during the course of the search. This may not be affordable if the function evaluation is computationally expensive~(even mildly), as it would result in significant run-time for overall optimization exercise. This problem is aggravated in particular for bilevel problems since a lower level optimization is required for evaluatin of \emph{each} solution at the upper level. Therefore the work in this thesis attempts to develop and analyze strategies that could be utilized to improve the solutions obtained while reducing the required number of function evaluations. 
+
+\end{itemize}
+
+
+\section{Scope of Research}
+
+Depending on the number and nature of the objective and constraint functions, several different kinds of bilevel problems are possible~(e.g. single-objective, multi-objective, multi-follower, co-operating/conflicting etc.). Correspondingly, certain types of strategies may be more suited to one type of problem than other. Within the scope of this thesis, the following characteristics have been assumed.   
+
+\begin{itemize}
+\item The thesis predominantly focuses on the cases where both upper and lower level problems have one objective and there is only one follower at lower level. However, two preliminary investigations are also presented for the case of single-objective multi-follower problem and a multi-objective bilevel problem. 
+\item All objective and constraint function(s) are assumed to be black-box. No a-priori known properties of the problems are used to inform the search. This might disadvantage the proposed methods compared to analytical algorithms when operating on linear/quadratic problems, but enables it to deal with a much wider range of problems.  
+
+\item The computational effort in solving the problem is measured using the number of evaluations alone. This is of particular relevance when the problems are computationally expensive, i.e., the effort involved in algorithmic operators are relatively negligible compared to that involved in evaluating the objective/constraint functions. 
+
+\item All the variables are considered to be real-valued rather than discrete. However, the extension to discrete cases can be relatively straightforward for the cases where the variables have an ordinal sense. In principle, an appropriate change in the underlying global/local search methods to handle discrete variables could demonstrate similar benefits for discrete problems. 
+\end{itemize}
+
+
+\section{Contribution of thesis}
+
+In light of the motivation and research opportunities discussed earlier, this thesis proposes and investigates three broad approaches to improve the performance and computationa effort in solving bilevel problems. These are: 
+
+\begin{enumerate}
+\item A \emph{memetic approach}, where a global search (such as an evolutionary algorithm) is combined with a local search (such as interior point). A hybrid memetic approach is developed where a global or a local search are used at upper and lower levels depending on the phase of the search. This is different from the traditional hybridization used in literature where a global search is only used at upper level and a local search only at the lower level.  
+\item A \emph{surrogate-assisted approach}, where multiple surrogate models are used to guide the lower level optimization in lieu of true function evaluations in order to reduce the computational effort substantially. In the literature, the use of surrogate models has been scarcely explored in dealing with such problems. Some of the existing works use simplistic approximations~(such as quadratic) to approximate lower level optima as a function of upper level variables, which is different approach from the work presented. 
+\item A \emph{non-nested approach}, where the bilevel problem is re-formulated as a single-level problem with an estimate of lower level optimality as an additional constraint. This formulation has been used in classical literature but not within evolutionary methods. Additionally, the presented optimality measure uses a simple neighborhood based scheme which is easy to evaluate and free from mathematical assumptions inherent in classical approaches. 
+\end{enumerate}
+
+Within the above approaches, further improvements are incorporated at the component level, of which two particular ones are \emph{revaluation} and \emph{nested local search}. The former helps in dealing with conflicting objectives by trying to ensure that the high ranked solutions are more extensively optimized at lower level in order to steer the search in the right direction. The latter helps in improving the convergence rate at the upper level by injecting additional good solutions periodically. 
+
+The performance of the above techniques is comprehensively studied on a number of benchmarks available from the literature. Approximately half of them~(referred to here as the BLTP series) are from the classical literature and involve mostly linear/quadratic objective and constraint functions, while the other half~(referred to as SMD series) is a more generic non-linear set of test problems developed in recent years. A statistical comparison is presented with the established recent evolutionary and hybrid techniques such as the Nested Bilevel Evolutionary Algorithm~(NBLEA), Bilevel Evolutionary Algorithm with Quadratic Approximations~(BLEAQ), Bilevel Genetic Algorithm~(BiGA) and Bilevel Differential Evolution~(BIDE).
+
+\section{Organization of thesis}
+
+Following this overall introduction, the thesis is divided into the following chapters:
+
+\begin{itemize}
+\item In chapter 2, an overview of bilevel programming is given, including mathematical formulations, performance metrics and existing approaches in the literature to solve bilevel problems.
+
+\item In chapter 3, a Bilevel Memetic Algorithm~(BLMA) is proposed, which embodies the ideas of hybrid search. 
+
+\item In chapter 4, a Surrogate Assisted Bilevel Algorithm~(SABLA) is presented, which uses surrogate functions in lieu of true evaluations to reduce the computational effort for lower level optimization.
+
+\item In chapter 5, a non-nested bilevel formulation is presented, in which the bilevel problem is re-formulated into a single-objective problem by using estimated optimality of lower level problem as an additional constraint for the upper level problem. 
+
+\item In chapter 6, preliminary studies are presented on multi-objective bilevel optimization problems using a nested evolutionary algorithm. 
+
+\item Lastly, chapter 7 summarizes the contributions and knowledge gained from the above studies and touches upon some future directions. 
+\end{itemize}
+

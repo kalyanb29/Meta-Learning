@@ -1,0 +1,25 @@
+General
+
+- Spell-check
+- Consistency between terms such as 'single objective' and 'single-objective' (should be single-objective, multi-objective, multi-follower, etc.)
+- Your references to algorithm/table/figure numbers are mixed up at many places - this is because the labels are not unique. Please go through each one of them carefully and correct them where needed. 
+- Can you look across all algorithms and make the parameter symbols more consistent, for example it is T_u somewhare and gen_u somewhere else. Make sure to do the corresponding changes in the text. 
+- Make sure all formulations in all chapters follow the same style, i.e. the LL problem is - lower level problem to be shifted slightly to the right, and the variable to be indicated below Minimize. Some equations are missing this.
+- Include an appendix with problem definitions of BLTP and SMD. 
+- Make sure the tables fit in the horizontal margins. If they're too big try to fit them sideways.
+- Make the bibliography consistent and make sure all required information is there. 
+
+---
+Chapter 3
+Make the symbols consistent between BLMA and BLMA_MF and make corresponding changes in the text. 
+
+Chapter 4
+Move the Tables 4.2,4.3 before Summary section (ideally move them to page 93-94)
+
+Chapter 6
+Some references to sections are missing, insert them properly. 
+Again, symbols could be made more consistent with Chapter 3, for example T_u for upper level generation and so on. 
+
+Format the equations consistently 
+
+At some point we had discovered the bug in DE code - Since DBMA uses the same DE, have you re-run all cases after fixing it ? If not please do so and update the results. 

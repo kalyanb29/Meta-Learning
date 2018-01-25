@@ -135,8 +135,8 @@ class MetaOptimizer(object):
                     if np.std(bin_num) == 0 or len(bin_num) == 1:
                         gradients = nest.flatten([tf.gradients(fx[bin_num[0]], x)])
                     else:
-                        gradients = nest.flatten([tf.gradients(fx[a], x[a])
-                            for a in bin_num])
+                        gradients = nest.flatten([tf.gradients(fx[a], x[b])
+                            for a, b in zip(bin_num, range(len(x)))])
                 if not second_derivatives:
                     gradients = [tf.stop_gradient(g) for g in gradients]
 

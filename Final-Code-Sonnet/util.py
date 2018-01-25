@@ -125,16 +125,33 @@ def get_config(problem_name, path=None):
     elif problem_name == "segmentation":
         mode = "train" if path is None else "test"
         problem = problems.segmentation(mode=mode)
-        net_config = {"cw": {
-            "net": "CoordinateWiseDeepLSTM",
-            "net_options": {"layers": (5, 5),
-                            "preprocess_name": "LogAndSign",
-                            "preprocess_options": {"k": 20},
-                            "scale": 0.1,
-                            },
-            "net_path": get_net_path("cw", path)
-        }}
-        net_assignments = None
+        net_config = {"conv": {"net": "CoordinateWiseDeepLSTM",
+                               "net_options": {"layers": (5, 5),
+                                               "preprocess_name": "LogAndSign",
+                                               "preprocess_options": {"k": 20},
+                                               "scale": 0.1, }, "net_path": get_net_path("cw", path)},
+                      "convT": {"net": "CoordinateWiseDeepLSTM",
+                                "net_options": {"layers": (5, 5),
+                                                "preprocess_name": "LogAndSign",
+                                                "preprocess_options": {"k": 20},
+                                                "scale": 0.1, }, "net_path": get_net_path("cw", path)},
+                      "fc": {"net": "CoordinateWiseDeepLSTM",
+                             "net_options": {"layers": (5, 5),
+                                             "preprocess_name": "LogAndSign",
+                                             "preprocess_options": {"k": 20},
+                                             "scale": 0.1, }, "net_path": get_net_path("cw", path)}
+                      }
+        conv_vars = ["conv_net_2d/conv_2d_0/w"]
+        conv_vars += ["conv_net_2d_{}/conv_2d_0/w".format(i) for i in range(1,18)]
+        conv_vars += ["conv_net_2d/conv_2d_0/b"]
+        conv_vars += ["conv_net_2d_{}/conv_2d_0/b".format(i) for i in range(1,18)]
+        conv_T_vars = ["conv_net_2d_transpose/conv_2d_transpose_0/w"]
+        conv_T_vars += ["conv_net_2d_transpose_{}/conv_2d_transpose_0/w".format(i) for i in range(1,3)]
+        conv_T_vars += ["conv_net_2d_transpose/conv_2d_transpose_0/b"]
+        conv_T_vars += ["conv_net_2d_transpose_{}/conv_2d_transpose_0/b".format(i) for i in range(1,3)]
+        fc_vars = ["conv_net_2d_{}/batch_norm_0/beta".format(i) for i in [1, 3, 4, 5, 6, 7, 9, 11, 13, 15, 16]]
+        fc_vars += ["v"]
+        net_assignments = [("conv", conv_vars), ("convT", conv_T_vars), ("fc", fc_vars)]
     else:
         raise ValueError("{} is not a valid problem".format(problem_name))
 

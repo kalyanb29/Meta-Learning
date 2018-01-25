@@ -11,6 +11,7 @@ from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 import tensorflow as tf
+import numpy as np
 
 from tensorflow.contrib.learn.python.learn.datasets import mnist as mnist_dataset
 import seggenerator
@@ -561,11 +562,11 @@ def segmentation(trainpath = train_path, valpath = val_path, cache_dir = cache_p
                                                         labels=label_batch))
     def convex_loss():
         v = tf.get_variable("v", shape=[1, 10], dtype=tf.float32,
-                                initializer=tf.random_normal_initializer(stddev=0.01))
+                            initializer=tf.random_normal_initializer(stddev=0.01))
 
         # Non-trainable variables.
         target = tf.get_variable("target", shape=[1, 10], dtype=tf.float32,
-                                     initializer=tf.random_normal_initializer(stddev=0.01), trainable=False)
+                                 initializer=tf.random_normal_initializer(stddev=0.01), trainable=False)
 
         return tf.reduce_mean(tf.clip_by_value(tf.square(v - target), 0, 10))
 

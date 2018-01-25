@@ -1,19 +1,3 @@
-# Copyright 2016 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Learning 2 Learn preprocessing modules."""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -63,7 +47,7 @@ class LogAndSign(snt.AbstractModule):
     eps = np.finfo(gradients.dtype.as_numpy_dtype).eps
     ndims = gradients.get_shape().ndims
 
-    log = tf.log(tf.abs(gradients) + eps)
+    log = tf.log(tf.maximum(tf.abs(gradients) + eps, np.exp(-self._k)))
     clamped_log = Clamp(min_value=-1.0)(log / self._k)  # pylint: disable=not-callable
     sign = Clamp(min_value=-1.0, max_value=1.0)(gradients * np.exp(self._k))  # pylint: disable=not-callable
 

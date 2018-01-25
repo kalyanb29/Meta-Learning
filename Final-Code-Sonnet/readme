@@ -1,0 +1,41 @@
+Dependencies:
+
+  Python 3.5.4
+  TensorFlow 1.4.0
+  Sonnet 1.14
+
+
+
+train.py--------Improved MetaLearner
+train_ori.py----------Original MetaLearner from https://arxiv.org/abs/1606.04474 
+train_direct.py-----------Using direct optimizers
+
+Files for MNIST and CIFAR-10 will be automatically downloaded. 
+
+problems.py contains the problems experimented on and new problems could be incorporated into it
+
+Inputs in the train/train_ori/train_direct.py:
+
+  num_Epochs: Number of optimizer epochs 
+  logging_period: Period for model saving
+  evaluation_period: Validation period
+  evaluation_epoch: Number of epochs for evaluation 
+  problem: Name of the problem
+  num_steps: Number of steps for the optimizer
+  unroll_length: Unrolling period for the optimizer
+  learning_rate: Learning rate for the optimizer
+  second_derivatives: Boolean for allowing or restricting backpropagation to flow through optimizee gradients
+
+Outputs:
+  
+  for train.py:
+  Figures and Models for training and validation stored under ./Save/problem/MetaSave/
+  Tensorflow events stored under ./Log/problem/MetaLog
+  
+  for train_ori.py:
+  Figures and Models for training and validation stored under ./Save/problem/OriMetaSave/
+  Tensorflow events stored under ./Log/problem/OriMetaLog
+  
+  for train_direct.py:
+  Figures and Models for training and validation stored under ./Save/problem/DirectSave/
+  Tensorflow events stored under ./Log/problem/DirectLog

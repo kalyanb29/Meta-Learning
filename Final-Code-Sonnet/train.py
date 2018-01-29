@@ -1,19 +1,3 @@
-# Copyright 2016 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Learning 2 Learn training."""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -37,15 +21,15 @@ logging = tf.logging
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer("num_epochs", 100, "Number of training epochs.") # 10000
+flags.DEFINE_integer("num_epochs", 20, "Number of training epochs.") # 10000
 flags.DEFINE_integer("logging_period", 10, "Log period.") # 100
 flags.DEFINE_integer("evaluation_period", 20, "Evaluation period.")#1000
 flags.DEFINE_integer("evaluation_epochs", 20, "Number of evaluation epochs.")
 
-flags.DEFINE_string("problem", "quadratic", "Type of problem.")
-flags.DEFINE_integer("num_steps", 100,
+flags.DEFINE_string("problem", "segmentation", "Type of problem.")
+flags.DEFINE_integer("num_steps", 8000,
                      "Number of optimization steps per epoch.") # 100
-flags.DEFINE_integer("unroll_length", 20, "Meta-optimizer unroll length.")
+flags.DEFINE_integer("unroll_length", 10, "Meta-optimizer unroll length.")
 flags.DEFINE_float("learning_rate", 0.001, "Learning rate.")
 flags.DEFINE_boolean("second_derivatives", False, "Use second derivatives.")
 
@@ -74,6 +58,7 @@ def main(_):
       second_derivatives=FLAGS.second_derivatives)
 
   step, loss, update, reset, cost_op, farray, lropt, _ = minimize
+
   with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     # Prevent accidental changes to the graph.
     graph_writer = tf.summary.FileWriter(logs_path, sess.graph)
@@ -107,6 +92,7 @@ def main(_):
           best_evaluation = evaloss
           plotlosseval.append(evalcost)
     slengths = np.arange(FLAGS.num_steps)
+    slengthlr = np.arange(FLAGS.num_steps - num_unrolls)
     np.savetxt(save_path + '/plotlosstrain.out', plotlosstrain, delimiter=',')
     np.savetxt(save_path + '/plotlrtrain.out', plotlrtrain, delimiter=',')
     np.savetxt(save_path + '/plotlosseval.out', plotlosseval, delimiter=',')
@@ -128,7 +114,7 @@ def main(_):
     savefig(save_path + '/Validation.png')
     plt.close()
     plt.figure(figsize=(8, 5))
-    plt.plot(slengths, np.mean(plotlrtrain, 0), 'r-', label='Learning Rate')
+    plt.plot(slengthlr, np.mean(plotlrtrain, 0), 'r-', label='Learning Rate')
     plt.xlabel('Epoch')
     plt.ylabel('Average Learning Rate')
     plt.legend()

@@ -5,6 +5,7 @@ from __future__ import print_function
 import collections
 import os
 
+import numpy as np
 import sonnet as snt
 import tensorflow as tf
 
@@ -48,7 +49,7 @@ class MetaOptimizer(object):
                     "net_options": {
                         "layers": (20, 20),
                         "preprocess_name": "LogAndSign",
-                        "preprocess_options": {"k": 5},
+                        "preprocess_options": {"k": 10},
                         "scale": 0.01,
                     }}}
         else:
@@ -97,6 +98,7 @@ class MetaOptimizer(object):
             x.append(item1)
             constants.append(item2)
         num_var = nest.flatten([0, [len(a) for a in x]])
+        var_num = np.cumsum(num_var)
         x = nest.flatten(x)
         constants = nest.flatten(constants)
         print("Optimizee variables")
@@ -122,12 +124,19 @@ class MetaOptimizer(object):
                          for j in subset],
                         name="state", trainable=False))
 
-        def update(net, fx, x, state):
+        def update(net, fx, x, state, subset):
             """Parameter and RNN state update."""
             with tf.name_scope("gradients"):
-                gradients = nest.flatten([tf.gradients(fx[a], x[num_var[b]:num_var[b] + num_var[b+1]])
-                         for a, b in zip(range(len(fx)),range(len(num_var)-1))])
-
+                if len(subset) == sum(num_var):
+                    gradients = nest.flatten([tf.gradients(fx[a], x[num_var[b]:num_var[b] + num_var[b+1]])
+                            for a, b in zip(range(len(fx)), range(len(num_var)-1))])
+                else:
+                    bin_num = np.digitize(subset,var_num) - 1
+                    if np.std(bin_num) == 0 or len(bin_num) == 1:
+                        gradients = nest.flatten([tf.gradients(fx[bin_num[0]], x)])
+                    else:
+                        gradients = nest.flatten([tf.gradients(fx[a], x[b])
+                            for a, b in zip(bin_num, range(len(x)))])
                 if not second_derivatives:
                     gradients = [tf.stop_gradient(g) for g in gradients]
 
@@ -160,8 +169,7 @@ class MetaOptimizer(object):
             with tf.name_scope("dx"):
                 for subset, key, s_i in zip(subsets, net_keys, state):
                     x_i = [x[j] for j in subset]
-                    deltas, s_i_next, ratio_i = update(nets[key], fx, x_i, s_i)
-
+                    deltas, s_i_next, ratio_i = update(nets[key], fx, x_i, s_i, subset)
                     for idx, j in enumerate(subset):
                         x_next[j] += deltas[idx]
                     state_next.append(s_i_next)

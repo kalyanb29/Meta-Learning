@@ -1,22 +1,4 @@
 ########################################################################
-#
-# Class for creating a data-set consisting of all files in a directory.
-#
-# Example usage is shown in the file knifey.py and Tutorial #09.
-#
-# Implemented in Python 3.5
-#
-########################################################################
-#
-# This file is part of the TensorFlow Tutorials available at:
-#
-# https://github.com/Hvass-Labs/TensorFlow-Tutorials
-#
-# Published under the MIT License. See the file LICENSE for details.
-#
-# Copyright 2016 by Magnus Erik Hvass Pedersen
-#
-########################################################################
 
 import numpy as np
 import os
